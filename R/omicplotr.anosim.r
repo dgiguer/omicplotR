@@ -25,8 +25,6 @@
 #' conds <- c(rep("NS", 7), rep("S", 7))
 #' p <- omicplotr.anosim(selex, conds)
 #'
-#' @notes helllo
-#'
 #' @export
 #'
 
