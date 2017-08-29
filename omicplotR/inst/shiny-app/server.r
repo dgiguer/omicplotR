@@ -290,7 +290,7 @@ server <- function(input, output) {
     cn <- column()
     abund <- input$abundance
     varcut <- input$varslider
-    source("../R/omicplotr.filter.r")
+    #source("www/omicplotr.filter.r")
 
     #set to zero, but inputs from sliders/numeric inputs
     min.count <- input$mincounts
@@ -313,7 +313,7 @@ server <- function(input, output) {
       x <- x
     } else {
 
-        ("../R/omicplotr.metadataFilter.r")
+        ("www/omicplotr.metadataFilter.r")
 
         x <- omicplotr.metadataFilter(x, meta, column = metaval$data, values = vals$data)
     }
@@ -323,7 +323,7 @@ server <- function(input, output) {
 
   #prcomp object
   data.prcomp <- reactive({
-      source("../R/omicplotr.clr.r")
+      #source("www/omicplotr.clr.r")
     #get data
     data.t <- data.t()
     var.filt <- input$varslider
@@ -513,7 +513,7 @@ server <- function(input, output) {
   output$removedDT <- renderDataTable({
     data.pr <- data.prcomp()
     data.in <- data()
-    source("../R/omicplotr.getRemovedSamples.r")
+    #source("www/omicplotr.getRemovedSamples.r")
 
     validate(need(input$showremoved, "Click 'Show removed samples/OTUs' to view removed samples"))
 
@@ -551,7 +551,7 @@ server <- function(input, output) {
   output$removedDTotu <- renderDataTable({
     data.pr <- data.prcomp()
     data.in <- data()
-    source("../R/omicplotr.getRemovedFeatures.r")
+    #source("www/omicplotr.getRemovedFeatures.r")
 
     validate(need(input$showremoved, "Click 'Show removed samples/OTUs' to view removed OTUs"))
 
@@ -785,8 +785,8 @@ server <- function(input, output) {
     taxselect <- as.numeric(input$taxlevel)
     cols <- colours()
 
-    source("../R/omicplotr.colvec.r")
-    source("../R/omicplotr.colouredPCA.r")
+    #source("www/omicplotr.colvec.r")
+    #source("www/omicplotr.colouredPCA.r")
 
     validate(need(input$selectcolumn, "Click 'Colouring Options' to choose metadata for colouring biplot"))
 

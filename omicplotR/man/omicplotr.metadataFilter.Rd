@@ -18,7 +18,3 @@ omicplotr.metadataFilter(data, meta, column, values)
 \description{
 Filters data by choosing values to remain using associated metadata.
 }
-\examples{
-values <- c("y", "n")
-
-}

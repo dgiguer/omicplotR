@@ -7,8 +7,6 @@
 #' @param column column name from metadata.
 #' @param values list of values to keep from metadata column.
 #'
-#' @examples
-#' values <- c("y", "n")
 #'
 #' @export
 

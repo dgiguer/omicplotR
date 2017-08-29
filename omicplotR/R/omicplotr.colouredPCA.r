@@ -19,6 +19,7 @@
 #' @param names.cex the size of sample names.
 #' @param points.cex the size of points representing features (text size for
 #'  taxonomic levels if \code{show.taxonomy = TRUE}).
+#' @param main main title 
 #'
 #' @export
 #'

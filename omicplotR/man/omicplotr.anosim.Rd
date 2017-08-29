@@ -17,7 +17,3 @@ next 4 columns condition 4).}
 Wrapper for \code{vegan} package to calculate anosim p-value between
  conditions from cenetered-log ratio values between two conditions.
 }
-\examples{
-For dataset where first 7 columns are condition x, next 7 are condition:
-conds <- c(rep("group1", 7). rep("group2", 7))
-}

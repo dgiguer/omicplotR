@@ -34,6 +34,8 @@ if \code{show.taxonomy = TRUE}, default 6 (genus).}
 
 \item{points.cex}{the size of points representing features (text size for
 taxonomic levels if \code{show.taxonomy = TRUE}).}
+
+\item{main}{main title}
 }
 \description{
 Generates a coloured PCA biplot from a \code{prcomp} object

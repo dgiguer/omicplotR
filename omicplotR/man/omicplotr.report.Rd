@@ -16,6 +16,3 @@ Displays table of features found to be significantly different by
  \code{ALDEx2}, when effect size > 1 and expected Benjamini Hochberg
  corrected p-values. In progress and will show more.
 }
-\examples{
-
-}
