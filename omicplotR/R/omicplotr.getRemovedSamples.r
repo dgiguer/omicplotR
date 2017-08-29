@@ -2,8 +2,12 @@
 #'
 #' Generates table of removed samples (columns) by \code{omicplotr.filter}.
 #'
-#' @param x unfiltered data.
-#' @param x.clr output from \code{omicplotr.clr}.
+#' @param x Unfiltered data.
+#' @param x.clr Output from \code{omicplotr.clr}.
+#'
+#' @seealso \code{\link{omicplotr.clr}}
+#'
+#' @author Daniel Giguere
 #'
 #' @export
 

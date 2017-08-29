@@ -1,12 +1,20 @@
 #' Filter data by selected metadata.
 #'
-#' Filters data by choosing values to remain using associated metadata.
+#' Filters samples in data to remain using values from associated metadata.
 #'
-#' @param data unfiltered data.
-#' @param meta unfiltered metadata.
-#' @param column column name from metadata.
-#' @param values list of values to keep from metadata column.
+#' @details This filter must be applied before filtering by count using
+#'  \code{omicplotr.filter} or generating \code{prcomp} object with
+#'  \code{omicplotr.clr}.
 #'
+#' @param data Unfiltered data.
+#' @param meta Unfiltered metadata.
+#' @param column Column name from metadata. Must exactly match.
+#' @param values List of values to keep from metadata column. Must exactly match
+#'  the values in the metadata (no extra characters - including spaces).
+#'
+#' @author Daniel Giguere
+#'
+#' @seealso \code{\link{omicplotr.filter}}, \code{\link{omicplotr.clr}}.
 #'
 #' @export
 

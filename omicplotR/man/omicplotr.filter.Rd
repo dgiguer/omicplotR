@@ -8,26 +8,30 @@ omicplotr.filter(x, min.reads = 0, min.count = 0, min.sum = 0,
   min.prop = 0, max.prop = 1)
 }
 \arguments{
-\item{x}{counts table as data frame.}
+\item{x}{Counts table as data frame.}
 
-\item{min.reads}{removes any columns with sum less than or equal to input.}
+\item{min.reads}{Removes any columns with sum less than or equal to input.}
 
-\item{min.count}{removes any rows with maximum lower than input.}
+\item{min.count}{Removes any rows with maximum lower than input.}
 
-\item{min.sum}{removes any rows with sum lower than input.}
+\item{min.sum}{Removes any rows with sum lower than input.}
 
-\item{min.prop}{minimum proportional abundance in any sample.}
+\item{min.prop}{Minimum proportional abundance in any sample.}
 
-\item{max.prop}{maximum proportional abundance in any sample.}
+\item{max.prop}{Maximum proportional abundance in any sample.}
 }
 \description{
 \code{omicplotr.filter} removes columns and/or rows of table below threshold.
 This must be used after \code{omicplotr.metadataFilter}.
 }
+\details{
+See arguments for filtering details. This filter must be done prior
+ to generating \code{prcomp} object with \code{omicplotr.clr}.
+}
 \examples{
 # The 'reads' data frame must have unique row and column names, and may
 # include a taxonomy column as the last column, and look like this
-# (from \\code{ALDEx2} documentation):
+# from ALDEx2 documentation:
 #
 #              T1a T1b  T2  T3  N1  N2  Nx taxonomy
 #   Gene_00001   0   0   2   0   0   1   0 Bacteria;Bacteroidetes;...
@@ -38,6 +42,10 @@ This must be used after \code{omicplotr.metadataFilter}.
 #   Gene_00006 129 126 451 223 243 149 209 Bacteria;Firmicutes;...
 #       ... many more rows ...
 #
-#   The taxonomy column is not required.
-#
+# The taxonomy column is not required.
+
+
+}
+\seealso{
+\code{\link{omicplotr.clr}}, \code{\link[ALDEx2]{aldex}}
 }

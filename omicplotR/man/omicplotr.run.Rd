@@ -7,5 +7,10 @@
 omicplotr.run()
 }
 \description{
-Launches \code{Shiny} for \code{omicplotR} in default browser.
+Launches \code{Shiny} for \code{omicplotR} in default browser. This
+ graphical user interface facilitates visual exploration of datasets for
+ both new and experienced R users alike.
+}
+\author{
+Daniel Giguere
 }

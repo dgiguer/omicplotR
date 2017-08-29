@@ -2,19 +2,28 @@
 % Please edit documentation in R/omicplotr.clr.r
 \name{omicplotr.clr}
 \alias{omicplotr.clr}
-\title{Generate prcomp object to plot compositional biplot with
- \code{omicplotr.colouredPCA}}
+\title{Calculate CLR and generate prcomp object for compositional biplot}
 \usage{
 omicplotr.clr(x, var.filt = 0)
 }
 \arguments{
-\item{x}{filtered data frame by \code{omicplotr.countfilter}}
+\item{x}{filtered data from \code{omicplotr.filter}.}
 
 \item{var.filt}{variance cutoff to be applied after clr is computed,
 default, 0.}
 }
+\value{
+Returns an object of class "prcomp".
+}
 \description{
-\code{omciplotr.clr} replaces zeros using CZM method from
- \code{zCompositions}, calculates CLR, filters by variance and
- generates a \code{prcomp} object from the transformed data frame.
+\code{omciplotr.clr} replaces zeros using CZM method using \code{cmultRepl}
+ from \code{zCompositions}, calculates CLR, filters by variance and
+ generates a \code{prcomp} object from data.
+}
+\details{
+If filtering by with \code{omicplotr.filter} or
+ \code{omicplotr.metadataFilter}, it must done before this step.
+}
+\seealso{
+\code{\link[stats]{prcomp}}.
 }

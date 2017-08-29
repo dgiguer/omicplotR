@@ -7,10 +7,16 @@
 omicplotr.getRemovedFeatures(x, x.clr)
 }
 \arguments{
-\item{x}{unfiltered data.}
+\item{x}{Unfiltered data.}
 
-\item{x.clr}{output from \code{omicplotr.clr}.}
+\item{x.clr}{Output from \code{omicplotr.clr}.}
 }
 \description{
 Generates table of features (rows) removed by \code{omicplotr.filter}.
+}
+\seealso{
+\code{\link{omicplotr.clr}}
+}
+\author{
+Daniel Giguere
 }

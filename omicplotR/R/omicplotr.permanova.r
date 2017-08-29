@@ -1,12 +1,18 @@
 #' Calculate PERMANOVA between conditions.
 #'
 #' Wrapper for \code{vegan} package to calculate PERMANOVA between
-#'  conditions from cenetered-log ratio values.
+#'  conditions from cenetered-log ratio values with \code{adonis}.
 #'
-#' @param x filtered data output from \code{omicplotr.filter}. columns must
-#'  in ordered of condition being tested (i.e., first 4 columns condition x and
-#'  next 4 columns condition 4).
-#' @param conds a character vector of group labels.
+#' @param x Filtered data output from \code{omicplotr.filter}. columns must
+#'  in ordered of condition being tested (i.e., first 7 columns condition x and
+#'  next 7 columns condition 2).
+#' @param conds A character vector of group labels. See example.
+#'
+#' @examples
+#' # For selex dataset.
+#' conds <- c(rep("NS", 7), rep("S", 7))
+#'
+#' @seealso \code{\link[vegan]{adonis}}, \code{\link[ALDEx2]{selex}}
 #'
 #' @export
 #'

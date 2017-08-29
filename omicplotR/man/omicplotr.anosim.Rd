@@ -11,9 +11,29 @@ omicplotr.anosim(x, conds)
 in ordered of condition being tested (i.e., first 4 columns condition x and
 next 4 columns condition 4).}
 
-\item{conds}{a character vector of group labels.}
+\item{conds}{A character vector of group labels. See example.}
+}
+\value{
+Returns significance from permutation.
 }
 \description{
-Wrapper for \code{vegan} package to calculate anosim p-value between
- conditions from cenetered-log ratio values between two conditions.
+Wraps \code{anosim} from \code{vegan} package to calculate anosim
+ p-value between conditions from cenetered-log ratio values between two
+ conditions.
+}
+\details{
+Any zeros are replaced using the CZM method using \code{cmultRepl} from
+ \code{zCompositions}. \code{dist} computes the distance matrix from the
+ cenetered-log ratio.
+}
+\examples{
+# For selex example data set where first 7 samples are non-selected, the last
+7 are selected.
+conds <- c(rep("NS", 7), rep("S", 7))
+p <- omicplotr.anosim(selex, conds)
+
+}
+\seealso{
+\code{\link[vegan]{anosim}},
+ \code{\link[zCompositions]{cmultRepl}}, \code{\link[ALDEx2]{selex}}
 }

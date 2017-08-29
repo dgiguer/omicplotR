@@ -7,13 +7,21 @@
 omicplotr.permanova(x, conds)
 }
 \arguments{
-\item{x}{filtered data output from \code{omicplotr.filter}. columns must
-in ordered of condition being tested (i.e., first 4 columns condition x and
-next 4 columns condition 4).}
+\item{x}{Filtered data output from \code{omicplotr.filter}. columns must
+in ordered of condition being tested (i.e., first 7 columns condition x and
+next 7 columns condition 2).}
 
-\item{conds}{a character vector of group labels.}
+\item{conds}{A character vector of group labels. See example.}
 }
 \description{
 Wrapper for \code{vegan} package to calculate PERMANOVA between
- conditions from cenetered-log ratio values.
+ conditions from cenetered-log ratio values with \code{adonis}.
+}
+\examples{
+# For selex dataset.
+conds <- c(rep("NS", 7), rep("S", 7))
+
+}
+\seealso{
+\code{\link[vegan]{adonis}}, \code{\link[ALDEx2]{selex}}
 }

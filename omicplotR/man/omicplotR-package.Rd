@@ -16,10 +16,17 @@ A Shiny app for visual exploration of omic datasets as
  filter data by count or by metadata to remove low counts, or to visualize
  select samples according to selected metadata. The Shiny app's graphical
  user interface facilitates visual exploration for new and experienced
- users
- of R alike.
+ users of R alike.
+}
+\details{
+To launch the \code{shiny} app in your default browser, use
+ \code{omicplotr.run}.
+}
+\seealso{
+\code{\link{omciplotr.filter}}, \code{\link{omciplotr.clr}},
+ \code{\link{omciplotr.clr}}, \code{\link{omciplotr.colvec}},
+ \code{\link{omciplotr.colouredPCA}}, \code{\link{omciplotr.run}}.
 }
 \author{
-\strong{Maintainer}: Daniel Giguere \email{dgiguer@uwo.ca}
-
+Daniel Giguere
 }

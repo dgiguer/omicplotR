@@ -3,17 +3,20 @@
 #' \code{omicplotr.filter} removes columns and/or rows of table below threshold.
 #' This must be used after \code{omicplotr.metadataFilter}.
 #'
-#' @param x counts table as data frame.
-#' @param min.reads removes any columns with sum less than or equal to input.
-#' @param min.count removes any rows with maximum lower than input.
-#' @param min.sum removes any rows with sum lower than input.
-#' @param min.prop minimum proportional abundance in any sample.
-#' @param max.prop maximum proportional abundance in any sample.
+#' @details See arguments for filtering details. This filter must be done prior
+#'  to generating \code{prcomp} object with \code{omicplotr.clr}.
+#'
+#' @param x Counts table as data frame.
+#' @param min.reads Removes any columns with sum less than or equal to input.
+#' @param min.count Removes any rows with maximum lower than input.
+#' @param min.sum Removes any rows with sum lower than input.
+#' @param min.prop Minimum proportional abundance in any sample.
+#' @param max.prop Maximum proportional abundance in any sample.
 #'
 #' @examples
 #' # The 'reads' data frame must have unique row and column names, and may
 #' # include a taxonomy column as the last column, and look like this
-#' # (from \code{ALDEx2} documentation):
+#' # from ALDEx2 documentation:
 #' #
 #' #              T1a T1b  T2  T3  N1  N2  Nx taxonomy
 #' #   Gene_00001   0   0   2   0   0   1   0 Bacteria;Bacteroidetes;...
@@ -24,12 +27,14 @@
 #' #   Gene_00006 129 126 451 223 243 149 209 Bacteria;Firmicutes;...
 #' #       ... many more rows ...
 #' #
-#' #   The taxonomy column is not required.
-#' #
+#' # The taxonomy column is not required.
+#'
+#'
+#' @seealso \code{\link{omicplotr.clr}}, \code{\link[ALDEx2]{aldex}}
+#'
 #' @export
 
-omicplotr.filter <- function(x, min.reads = 0, min.count = 0, min.sum = 0,
-     min.prop = 0, max.prop = 1) {
+omicplotr.filter <- function(x, min.reads = 0, min.count = 0, min.sum = 0, min.prop = 0, max.prop = 1) {
 
         if (is.null(x$taxonomy)) {
             taxCheck <- TRUE

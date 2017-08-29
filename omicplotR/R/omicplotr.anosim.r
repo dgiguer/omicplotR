@@ -1,12 +1,31 @@
 #' Calculate \code{anosim} between conditions.
 #'
-#' Wrapper for \code{vegan} package to calculate anosim p-value between
-#'  conditions from cenetered-log ratio values between two conditions.
+#' Wraps \code{anosim} from \code{vegan} package to calculate anosim
+#'  p-value between conditions from cenetered-log ratio values between two
+#'  conditions.
+#'
+#' @details
+#' Any zeros are replaced using the CZM method using \code{cmultRepl} from
+#'  \code{zCompositions}. \code{dist} computes the distance matrix from the
+#'  cenetered-log ratio.
 #'
 #' @param x Filtered data output from \code{omicplotr.filter}. Columns must
 #'  in ordered of condition being tested (i.e., first 4 columns condition x and
 #'  next 4 columns condition 4).
-#' @param conds a character vector of group labels.
+#' @param conds A character vector of group labels. See example.
+#'
+#' @return Returns significance from permutation.
+#'
+#' @seealso \code{\link[vegan]{anosim}},
+#'  \code{\link[zCompositions]{cmultRepl}}, \code{\link[ALDEx2]{selex}}
+#'
+#' @examples
+#' # For selex example data set where first 7 samples are non-selected, the last
+#' 7 are selected.
+#' conds <- c(rep("NS", 7), rep("S", 7))
+#' p <- omicplotr.anosim(selex, conds)
+#'
+#' @notes helllo
 #'
 #' @export
 #'

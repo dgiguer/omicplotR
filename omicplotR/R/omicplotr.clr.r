@@ -1,13 +1,19 @@
-#' Generate prcomp object to plot compositional biplot with
-#'  \code{omicplotr.colouredPCA}
+#' Calculate CLR and generate prcomp object for compositional biplot
 #'
-#' \code{omciplotr.clr} replaces zeros using CZM method from
-#'  \code{zCompositions}, calculates CLR, filters by variance and
-#'  generates a \code{prcomp} object from the transformed data frame.
+#' \code{omciplotr.clr} replaces zeros using CZM method using \code{cmultRepl}
+#'  from \code{zCompositions}, calculates CLR, filters by variance and
+#'  generates a \code{prcomp} object from data.
 #'
-#' @param x filtered data frame by \code{omicplotr.countfilter}
+#' @details If filtering by with \code{omicplotr.filter} or
+#'  \code{omicplotr.metadataFilter}, it must done before this step.
+#'
+#' @param x filtered data from \code{omicplotr.filter}.
 #' @param var.filt variance cutoff to be applied after clr is computed,
 #'  default, 0.
+#'
+#' @return Returns an object of class "prcomp".
+#'
+#' @seealso \code{\link[stats]{prcomp}}.
 #'
 #' @export
 #'

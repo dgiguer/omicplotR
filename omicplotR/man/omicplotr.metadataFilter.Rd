@@ -7,14 +7,26 @@
 omicplotr.metadataFilter(data, meta, column, values)
 }
 \arguments{
-\item{data}{unfiltered data.}
+\item{data}{Unfiltered data.}
 
-\item{meta}{unfiltered metadata.}
+\item{meta}{Unfiltered metadata.}
 
-\item{column}{column name from metadata.}
+\item{column}{Column name from metadata. Must exactly match.}
 
-\item{values}{list of values to keep from metadata column.}
+\item{values}{List of values to keep from metadata column. Must exactly match
+the values in the metadata (no extra characters - including spaces).}
 }
 \description{
-Filters data by choosing values to remain using associated metadata.
+Filters samples in data to remain using values from associated metadata.
+}
+\details{
+This filter must be applied before filtering by count using
+ \code{omicplotr.filter} or generating \code{prcomp} object with
+ \code{omicplotr.clr}.
+}
+\seealso{
+\code{\link{omicplotr.filter}}, \code{\link{omicplotr.clr}}.
+}
+\author{
+Daniel Giguere
 }
