@@ -1,0 +1,40 @@
+### Welcome to omicplotR!
+
+omicplotR is a data visualization tool based on the Shiny framework to easily explore your multivariate 'omic' data.
+
+<img src="colored_biplot.png" style="width: 40%"/>
+<img src="histogram_colored.png" style="width: 40%"/>
+
+#### *Features*
+
+* Clustering using PCA biplots
+* Filtering count tables by counts (per sample or OTU/gene)
+* Filter data using metadata
+* Colouring biplots using metadata
+* Assocation plots
+* Dendrograms and stacked barplots for taxonomic information
+* Effect plots using ALDEx2
+
+
+#### *Data format requirements*
+
+**Data**  
+
+1. The data file must be a **tab delimited .txt** (this is an option when you click 'Save as' from Excel).
+2. The first column must contain gene/OTU identifier.
+3. The first row must contain sample identifiers.
+4. The last column may contain taxonomic level information, but is not required. If present, it must be labelled 'taxonomy'.
+5. Data table must have all blank rows removed (this may require you to check in a text editor like Notepad ++ or Atom before using the app)  
+<img src="example_data.png" style="width: 80%"/>
+
+**Metadata**  
+
+1. Must be a **tab delimited .txt** (this is an option when you click 'Save as' from Excel).
+2. The first column must contain sample identifiers. The sample identifiers must be identical to the data file (not required to be in the same order). 
+3. The first row must contain phenotypic information.
+
+<img src="example_metadata.png" style="width: 50%"/>
+
+#### Saving Plots
+
+To save your image, right-click the desired image and click 'Save picture as'.
