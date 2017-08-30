@@ -17,9 +17,9 @@
 #'
 #' @author Daniel Giguere
 #'
-#' @seealso \code{\link{omciplotr.filter}}, \code{\link{omciplotr.clr}},
-#'  \code{\link{omciplotr.clr}}, \code{\link{omciplotr.colvec}},
-#'  \code{\link{omciplotr.colouredPCA}}, \code{\link{omciplotr.run}}.
+#' @seealso \code{\link{omicplotr.filter}}, \code{\link{omicplotr.clr}},
+#'  \code{\link{omicplotr.clr}}, \code{\link{omicplotr.colvec}},
+#'  \code{\link{omicplotr.colouredPCA}}, \code{\link{omicplotr.run}}.
 #'
 #'
 #'

@@ -21,9 +21,9 @@
 #'
 #' @examples
 #' # For selex example data set where first 7 samples are non-selected, the last
-#' 7 are selected.
-#' conds <- c(rep("NS", 7), rep("S", 7))
-#' p <- omicplotr.anosim(selex, conds)
+#' # 7 are selected.
+#' # conds <- c(rep("NS", 7), rep("S", 7))
+#' # p <- omicplotr.anosim(selex, conds)
 #'
 #' @export
 #'

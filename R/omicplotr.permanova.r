@@ -10,7 +10,7 @@
 #'
 #' @examples
 #' # For selex dataset.
-#' conds <- c(rep("NS", 7), rep("S", 7))
+#' # conds <- c(rep("NS", 7), rep("S", 7))
 #'
 #' @seealso \code{\link[vegan]{adonis}}, \code{\link[ALDEx2]{selex}}
 #'

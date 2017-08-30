@@ -19,7 +19,7 @@ Wrapper for \code{vegan} package to calculate PERMANOVA between
 }
 \examples{
 # For selex dataset.
-conds <- c(rep("NS", 7), rep("S", 7))
+# conds <- c(rep("NS", 7), rep("S", 7))
 
 }
 \seealso{
