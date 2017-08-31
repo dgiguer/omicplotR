@@ -7,7 +7,7 @@
 #' @param x.all output from \code{ALDEx2}
 #' @param feature optional; report for single feature/OTU
 #'
-#' @export
+#'
 #'
 omicplotr.report <- function(x.all, feature = NULL) {
 

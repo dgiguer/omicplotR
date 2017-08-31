@@ -36,6 +36,6 @@ omicplotr.getRemovedFeatures <- function(x, x.clr) {
     #include OTUs as column because renderDataTable doesn't include rownames
     output <- cbind(OTUs = rownames(output), output)
 
-    return(output)
+        return(output)
 
     }

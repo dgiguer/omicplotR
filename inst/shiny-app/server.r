@@ -512,7 +512,7 @@ server <- function(input, output) {
     data.pr <- data.prcomp()
     data.in <- data()
 
-    validate(need(input$showremoved, "Click 'Show removed samples/OTUs' to view removed samples"))
+    validate(need(input$showremoved, ""))
 
     omicplotr.getRemovedSamples(data.in, data.pr)
   },
@@ -632,12 +632,8 @@ server <- function(input, output) {
     associationPlot(d)
   })
   output$associationtext <- renderText({
-    "This association plot uses Spearman's rho to measure the strength and direction of assocation between two variables.
-    The cutoff values ranges from -1 to 1."
-  })
-
-  output$nometa <- renderImage({
-    image <- source("www/nometa.png")
+    "This association plot uses Spearman's rho to measure the strength and direction of association between two variables.
+    The cutoff values ranges from -1 to 1. If greater than 1000 features are detected, input will be required on the R console."
   })
 
   output$nometadata <- renderText({
@@ -1038,7 +1034,7 @@ server <- function(input, output) {
         return(NULL)
       } else {
         aldex.plot(x.all, type="MA", test="welch", col = rgb(0,0,0,0.2), all.cex = 1.6, rare.cex = 1.5, called.cex = 1.5, xlab = "CLR Abundance", ylab = "Difference")
-        title(main = "MA (Bland-Altman)")
+        title(main = "Bland-Altman")
       }
     }
   })
@@ -1050,7 +1046,7 @@ server <- function(input, output) {
         return(NULL)
       } else {
         aldex.plot(x.all, type="MW", test="welch", all.cex = 1.5, rare.cex = 1.5, called.cex = 1.5, xlab = "Dispersion", ylab = "Difference")
-        title(main = "MW (Effect Plot)")
+        title(main = "Effect Plot")
       }
     }
   })

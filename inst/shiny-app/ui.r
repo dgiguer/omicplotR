@@ -12,7 +12,7 @@ require(igraph)
 
 #userinterface -------------------------------------------------------
 ui <- fluidPage(theme= "bootstrap.css",
-  titlePanel("Visual exploration of multivariate meta-omic datasets"),
+  titlePanel("omicplotR: Visual exploration of omic datasets as compositions"),
 
   navbarPage("omicplotR",
              tabPanel("Getting started",
@@ -87,7 +87,7 @@ ui <- fluidPage(theme= "bootstrap.css",
                               max = 1,
                               step = 1
                             ),
-                            actionButton("showremoved", "Show removed samples/OTUs"),
+
                             textOutput("removedsamples"),
                             textOutput("removedotus")
                             ),
@@ -114,18 +114,6 @@ ui <- fluidPage(theme= "bootstrap.css",
                         mainPanel(
                             tabsetPanel(
                           selected = "Biplot",
-                          tabPanel("Filtering plots",
-                                   fluidRow(
-                                     column(6, plotOutput("colsums")),
-                                     column(6, plotOutput("rowsums")),
-                                     tabsetPanel(tabPanel("Samples removed", fluidRow(column(
-                                       12, dataTableOutput("removedDT")
-                                     ))),
-                                     tabPanel("OTUs removed", fluidRow(column(
-                                       12, dataTableOutput("removedDTotu")
-                                     ))))
-                                   )
-                          ),
                           tabPanel(
                             "Biplot",
                             h3(textOutput("nodata")),
@@ -143,13 +131,26 @@ ui <- fluidPage(theme= "bootstrap.css",
                               plotOutput("coloredBiplot", width = 600, height = 600),
                               plotOutput("metahist")
                             )
+                          ),
+                          tabPanel("Removed data",
+                                   fluidRow(
+                                     column(6, plotOutput("colsums")),
+                                     column(6, plotOutput("rowsums")),
+                                     tabsetPanel(tabPanel("Samples removed", fluidRow(column(
+                                       12, dataTableOutput("removedDT")
+                                     )),
+                                     actionButton("showremoved", "Show removed samples/OTUs")),
+                                     tabPanel("Features removed", fluidRow(column(
+                                       12, dataTableOutput("removedDTotu")
+                                     ))))
+                                   )
                           )
                         )))#sidebarlayout
              ), #tabpanel
              tabPanel("Association plots",
                       sidebarLayout(
                         sidebarPanel(width = 3,
-                          numericInput("phicutoff",
+                          numericInput("rhocutoff",
                                        label = "Input rho cutoff",
                                        value = -0.25),
                           textOutput("associationtext")),
