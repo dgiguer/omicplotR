@@ -19,8 +19,8 @@ A Shiny app for visual exploration of omic datasets as
  users of R alike.
 }
 \details{
-To launch the \code{shiny} app in your default browser, use
- \code{omicplotr.run}.
+To launch the \code{shiny} app in your default browser, type
+ \code{omicplotr.run()}.
 }
 \seealso{
 \code{\link{omicplotr.filter}}, \code{\link{omicplotr.clr}},
