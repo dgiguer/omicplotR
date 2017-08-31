@@ -12,8 +12,8 @@
 #'  user interface facilitates visual exploration for new and experienced
 #'  users of R alike.
 #'
-#' @details To launch the \code{shiny} app in your default browser, use
-#'  \code{omicplotr.run}.
+#' @details To launch the \code{shiny} app in your default browser, type
+#'  \code{omicplotr.run()}.
 #'
 #' @author Daniel Giguere
 #'
