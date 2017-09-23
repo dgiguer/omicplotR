@@ -2,6 +2,7 @@ server <- function(input, output) {
   ##############################################################################
   #observe events
   #quit button
+  options(shiny.maxRequestSize=70*1024^2)
   observeEvent(input$stopApp, {
     stopApp(returnValue = invisible())
   })
@@ -240,6 +241,27 @@ server <- function(input, output) {
     }
   })
 
+  effect_input <- reactive({
+
+    inFile3 <- input$effect_file
+
+    #return NULL when no file is uploaded
+    if (is.null(inFile3))
+      return(NULL)
+
+    read.table(
+      inFile3$datapath,
+      header = TRUE,
+      sep = "\t",
+      stringsAsFactors = FALSE,
+      quote = "",
+      row.names = 1,
+      check.names = FALSE,
+      comment.char = "",
+      na.strings = ""
+    )
+  })
+
   #create reactive object for biplot filtering inputs
   vals <- reactiveValues(data = NULL)
   metaval <- reactiveValues(data = NULL)
@@ -413,6 +435,7 @@ server <- function(input, output) {
     )
     #hack to output d.clr
     d.clr <- d.clr
+
     })
 
   aldex.obj <- reactive({
@@ -1038,10 +1061,59 @@ server <- function(input, output) {
       }
     }
   })
+
+  point.colour <- eventReactive(input$update_points, {
+    effect <- effect_input()
+    point.colour <- input$point.colour
+
+    row.num <- grep(point.colour, rownames(effect))
+
+    points(effect$rab.all[row.num], effect$diff.btw[row.num], pch=19, col=rgb(1,0,0,0.1), cex=0.4)
+
+
+  })
+
+
+  output$table_effect <- renderPlot({
+    effect <- effect_input()
+    point.colour <- input$point.colour
+
+    if (input$effectplot_ab2) {
+        if (is.null(effect)){
+          return(NULL)
+        } else {
+          plot(effect$rab.all, effect$diff.btw, pch = 19, col=rgb(0,0,0,0.1), cex=0.4, xlab = "Difference within", ylab = "Difference between")
+          title(main = "Effect Plot")
+        }
+
+        if (input$update_points == 0){
+          return()
+        } else {
+          point.colour()
+        }
+
+
+          }
+    })
+
+
+  output$table_bland <- renderPlot({
+    effect <- effect_input()
+
+    if (input$effectplot_ab2) {
+        if (is.null(effect)){
+          return(NULL)
+        } else {
+          plot(effect$diff.win, effect$diff.btw, pch = 19, xlab = "Difference within", ylab = "Difference between")
+          title(main = "Effect Plot")
+        }
+      }
+  })
+
   output$effectMW <- renderPlot({
     x.all <- aldex.obj()
 
-    if (input$effectplot_ab) {
+  if (input$effectplot_ab) {
       if (is.null(x.all)){
         return(NULL)
       } else {
@@ -1054,7 +1126,7 @@ server <- function(input, output) {
   output$ma_hovertext <- renderUI({
     x.all <- aldex.obj()
 
-    row <- nearPoints(x.all, input$ma_hover, xvar = "rab.all", yvar = "diff.btw")
+      row <- nearPoints(x.all, input$ma_hover, xvar = "rab.all", yvar = "diff.btw")
 
       x <- paste("Sample Id: ", rownames(row))
       y <- paste("Median Log2 relative abundance: ", round(row$rab.all, digits =3))
@@ -1104,6 +1176,7 @@ server <- function(input, output) {
     }
 
     row <- nearPoints(x.all, input$mw_hover, xvar = "diff.win", yvar = "diff.btw", maxpoints = 1)
+
     feature <- rownames(row)
 
     if (length(feature) == 0) {
@@ -1142,7 +1215,6 @@ server <- function(input, output) {
 
     s <- cbind(cond1.clr, cond2.clr)
 
-
     #clr values for each condition for the otu
     s.clr <- list("Condition 1" = cond1.clr, "Condition 2" = cond2.clr)
 
@@ -1151,6 +1223,56 @@ server <- function(input, output) {
                col = c("black", "red"), pch =16, vertical = TRUE, method = "jitter", jitter = 0.10)
     #text(0, labels = txt)
   })
+
+  output$stripchart2 <- renderUI({
+    x.all <- effect_input()
+    cond1 <- input$group1s
+    cond2 <- input$group2s
+    g1s <- input$group1s
+    g2s <- input$group2s
+    group1 <- input$group1
+    group2 <- input$group2
+
+
+    row <- nearPoints(x.all, input$mw_hover2, xvar = "rab.all", yvar = "diff.btw")
+
+    feature <- rownames(row)
+
+    return(rownames(x.all[feature,]))
+
+
+
+    # if (length(feature) == 0) {
+    #   return(NULL)
+    # }
+    #
+    # if (input$ep_chooseconds == 1) {
+    #   cond1.clr <- obj[feature,1:cond1]
+    #   cond2.clr <- obj[feature,(cond1+1):(cond1+cond2)]
+    #
+    #   #make conditions vector
+    #   conds <- c(rep("group1", g1s),
+    #              rep("group2", g2s))
+    # }
+    #
+    # s <- cbind(cond1.clr, cond2.clr)
+    #
+    # s.clr <- list("Condition 1" = cond1.clr, "Condition 2" = cond2.clr)
+    #
+    # stripchart(s.clr, main = c("Difference between conditions for: ", feature), xlab = "Conditions", ylab = "Expected CLR values",
+    #            col = c("black", "red"), pch =16, vertical = TRUE, method = "jitter", jitter = 0.10)
+
+
+
+
+
+
+
+
+  })
+
+
+
 
   output$effectwarning <- renderText({
     "See the GitHub Wiki for more information on how to select conditions"
@@ -1196,6 +1318,7 @@ server <- function(input, output) {
     # convert to abundances
     d.prop <- apply(d.agg, 2, function(x){x/sum(x)})
 
+    #filters by abundance (slider bar)
     d.abund <- d.agg[apply(d.prop, 1, max) > abund,]
     tax.abund.u <- tax.agg[apply(d.prop, 1, max) > abund]
 

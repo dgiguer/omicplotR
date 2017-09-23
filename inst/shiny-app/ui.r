@@ -185,33 +185,67 @@ ui <- fluidPage(theme= "bootstrap.css",
              tabPanel("Effect plots",
                       sidebarLayout(
                         sidebarPanel(
-                          radioButtons("ep_chooseconds", "How will you select your conditions?", choices = list("Manually" = 1, "From metadata" = 2)),
-                          selectInput("denomchoice", "Choose ALDEx2 method", choices = list("all" = 1, "iqlr" = 2, "zero"= 3)),
-                          actionButton("effectplot_ab", "Generate effect plot"),
-                          # textOutput("anosim"),
-                          conditionalPanel("input.ep_chooseconds == '2'",
-                                           uiOutput("colselectcond")),
-                          uiOutput("conditions"),
-                          textOutput("effectwarning")
+                          tabsetPanel(
+                            tabPanel("Calculate",
+                              radioButtons("ep_chooseconds", "How will you select your conditions?", choices = list("Manually" = 1, "From metadata" = 2)),
+                              selectInput("denomchoice", "Choose ALDEx2 method", choices = list("all" = 1, "iqlr" = 2, "zero"= 3)),
+                              actionButton("effectplot_ab", "Generate effect plot"),
+                              # textOutput("anosim"),
+                              conditionalPanel("input.ep_chooseconds == '2'",
+                                               uiOutput("colselectcond")),
+                              uiOutput("conditions"),
+                              textOutput("effectwarning")
+                            ),
+                            tabPanel("Input",
+
+                            fileInput(
+                            'effect_file',
+                            label = h3('Input ALDEx2 file'),
+                            accept = c('text/csv',
+                                       'text/comma-separated-values,text/plain',
+                                       '.csv')
+                            ),
+                            actionButton("effectplot_ab2", "Generate effect plot")
+                          )
+                          )
                         ),
                         mainPanel(
+                          tabsetPanel(selected = "Calculate",
+                            tabPanel("Calculate",
                           h3(textOutput("nostripchart"),
                           splitLayout(
                             cellWidths = c("50%", "50%"),
                             plotOutput("stripchart"),
+
                             plotOutput("effectMW",
-                                       hover = hoverOpts(id = "mw_hover"))
+                                      hover = hoverOpts(id = "mw_hover"))
                           ),
                           fluidRow(column(6, offset = 6,
                                           uiOutput("mw_hovertext"),
-                                          plotOutput("effectMA",
-                                                     hover = hoverOpts(
-                                                       id = "ma_hover"
-                                                     )),
+                                          plotOutput("table_bland",
+                                                    hover = hoverOpts(
+                                                      id = "ma_hover"
+                                                    )),
+                                          # plotOutput("effectMA",
+                                          #            hover = hoverOpts(
+                                          #              id = "ma_hover"
+                                          #            )),
                                           uiOutput("ma_hovertext"))
-                          ))
+                          ))),
+                          tabPanel("ALDEx2 input",
+                          splitLayout(
+                            cellWidths = c("50%", "50%"),
+                            uiOutput("stripchart2"),
+                            plotOutput("table_effect",
+                                       hover = hoverOpts(id = "mw_hover2"))
+                          ),
+                          textInput("point.colour", label = "Colour points by name",
+                          placeholder = "Input string to search in row names..."
+                        ),
+                        actionButton("update_points", label = "Update")
                         )
-                      )),
+                        )
+                      ))),
               navbarMenu("More",
                          tabPanel("Instructions",
                                   fluidRow(
