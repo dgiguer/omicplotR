@@ -233,12 +233,10 @@ ui <- fluidPage(theme= "bootstrap.css",
                                           uiOutput("ma_hovertext"))
                           ))),
                           tabPanel("ALDEx2 input",
-                          splitLayout(
-                            cellWidths = c("50%", "50%"),
-                            uiOutput("stripchart2"),
-                            plotOutput("table_effect",
+                            plotOutput("table_effect", height = "500px", width = "500px",
                                        hover = hoverOpts(id = "mw_hover2"))
-                          ),
+                          ,
+                          uiOutput("stripchart2"),
                           textInput("point.colour", label = "Colour points by name",
                           placeholder = "Input string to search in row names..."
                         ),

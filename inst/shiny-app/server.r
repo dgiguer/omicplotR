@@ -1068,7 +1068,7 @@ server <- function(input, output) {
 
     row.num <- grep(point.colour, rownames(effect))
 
-    points(effect$rab.all[row.num], effect$diff.btw[row.num], pch=19, col=rgb(1,0,0,0.1), cex=0.4)
+    points(effect$diff.win[row.num], effect$diff.btw[row.num], pch=19, col=rgb(1,0,0,0.8), cex=1)
 
 
   })
@@ -1082,7 +1082,7 @@ server <- function(input, output) {
         if (is.null(effect)){
           return(NULL)
         } else {
-          plot(effect$rab.all, effect$diff.btw, pch = 19, col=rgb(0,0,0,0.1), cex=0.4, xlab = "Difference within", ylab = "Difference between")
+          plot(effect$diff.win, effect$diff.btw, pch = 19, col=rgb(0,0,0,0.1), cex=0.4, xlab = "Difference within", ylab = "Difference between")
           title(main = "Effect Plot")
         }
 
@@ -1234,7 +1234,7 @@ server <- function(input, output) {
     group2 <- input$group2
 
 
-    row <- nearPoints(x.all, input$mw_hover2, xvar = "rab.all", yvar = "diff.btw")
+    row <- nearPoints(x.all, input$mw_hover2, xvar = "diff.win", yvar = "diff.btw")
 
     feature <- rownames(row)
 
