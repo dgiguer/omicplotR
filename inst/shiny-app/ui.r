@@ -222,20 +222,22 @@ ui <- fluidPage(theme= "bootstrap.css",
                           ),
                           fluidRow(column(6, offset = 6,
                                           uiOutput("mw_hovertext"),
-                                          plotOutput("table_bland",
-                                                    hover = hoverOpts(
-                                                      id = "ma_hover"
-                                                    )),
-                                          # plotOutput("effectMA",
-                                          #            hover = hoverOpts(
-                                          #              id = "ma_hover"
-                                          #            )),
+                                          plotOutput("effectMA",
+                                                     hover = hoverOpts(
+                                                       id = "ma_hover"
+                                                     )),
                                           uiOutput("ma_hovertext"))
                           ))),
                           tabPanel("ALDEx2 input",
-                            plotOutput("table_effect", height = "500px", width = "500px",
-                                       hover = hoverOpts(id = "mw_hover2"))
-                          ,
+                          splitLayout(
+                            cellWidths = c("50%", "50%"),
+                            plotOutput("table_effect",
+                                       hover = hoverOpts(id = "mw_hover2")),
+                            plotOutput("table_bland",
+                                      hover = hoverOpts(
+                                        id = "ma_hover"
+                                      ))
+                          ),
                           uiOutput("stripchart2"),
                           textInput("point.colour", label = "Colour points by name",
                           placeholder = "Input string to search in row names..."

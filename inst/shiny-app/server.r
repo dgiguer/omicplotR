@@ -490,7 +490,7 @@ server <- function(input, output) {
 
     )
         # Combine into one table
-    x.all <- data.frame(x.tt, x.effect, stringsAsFactors=FALSE)
+    x.all <- data.frame(x.effect, stringsAsFactors=FALSE)
   })
 
   #stripchart data
@@ -1069,8 +1069,15 @@ server <- function(input, output) {
     row.num <- grep(point.colour, rownames(effect))
 
     points(effect$diff.win[row.num], effect$diff.btw[row.num], pch=19, col=rgb(1,0,0,0.8), cex=1)
+  })
 
+  BA.point.colour <- eventReactive(input$update_points, {
+    effect <- effect_input()
+    point.colour <- input$point.colour
 
+    row.num <- grep(point.colour, rownames(effect))
+
+    points(effect$rab.all[row.num], effect$diff.btw[row.num], pch=19, col=rgb(1,0,0,0.8), cex=1)
   })
 
 
@@ -1085,27 +1092,29 @@ server <- function(input, output) {
           plot(effect$diff.win, effect$diff.btw, pch = 19, col=rgb(0,0,0,0.1), cex=0.4, xlab = "Difference within", ylab = "Difference between")
           title(main = "Effect Plot")
         }
-
         if (input$update_points == 0){
           return()
         } else {
           point.colour()
         }
-
-
           }
     })
 
-
   output$table_bland <- renderPlot({
     effect <- effect_input()
+    point.colour <- input$point.colour
 
     if (input$effectplot_ab2) {
         if (is.null(effect)){
           return(NULL)
         } else {
-          plot(effect$diff.win, effect$diff.btw, pch = 19, xlab = "Difference within", ylab = "Difference between")
-          title(main = "Effect Plot")
+          plot(effect$rab.all, effect$diff.btw, pch = 19, col=rgb(0,0,0,0.1), cex=0.4, xlab = "CLR abundance", ylab = "Difference within")
+          title(main = "Bland-Altman Plot")
+        }
+        if (input$update_points == 0){
+          return()
+        } else {
+          BA.point.colour()
         }
       }
   })
@@ -1119,6 +1128,19 @@ server <- function(input, output) {
       } else {
         aldex.plot(x.all, type="MW", test="welch", all.cex = 1.5, rare.cex = 1.5, called.cex = 1.5, xlab = "Dispersion", ylab = "Difference")
         title(main = "Effect Plot")
+      }
+    }
+  })
+
+  output$effectMA <- renderPlot({
+    x.all <- aldex.obj()
+
+  if (input$effectplot_ab) {
+      if (is.null(x.all)){
+        return(NULL)
+      } else {
+        aldex.plot(x.all, type="MA", test="welch", all.cex = 1.5, rare.cex = 1.5, called.cex = 1.5, xlab = "CLR abundance", ylab = "Difference between")
+        title(main = "Bland-Altman Plot")
       }
     }
   })
@@ -1226,53 +1248,19 @@ server <- function(input, output) {
 
   output$stripchart2 <- renderUI({
     x.all <- effect_input()
-    cond1 <- input$group1s
-    cond2 <- input$group2s
-    g1s <- input$group1s
-    g2s <- input$group2s
-    group1 <- input$group1
-    group2 <- input$group2
-
 
     row <- nearPoints(x.all, input$mw_hover2, xvar = "diff.win", yvar = "diff.btw")
 
+    ba.row <- nearPoints(x.all, input$ma_hover, xvar = "rab.all", yvar = "diff.btw")
+
     feature <- rownames(row)
 
-    return(rownames(x.all[feature,]))
+    feature2 <- rownames(ba.row)
 
-
-
-    # if (length(feature) == 0) {
-    #   return(NULL)
-    # }
-    #
-    # if (input$ep_chooseconds == 1) {
-    #   cond1.clr <- obj[feature,1:cond1]
-    #   cond2.clr <- obj[feature,(cond1+1):(cond1+cond2)]
-    #
-    #   #make conditions vector
-    #   conds <- c(rep("group1", g1s),
-    #              rep("group2", g2s))
-    # }
-    #
-    # s <- cbind(cond1.clr, cond2.clr)
-    #
-    # s.clr <- list("Condition 1" = cond1.clr, "Condition 2" = cond2.clr)
-    #
-    # stripchart(s.clr, main = c("Difference between conditions for: ", feature), xlab = "Conditions", ylab = "Expected CLR values",
-    #            col = c("black", "red"), pch =16, vertical = TRUE, method = "jitter", jitter = 0.10)
-
-
-
-
-
-
-
+    number <- c(rownames(x.all[feature,]), rownames(x.all[feature2,]))
+      return(number)
 
   })
-
-
-
 
   output$effectwarning <- renderText({
     "See the GitHub Wiki for more information on how to select conditions"
