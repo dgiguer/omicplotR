@@ -21,7 +21,7 @@ server <- function(input, output) {
   #convert input to reactive object
   observeEvent(input$update, {
     vals$data <-
-      c(input$cnname, input$cnname2, input$cnname3, input$cnname4)
+    c(input$cnname, input$cnname2, input$cnname3, input$cnname4)
     metaval$data <- input$select_biplot_filter
     removeModal()
 
@@ -68,83 +68,61 @@ server <- function(input, output) {
       the metadata values. Leave inputs blank if you don't need them.
       Samples that do not have metadata will be coloured black",
       footer = tagList(actionButton("update", "Update Biplot"),
-                       actionButton("reset", "Reset Filter"),
-                       modalButton("Cancel")),
+      actionButton("reset", "Reset Filter"),
+      modalButton("Cancel")),
       easyClose = TRUE
     )
   }
 
-  #loading
-  output$loading <- renderUI({
-    conditionalPanel(
-      tags$head(tags$style(type="text/css", "
-                                               #loadmessage {
-                                               position: fixed;
-                                               bottom: 0;
-                                               right: 0;
-                                               width: 100%;
-                                               padding: 5px 5px 5px 5px;
-                                               text-align: bottom;
-                                               font-weight: bold;
-                                               font-size: 100%;
-                                               color: #000000;
-                                               background-color: #fffff;
-                                               z-index: 105;
-                                               }
-                                               ")),
-      condition="$('html').hasClass('shiny-busy')",
-                     tags$div("Calculating...",id="loadmessage")
-    )
-  })
-
   output$taxchoice <- renderUI({
     if (input$taxoncheckbox) {
       radioButtons("taxlevel",
-                   "Choose taxonomic level to display",
-                   c("Kingdom" = 1,
-                     "Phylum" = 2,
-                     "Class" = 3,
-                     "Order" = 4,
-                     "Family" = 5,
-                     "Genus" = 6,
-                     "Species" = 7),
-                   selected = 4
-      )
+      "Choose taxonomic level to display",
+      c("Kingdom" = 1,
+      "Phylum" = 2,
+      "Class" = 3,
+      "Order" = 4,
+      "Family" = 5,
+      "Genus" = 6,
+      "Species" = 7),
+      selected = 4
+    )
+  }
+})
+
+#dynamic variance slider
+output$varianceslider <- renderUI({
+  data <- data()
+
+  sliderInput(
+    "varslider",
+    "Variance cutoff",
+    min = 0,
+    max = 5,
+    value = 0,
+    step = 0.05
+  )
+})
+
+#effect plot conditions
+output$conditions<- renderUI({
+  if (input$ep_chooseconds == 1) {
+    tagList(
+      numericInput("group1s", "Number of columns for group 1", value = 0),
+      numericInput("group2s", "Number of columns for group 2", value = 0)
+    )
+  } else {
+    meta <- metadata()
+    options <- colnames(meta)
+    cn <- input$colselect
+    choice <- unique(meta[[cn]])
+    tagList(
+      selectInput("group1", "Choose group 1", choices = choice),
+      selectInput("group2", "Choose group 2", choices = choice))
     }
   })
 
-  #dynamic variance slider
-  output$varianceslider <- renderUI({
-    data <- data()
-
-      sliderInput(
-        "varslider",
-        "Variance cutoff",
-        min = 0,
-        max = 5,
-        value = 0,
-        step = 0.05
-      )
-  })
-
-  #effect plot conditions
-  output$conditions<- renderUI({
-    if (input$ep_chooseconds == 1) {
-      tagList(
-        numericInput("group1s", "Number of columns for group 1", value = 0),
-        numericInput("group2s", "Number of columns for group 2", value = 0)
-      )
-    } else {
-      meta <- metadata()
-      options <- colnames(meta)
-      cn <- input$colselect
-      choice <- unique(meta[[cn]])
-      tagList(
-        selectInput("group1", "Choose group 1", choices = choice),
-        selectInput("group2", "Choose group 2", choices = choice))
-    }
-  })
-
+  #choose column from metadata
   output$colselectcond <- renderUI({
     meta <- metadata()
     options <- colnames(meta)
@@ -186,7 +164,7 @@ server <- function(input, output) {
 
         #return NULL when no file is uploaded
         if (is.null(inFile))
-          return(NULL)
+        return(NULL)
 
         #reads the file
         read.table(
@@ -225,7 +203,7 @@ server <- function(input, output) {
 
       #return NULL when no file is uploaded
       if (is.null(inFile2))
-        return(NULL)
+      return(NULL)
 
       #reads the file
       read.table(
@@ -241,13 +219,14 @@ server <- function(input, output) {
     }
   })
 
+  #input ALDEx2 table
   effect_input <- reactive({
 
     inFile3 <- input$effect_file
 
     #return NULL when no file is uploaded
     if (is.null(inFile3))
-      return(NULL)
+    return(NULL)
 
     read.table(
       inFile3$datapath,
@@ -274,7 +253,7 @@ server <- function(input, output) {
 
   ###########################################################################
   #data processing
-  #generate taxonomy vector
+  #generate taxonomy vector for biplots
   taxonomy <- reactive({
     data <- data.t()
     tax.result <- data.check()
@@ -334,9 +313,10 @@ server <- function(input, output) {
       x <- x
     } else {
 
-        ("www/omicplotr.metadataFilter.r")
+      #filtering metadata location
+      ("www/omicplotr.metadataFilter.r")
 
-        x <- omicplotr.metadataFilter(x, meta, column = metaval$data, values = vals$data)
+      x <- omicplotr.metadataFilter(x, meta, column = metaval$data, values = vals$data)
     }
 
     x.filt <- omicplotr.filter(x, min.reads = min.reads, min.count = min.count, min.prop = min.prop, max.prop = max.prop, min.sum = min.sum)
@@ -387,17 +367,17 @@ server <- function(input, output) {
     #require user to click action button
     validate(need(input$effectplot_ab, ""))
 
-      # Separate the taxonomy column from the counts
-      if (is.null(x$taxonomy)) {
-        d <- x
-      } else {
-        d <- x[, 0:(dim(x)[2] - 1)]
-        taxon <- x[(dim(x)[2])]
-      }
+    # Separate the taxonomy column from the counts
+    if (is.null(x$taxonomy)) {
+      d <- x
+    } else {
+      d <- x[, 0:(dim(x)[2] - 1)]
+      taxon <- x[(dim(x)[2])]
+    }
 
     if (input$ep_chooseconds == 1) {
       conds <- c(rep("group1", g1s),
-                 rep("group2", g2s))
+      rep("group2", g2s))
     }
 
     if (input$ep_chooseconds ==2) {
@@ -413,14 +393,14 @@ server <- function(input, output) {
       two <- length(data2.filt)
 
       conds <- c(rep("Group 1", one),
-                 rep("Group 2", two))
+      rep("Group 2", two))
 
       #combine
       d <- cbind(data1.filt, data2.filt)
     }
 
-      # Generate ALDEx2 object and get a distribution of values that are centered
-      # log ratio transformed at each feature*sample
+    # Generate ALDEx2 object and get a distribution of values that are centered
+    # log ratio transformed at each feature*sample
 
     choices = c("all", "iqlr", "zero")
 
@@ -433,10 +413,10 @@ server <- function(input, output) {
         incProgress(1/2, message = "clr values calculated")
       }
     )
-    #hack to output d.clr
+    #output d.clr
     d.clr <- d.clr
 
-    })
+  })
 
   aldex.obj <- reactive({
     x <- data()
@@ -457,7 +437,7 @@ server <- function(input, output) {
 
     if (input$ep_chooseconds == 1) {
       conds <- c(rep("group1", g1s),
-                 rep("group2", g2s))
+      rep("group2", g2s))
     }
 
     if (input$ep_chooseconds ==2) {
@@ -473,75 +453,89 @@ server <- function(input, output) {
       two <- length(data2.filt)
 
       conds <- c(rep("Group 1", one),
-                 rep("Group 2", two))
+      rep("Group 2", two))
     }
 
     withProgress(
       message = "Calculating t-test...",
       detail = "Calculating t test and effect size", value = 1/2, {
         # Run a t-test between the two groups specified by conds
+        #TODO option to generate effect plots ttest to save time.
+        # this will require changing aldex.plot in effect plot output
         x.tt <- aldex.ttest(d.clr, conds, paired.test=FALSE)
         incProgress(1/4, message = "Calculating effect size...")
         # Generate effect sizes
         x.effect <- aldex.effect(d.clr, conds, include.sample.summary=TRUE,
-                                 verbose=TRUE)
-        incProgress(1/4, message = "Efect sizes calculated")
-      }
-
-    )
-        # Combine into one table
-    x.all <- data.frame(x.effect, stringsAsFactors=FALSE)
-  })
-
-  #stripchart data
-  clr.strip <- reactive({
-    x <- d.clr()
-    codaSeq.repl <- function(x){
-      # Initialize medians vector to be reshaped later to matrix
-      MC.means <- numeric()
-
-      # Iterating all samples
-      for(i in 1:numConditions(x)) {
-        sample.means <- numeric()
-
-        # Get sample's MC Instances for features
-        MC.matrix <- getMonteCarloReplicate(x, i)
-
-        # Iterating features
-        for(j in 1:numFeatures(x)){
-          feature.means <- mean(MC.matrix[j, ])
-          sample.means <- append(sample.means, feature.means)
+          verbose=TRUE)
+          incProgress(1/4, message = "Efect sizes calculated")
         }
 
-        # Add subject's MC instance medians to master vector
-        MC.means <- append(MC.means, sample.means)
+      )
+      # Combine into one table
+      x.all <- data.frame(x.tt, x.effect, stringsAsFactors=FALSE)
+    })
+
+    #stripchart data
+    clr.strip <- reactive({
+      x <- d.clr()
+      codaSeq.repl <- function(x){
+        # Initialize medians vector to be reshaped later to matrix
+        MC.means <- numeric()
+
+        # Iterating all samples
+        for(i in 1:numConditions(x)) {
+          sample.means <- numeric()
+
+          # Get sample's MC Instances for features
+          MC.matrix <- getMonteCarloReplicate(x, i)
+
+          # Iterating features
+          for(j in 1:numFeatures(x)){
+            feature.means <- mean(MC.matrix[j, ])
+            sample.means <- append(sample.means, feature.means)
+          }
+
+          # Add subject's MC instance medians to master vector
+          MC.means <- append(MC.means, sample.means)
+        }
+
+        # Turn the vector of medians into a matrix and then data frame with
+        # appropriate labels
+        result <- matrix(MC.means, nrow = numFeatures(x), ncol = numConditions(x))
+        result <- data.frame(result, row.names = getFeatureNames(x))
+        colnames(result) <- getSampleIDs(x)
+
+        return(result)
       }
 
-      # Turn the vector of medians into a matrix and then data frame with
-      # appropriate labels
-      result <- matrix(MC.means, nrow = numFeatures(x), ncol = numConditions(x))
-      result <- data.frame(result, row.names = getFeatureNames(x))
-      colnames(result) <- getSampleIDs(x)
+      clr.strip <- codaSeq.repl(x)
+    })
 
-      return(result)
-    }
+    ###########################################################################
+    # outputs
+    #show removed OTUs/samples
+    output$removedDT <- renderDataTable({
+      data.pr <- data.prcomp()
+      data.in <- data()
 
-    clr.strip <- codaSeq.repl(x)
-  })
+      validate(need(input$showremoved, ""))
 
-  ###########################################################################
-  #outputs
-  output$removedDT <- renderDataTable({
+      omicplotr.getRemovedSamples(data.in, data.pr)
+    },
+    #force datatable to size of window
+    options = list(scrollX = TRUE)
+  )
+
+  output$removedDTotu <- renderDataTable({
     data.pr <- data.prcomp()
     data.in <- data()
 
-    validate(need(input$showremoved, ""))
+    validate(need(input$showremoved, "Click 'Show removed samples/OTUs' to view removed OTUs"))
 
-    omicplotr.getRemovedSamples(data.in, data.pr)
+    omicplotr.getRemovedFeatures(data.in, data.pr)
   },
   #force datatable to size of window
-  options = list(scrollX = TRUE)
-  )
+  options = list(scrollX = TRUE))
 
   #choose the metadata column you want to colour by
   output$choose_column <- renderUI({
@@ -568,96 +562,11 @@ server <- function(input, output) {
     }
   })
 
-  output$removedDTotu <- renderDataTable({
-    data.pr <- data.prcomp()
-    data.in <- data()
-
-    validate(need(input$showremoved, "Click 'Show removed samples/OTUs' to view removed OTUs"))
-
-    omicplotr.getRemovedFeatures(data.in, data.pr)
-  },
-  #force datatable to size of window
-  options = list(scrollX = TRUE))
-
   output$textTitle <- renderText({
     "Choose filtering options"
   })
 
-  output$associationplot <- renderPlot({
-    d <- data()
-    rhocut <- input$rhocutoff
 
-    if (is.null(d)) {
-      return(NULL)
-    }
-    associationPlot <- function(x, cutoff = rhocut) {
-      # Separate out the taxonomy column from the counts
-      d <- x[, 0:(dim(x)[2] - 1)]
-      taxon <- x[(dim(x)[2])]
-
-      # Generate ALDEx2 object so values are centered log ratio transformed,
-      # then convert to propr object with a symmetric rho statistic matrix
-      d.clr <- aldex.clr(d, mc.samples = 128, verbose = TRUE)
-      d.sma.df <- aldex2propr(d.clr, how = "perb")
-
-      # Make a reference list with pairs related by a rho statistic
-      # less than the cutoff
-      d.sma.lo.rho <- d.sma.df["<", cutoff]
-
-      # **** propr and ALDEx stuff done ****
-
-      # igraph: Convert the connections into a graphical object using propr's
-      # cytescape function to first generate a table of indexed pairs and
-      # proportions
-      g <- graph.data.frame(cytescape(d.sma.lo.rho), directed = FALSE)
-
-      # igraph: Find the clusters
-      g.clust <- clusters(g)
-
-      # Make a table to examine the cluster membership by hand
-      g.df <-
-        data.frame(
-          Systematic.name = V(g)$name,
-          cluster = g.clust$membership,
-          cluster.size = g.clust$csize[g.clust$membership]
-        )
-
-      # Generate a set of clusters larger than some size
-      # Minimum cluster size is 2 (obviously)
-      big <- g.df[which(g.df$cluster.size >= 2), ]
-      colnames(big) <- colnames(g.df)
-
-      # Get genera
-      genera <- c()
-      for (i in 1:dim(taxon)[1]) {
-        genera <- c(genera, sapply(strsplit(as.character(taxon[i,]), ";"),
-                                   "[", 6))
-      }
-
-      # igraph: Rename the cluster members by their genus name
-      # gsub(pattern, replacement, strings, perl-syntax)
-      V(g)$name <- gsub("(^[A-Za-z]{3}).+", "\\1",
-                        as.vector(genera[V(g)]), perl = TRUE)
-
-      plot.new()
-
-      # igraph:
-      # vertex.size controls point and text color
-      # vertex.color controls point color
-      # vertex.frame controls point outline color
-      plot(
-        g,
-        vertex.size = 5,
-        vertex.color = rgb(0, 0, 0, 0.2),
-        vertex.frame.color = "white"
-      )
-    }
-    associationPlot(d)
-  })
-  output$associationtext <- renderText({
-    "This association plot uses Spearman's rho to measure the strength and direction of association between two variables.
-    The cutoff values ranges from -1 to 1. If greater than 1000 features are detected, input will be required on the R console."
-  })
 
   output$nometadata <- renderText({
     metadata <- metadata()
@@ -694,7 +603,7 @@ server <- function(input, output) {
       output <- cbind(OTUs = rownames(data), data)
 
     }
-  }, options = list(scrollX = TRUE))
+  }, options = list(scrollX = TRUE)) #force data table to window size
 
   output$metadatatable <- renderDataTable({
 
@@ -704,14 +613,18 @@ server <- function(input, output) {
       meta <- metadata()
 
       output <- cbind(Samples = rownames(meta), meta)
-          }
-  }, options = list(scrollX = TRUE))
+    }
+  }, options = list(scrollX = TRUE)) #force data table to window size
 
   output$contents <- renderTable(include.rownames = TRUE, {
     data()
   })
 
-  #make an ugly biplot
+  ################################################################################
+
+  # PCA biplots
+
+  #biplot
   output$biplot <- renderPlot({
     #get reactive objects
     data <- data.prcomp()
@@ -728,14 +641,15 @@ server <- function(input, output) {
 
     #if no data don't display anything
     if (is.null(data))
-      return(NULL)
+    return(NULL)
 
     if (input$taxoncheckbox) {
       validate(need(input$taxlevel, "Processing..."))
     }
 
-    #taxonomy <- taxonomy()
     taxonomy <- tax$taxonomy
+
+    #get genus (or other level)
     genus <- sapply(strsplit(as.character(taxonomy), ";"), "[", taxselect)
 
     #makes the points on the graphs periods
@@ -772,22 +686,22 @@ server <- function(input, output) {
       size = c(1.0, 0.8)
     }
 
-        biplot(
-          data,
-          main = "Principal Component Analysis Biplot",
-          cex.main = 1.5,
-          cex = size,
-          col = col,
-          scale = scale.slider,
-          var.axes = arrows,
-          xlab = PC1,
-          ylab = PC2,
-          xlabs = xlabs,
-          ylabs = points
-        )
+    biplot(
+      data,
+      main = "Principal Component Analysis Biplot",
+      cex.main = 1.5,
+      cex = size,
+      col = col,
+      scale = scale.slider,
+      var.axes = arrows,
+      xlab = PC1,
+      ylab = PC2,
+      xlabs = xlabs,
+      ylabs = points
+    )
   })
 
-  #make a pretty biplot
+  #coloured biplot
   output$coloredBiplot <- renderPlot({
     #get reactive objects
     d <- data()
@@ -823,7 +737,7 @@ server <- function(input, output) {
 
       df <- as.data.frame(df[which(df %in% rownames(meta))])
 
-      }
+    }
 
     if (input$taxoncheckbox) {
       validate(need(input$taxlevel, "Processing..."))
@@ -831,7 +745,7 @@ server <- function(input, output) {
 
     #if no data don't display anything
     if (is.null(meta))
-      return(NULL)
+    return(NULL)
 
     #get rid of taxonomy column if its there
     if (!isTRUE(tax.check)) {
@@ -853,7 +767,7 @@ server <- function(input, output) {
     validate(need(input$selectcolumn, ""))
 
     if (is.null(meta))
-      return(NULL)
+    return(NULL)
 
     #get sample names
     df <- unlist(dimnames(data$x)[1])
@@ -902,47 +816,47 @@ server <- function(input, output) {
 
       #add quartile rank column
       tn <-
-        within(t, quartile <-
-                 as.integer(cut(
-                   t[, 1], quantile(meta[[cn]]), include.lowest = TRUE
-                 )))
+      within(t, quartile <-
+        as.integer(cut(
+          t[, 1], quantile(meta[[cn]]), include.lowest = TRUE
+        )))
 
-      c <- colorRampPalette(c("green", "blue"))(4)
+        c <- colorRampPalette(c("green", "blue"))(4)
 
-      #replace with colours
-      tn$quartile[tn$quartile == 1] <- c[1]
-      tn$quartile[tn$quartile == 2] <- c[2]
-      tn$quartile[tn$quartile == 3] <- c[3]
-      tn$quartile[tn$quartile == 4] <- c[4]
+        #replace with colours
+        tn$quartile[tn$quartile == 1] <- c[1]
+        tn$quartile[tn$quartile == 2] <- c[2]
+        tn$quartile[tn$quartile == 3] <- c[3]
+        tn$quartile[tn$quartile == 4] <- c[4]
 
-      barplot(
-        table(meta[[cn]]),
-        col = tn$quartile,
-        space = 0,
-        main = "Variable frequency",
-        xlab = paste(cn, "by Quartiles")
-      )
+        barplot(
+          table(meta[[cn]]),
+          col = tn$quartile,
+          space = 0,
+          main = "Variable frequency",
+          xlab = paste(cn, "by Quartiles")
+        )
 
-    } else if (input$colouringtype == 3) {
-      #get frequency table
-      t <- as.data.frame(table(meta[[cn]], exclude = NULL))
+      } else if (input$colouringtype == 3) {
+        #get frequency table
+        t <- as.data.frame(table(meta[[cn]], exclude = NULL))
 
-      #make colour column
-      t$col <- NA
+        #make colour column
+        t$col <- NA
 
-      #get unique features of columns in metadata
-      u <- as.character(unique(meta[[cn]]))
+        #get unique features of columns in metadata
+        u <- as.character(unique(meta[[cn]]))
 
-      #colour palette
-      colours <- c("indianred1", "steelblue3",  "skyblue1", "mediumorchid",
-                   "royalblue4", "olivedrab3", "pink", "#FFED6F", "mediumorchid3",
-                   "ivory2", "tan1", "aquamarine3", "#C0C0C0", "mediumvioletred",
-                   "#999933", "#666699", "#CC9933", "#006666", "#3399FF",
-                   "#993300", "#CCCC99", "#666666", "#FFCC66", "#6699CC",
-                   "#663366", "#9999CC", "#CCCCCC", "#669999", "#CCCC66",
-                   "#CC6600", "#9999FF", "#0066CC", "#99CCCC", "#999999",
-                   "#FFCC00", "#009999", "#FF9900", "#999966", "#66CCCC",
-                   "#339966", "#CCCC33", "#EDEDED"
+        #colour palette
+        colours <- c("indianred1", "steelblue3",  "skyblue1", "mediumorchid",
+        "royalblue4", "olivedrab3", "pink", "#FFED6F", "mediumorchid3",
+        "ivory2", "tan1", "aquamarine3", "#C0C0C0", "mediumvioletred",
+        "#999933", "#666699", "#CC9933", "#006666", "#3399FF",
+        "#993300", "#CCCC99", "#666666", "#FFCC66", "#6699CC",
+        "#663366", "#9999CC", "#CCCCCC", "#669999", "#CCCC66",
+        "#CC6600", "#9999FF", "#0066CC", "#99CCCC", "#999999",
+        "#FFCC00", "#009999", "#FF9900", "#999966", "#66CCCC",
+        "#339966", "#CCCC33", "#EDEDED"
       )
 
       #the tricky part here is to order the colouring based on what the coloredBiplot is doing,
@@ -987,11 +901,13 @@ server <- function(input, output) {
 
     #if no data don't display anything
     if (is.null(data.t()))
-      return(NULL)
+    return(NULL)
 
     #generate screeplot
     screeplot(data, main = "Screeplot of Variances", xlab = "Component")
   })
+
+  #removed samples
 
   #colsums for samples
   output$colsums <- renderPlot({
@@ -1004,12 +920,12 @@ server <- function(input, output) {
     ab <- input$minreads
 
     if (is.null(data$taxonomy)){
-    x <- colSums(data)
+      x <- colSums(data)
 
-    plot(x, ylab = "Counts", xlab = "Sample Number", pch = 19, col = ifelse({x > ab}, "gray0", "red"), main = "Samples removed by filtering")
+      plot(x, ylab = "Counts", xlab = "Sample Number", pch = 19, col = ifelse({x > ab}, "gray0", "red"), main = "Samples removed by filtering")
 
-    abline(h = ab, col = "red", lty = 2, lwd = 2)
-    legend("topright", legend = c("Remaining", "Removed"), col = c("black", "red"), pch = 19)
+      abline(h = ab, col = "red", lty = 2, lwd = 2)
+      legend("topright", legend = c("Remaining", "Removed"), col = c("black", "red"), pch = 19)
 
     } else {
       x <- colSums(data[,1:(ncol(data) - 1)])
@@ -1048,225 +964,92 @@ server <- function(input, output) {
     }
   })
 
-  #effect plots
-  output$effectMA <- renderPlot({
-    x.all <- aldex.obj()
+  ################################################################################
 
-    if (input$effectplot_ab) {
-      if (is.null(x.all)){
-        return(NULL)
-      } else {
-        aldex.plot(x.all, type="MA", test="welch", col = rgb(0,0,0,0.2), all.cex = 1.6, rare.cex = 1.5, called.cex = 1.5, xlab = "CLR Abundance", ylab = "Difference")
-        title(main = "Bland-Altman")
-      }
-    }
-  })
+  #association plot
 
-  point.colour <- eventReactive(input$update_points, {
-    effect <- effect_input()
-    point.colour <- input$point.colour
+  output$associationplot <- renderPlot({
+    d <- data()
+    rhocut <- input$rhocutoff
 
-    row.num <- grep(point.colour, rownames(effect))
-
-    points(effect$diff.win[row.num], effect$diff.btw[row.num], pch=19, col=rgb(1,0,0,0.8), cex=1)
-  })
-
-  BA.point.colour <- eventReactive(input$update_points, {
-    effect <- effect_input()
-    point.colour <- input$point.colour
-
-    row.num <- grep(point.colour, rownames(effect))
-
-    points(effect$rab.all[row.num], effect$diff.btw[row.num], pch=19, col=rgb(1,0,0,0.8), cex=1)
-  })
-
-
-  output$table_effect <- renderPlot({
-    effect <- effect_input()
-    point.colour <- input$point.colour
-
-    if (input$effectplot_ab2) {
-        if (is.null(effect)){
-          return(NULL)
-        } else {
-          plot(effect$diff.win, effect$diff.btw, pch = 19, col=rgb(0,0,0,0.1), cex=0.4, xlab = "Difference within", ylab = "Difference between")
-          title(main = "Effect Plot")
-        }
-        if (input$update_points == 0){
-          return()
-        } else {
-          point.colour()
-        }
-          }
-    })
-
-  output$table_bland <- renderPlot({
-    effect <- effect_input()
-    point.colour <- input$point.colour
-
-    if (input$effectplot_ab2) {
-        if (is.null(effect)){
-          return(NULL)
-        } else {
-          plot(effect$rab.all, effect$diff.btw, pch = 19, col=rgb(0,0,0,0.1), cex=0.4, xlab = "CLR abundance", ylab = "Difference within")
-          title(main = "Bland-Altman Plot")
-        }
-        if (input$update_points == 0){
-          return()
-        } else {
-          BA.point.colour()
-        }
-      }
-  })
-
-  output$effectMW <- renderPlot({
-    x.all <- aldex.obj()
-
-  if (input$effectplot_ab) {
-      if (is.null(x.all)){
-        return(NULL)
-      } else {
-        aldex.plot(x.all, type="MW", test="welch", all.cex = 1.5, rare.cex = 1.5, called.cex = 1.5, xlab = "Dispersion", ylab = "Difference")
-        title(main = "Effect Plot")
-      }
-    }
-  })
-
-  output$effectMA <- renderPlot({
-    x.all <- aldex.obj()
-
-  if (input$effectplot_ab) {
-      if (is.null(x.all)){
-        return(NULL)
-      } else {
-        aldex.plot(x.all, type="MA", test="welch", all.cex = 1.5, rare.cex = 1.5, called.cex = 1.5, xlab = "CLR abundance", ylab = "Difference between")
-        title(main = "Bland-Altman Plot")
-      }
-    }
-  })
-  #hoverinfo
-  output$ma_hovertext <- renderUI({
-    x.all <- aldex.obj()
-
-      row <- nearPoints(x.all, input$ma_hover, xvar = "rab.all", yvar = "diff.btw")
-
-      x <- paste("Sample Id: ", rownames(row))
-      y <- paste("Median Log2 relative abundance: ", round(row$rab.all, digits =3))
-      z <- paste("Between condition difference size: ", round(row$diff.btw, digits = 3))
-      e <- paste("Effect size: ", round(row$effect, digits = 3))
-      a <- ""
-      HTML(paste(x, y, z, e, a, sep = "<br/>"))
-  })
-
-  output$mw_hovertext <- renderUI({
-    x.all <- aldex.obj()
-    a <- d.clr()
-
-    row <- nearPoints(x.all, input$mw_hover, xvar = "diff.win", yvar = "diff.btw", maxpoints = 1)
-
-    if (is.null(input$mw_hover)) {
-      HTML("Hover over MW plot with mouse")
-
-    } else {
-      x <- paste("Sample Id: ", rownames(row))
-      y <- paste("Within condition difference size: ", round(row$diff.win, digits =3))
-      z <- paste("Between condition difference size: ", round(row$diff.btw, digits = 3))
-      e <- paste("Effect size: ", round(row$effect, digits = 3))
-      a <- ""
-      HTML(paste(x, y, z, e, a, sep = "<br/>"))
-    }
-  })
-
-  output$stripchart <- renderPlot({
-    x <- data()
-    cond1 <- input$group1s
-    cond2 <- input$group2s
-    g1s <- input$group1s
-    g2s <- input$group2s
-    obj <- clr.strip()
-    x.all <- aldex.obj()
-    meta <- metadata()
-    cn <- input$colselect
-    group1 <- input$group1
-    group2 <- input$group2
-
-    if (is.null(x$taxonomy)) {
-      d <- x
-    } else {
-      d <- x[, 0:(dim(x)[2] - 1)]
-      taxon <- x[(dim(x)[2])]
-    }
-
-    row <- nearPoints(x.all, input$mw_hover, xvar = "diff.win", yvar = "diff.btw", maxpoints = 1)
-
-    feature <- rownames(row)
-
-    if (length(feature) == 0) {
+    if (is.null(d)) {
       return(NULL)
     }
+    associationPlot <- function(x, cutoff = rhocut) {
+      # Separate out the taxonomy column from the counts
+      d <- x[, 0:(dim(x)[2] - 1)]
+      taxon <- x[(dim(x)[2])]
 
-    if (input$ep_chooseconds == 1) {
-      cond1.clr <- obj[feature,1:cond1]
-      cond2.clr <- obj[feature,(cond1+1):(cond1+cond2)]
+      # Generate ALDEx2 object so values are centered log ratio transformed,
+      # then convert to propr object with a symmetric rho statistic matrix
+      d.clr <- aldex.clr(d, mc.samples = 128, verbose = TRUE)
+      d.sma.df <- aldex2propr(d.clr, how = "perb")
 
-      #make conditions vector
-      conds <- c(rep("group1", g1s),
-                 rep("group2", g2s))
+      # Make a reference list with pairs related by a rho statistic
+      # less than the cutoff
+      d.sma.lo.rho <- d.sma.df["<", cutoff]
+
+      # **** propr and ALDEx stuff done ****
+
+      # igraph: Convert the connections into a graphical object using propr's
+      # cytescape function to first generate a table of indexed pairs and
+      # proportions
+      g <- graph.data.frame(cytescape(d.sma.lo.rho), directed = FALSE)
+
+      # igraph: Find the clusters
+      g.clust <- clusters(g)
+
+      # Make a table to examine the cluster membership by hand
+      g.df <-
+      data.frame(
+        Systematic.name = V(g)$name,
+        cluster = g.clust$membership,
+        cluster.size = g.clust$csize[g.clust$membership]
+      )
+
+      # Generate a set of clusters larger than some size
+      # Minimum cluster size is 2 (obviously)
+      big <- g.df[which(g.df$cluster.size >= 2), ]
+      colnames(big) <- colnames(g.df)
+
+      # Get genera
+      genera <- c()
+      for (i in 1:dim(taxon)[1]) {
+        genera <- c(genera, sapply(strsplit(as.character(taxon[i,]), ";"),
+        "[", 6))
+      }
+
+      # igraph: Rename the cluster members by their genus name
+      # gsub(pattern, replacement, strings, perl-syntax)
+      V(g)$name <- gsub("(^[A-Za-z]{3}).+", "\\1",
+      as.vector(genera[V(g)]), perl = TRUE)
+
+      plot.new()
+
+      # igraph:
+      # vertex.size controls point and text color
+      # vertex.color controls point color
+      # vertex.frame controls point outline color
+      plot(
+        g,
+        vertex.size = 5,
+        vertex.color = rgb(0, 0, 0, 0.2),
+        vertex.frame.color = "white"
+      )
     }
-
-    if (input$ep_chooseconds ==2) {
-      #filter the meta and keep on the data which have been chosen
-      group1 <- rownames(meta[which(meta[[cn]] == group1), ])
-      group1.filt <- group1[group1 %in% (colnames(x))]
-      data1.filt <- x[,which(colnames(x) %in% group1.filt)]
-      one <- length(data1.filt)
-
-      group2 <- rownames(meta[which(meta[[cn]] == group2), ])
-      group2.filt <- group2[group2 %in% (colnames(x))]
-      data2.filt <- x[,which(colnames(x) %in% group2.filt)]
-      two <- length(data2.filt)
-
-      cond1.clr <- obj[feature,1:one]
-      cond2.clr <- obj[feature,(one+1):(one+two)]
-
-      #make condition vector
-      conds <- c(rep("Group 1", one),
-                 rep("Group 2", two))
-
-    }
-
-    s <- cbind(cond1.clr, cond2.clr)
-
-    #clr values for each condition for the otu
-    s.clr <- list("Condition 1" = cond1.clr, "Condition 2" = cond2.clr)
-
-
-    stripchart(s.clr, main = c("Difference between conditions for: ", feature), xlab = "Conditions", ylab = "Expected CLR values",
-               col = c("black", "red"), pch =16, vertical = TRUE, method = "jitter", jitter = 0.10)
-    #text(0, labels = txt)
+    associationPlot(d)
   })
 
-  output$stripchart2 <- renderUI({
-    x.all <- effect_input()
-
-    row <- nearPoints(x.all, input$mw_hover2, xvar = "diff.win", yvar = "diff.btw")
-
-    ba.row <- nearPoints(x.all, input$ma_hover, xvar = "rab.all", yvar = "diff.btw")
-
-    feature <- rownames(row)
-
-    feature2 <- rownames(ba.row)
-
-    number <- c(rownames(x.all[feature,]), rownames(x.all[feature2,]))
-      return(number)
-
+  output$associationtext <- renderText({
+    "This association plot uses Spearman's rho to measure the strength and direction of association between two variables.
+    The cutoff values ranges from -1 to 1. If greater than 1000 features are detected, input will be required on the R console."
   })
 
-  output$effectwarning <- renderText({
-    "See the GitHub Wiki for more information on how to select conditions"
-  })
+  ################################################################################
 
-  #dendrograms
+  # Relative abundance plots
+
+  #dendrogram
   output$dendrogram <- renderPlot({
     x <- data()
     abund <- input$abundcutoffbarplot
@@ -1295,7 +1078,7 @@ server <- function(input, output) {
     genera <- c()
     for(i in 1:dim(taxon)[1]){
       genera <- c(genera, sapply(strsplit(as.character(taxon[i, ]), ";"),
-                                 "[", 6))
+      "[", 6))
     }
 
     # sum counts by name
@@ -1346,6 +1129,7 @@ server <- function(input, output) {
     "Drag mouse and double click to zoom in. \nDouble click again to zoom out"
   })
 
+  #taoxnomic distribution
   output$barplot <- renderPlot({
     x <- data()
     abund <- input$abundcutoffbarplot
@@ -1374,7 +1158,7 @@ server <- function(input, output) {
     genera <- c()
     for(i in 1:dim(taxon)[1]){
       genera <- c(genera, sapply(strsplit(as.character(taxon[i, ]), ";"),
-                                 "[", 6))
+      "[", 6))
     }
 
     # sum counts by name
@@ -1415,14 +1199,14 @@ server <- function(input, output) {
 
     # standard colour scheme (Jean Macklaim)
     colours <- c("steelblue3", "skyblue1", "indianred", "mediumpurple1",
-                 "olivedrab3", "pink", "#FFED6F", "mediumorchid3",
-                 "ivory2", "tan1", "aquamarine3", "#C0C0C0", "royalblue4",
-                 "mediumvioletred", "#999933", "#666699", "#CC9933", "#006666",
-                 "#3399FF", "#993300", "#CCCC99", "#666666", "#FFCC66",
-                 "#6699CC", "#663366", "#9999CC", "#CCCCCC", "#669999",
-                 "#CCCC66", "#CC6600", "#9999FF", "#0066CC", "#99CCCC",
-                 "#999999", "#FFCC00", "#009999", "#FF9900", "#999966",
-                 "#66CCCC", "#339966", "#CCCC33", "#EDEDED")
+    "olivedrab3", "pink", "#FFED6F", "mediumorchid3",
+    "ivory2", "tan1", "aquamarine3", "#C0C0C0", "royalblue4",
+    "mediumvioletred", "#999933", "#666699", "#CC9933", "#006666",
+    "#3399FF", "#993300", "#CCCC99", "#666666", "#FFCC66",
+    "#6699CC", "#663366", "#9999CC", "#CCCCCC", "#669999",
+    "#CCCC66", "#CC6600", "#9999FF", "#0066CC", "#99CCCC",
+    "#999999", "#FFCC00", "#009999", "#FF9900", "#999966",
+    "#66CCCC", "#339966", "#CCCC33", "#EDEDED")
 
     plot.new()
     par(fig=c(0,1,0,1), new = TRUE)
@@ -1437,6 +1221,225 @@ server <- function(input, output) {
     leg.col <- rev(colours[1:nrow(d.P)])
 
     legend(x="center", legend=rev(tax.abund), col=leg.col, lwd=5, cex=0.8,
-           border=NULL)
+    border=NULL)
   })
+
+
+
+################################################################################
+
+# effect plots
+
+#find points by string and colour them
+point.colour <- eventReactive(input$update_points, {
+  effect <- effect_input()
+  point.colour <- input$point.colour
+
+  row.num <- grep(point.colour, rownames(effect))
+
+  points(effect$diff.win[row.num], effect$diff.btw[row.num], pch=19, col=rgb(1,0,0,0.8), cex=1)
+})
+
+#find points by string and colour them
+BA.point.colour <- eventReactive(input$update_points, {
+  effect <- effect_input()
+  point.colour <- input$point.colour
+
+  row.num <- grep(point.colour, rownames(effect))
+
+  points(effect$rab.all[row.num], effect$diff.btw[row.num], pch=19, col=rgb(1,0,0,0.8), cex=1)
+})
+
+#effect plots after calculating
+output$effectMW <- renderPlot({
+  x.all <- aldex.obj()
+
+  if (input$effectplot_ab) {
+    if (is.null(x.all)){
+      return(NULL)
+    } else {
+      aldex.plot(x.all, type="MW", test="welch", all.cex = 1.5, rare.cex = 1.5, called.cex = 1.5, xlab = "Dispersion", ylab = "Difference")
+      title(main = "Effect Plot")
+    }
+  }
+})
+
+output$effectMA <- renderPlot({
+  x.all <- aldex.obj()
+
+  if (input$effectplot_ab) {
+    if (is.null(x.all)){
+      return(NULL)
+    } else {
+      aldex.plot(x.all, type="MA", test="welch", all.cex = 1.5, rare.cex = 1.5, called.cex = 1.5, xlab = "CLR abundance", ylab = "Difference between")
+      title(main = "Bland-Altman Plot")
+    }
+  }
+})
+
+
+#effect plots for inputted aldex table
+output$table_effect <- renderPlot({
+  effect <- effect_input()
+  point.colour <- input$point.colour
+
+  if (input$effectplot_ab2) {
+    if (is.null(effect)){
+      return(NULL)
+    } else {
+      plot(effect$diff.win, effect$diff.btw, pch = 19, col=rgb(0,0,0,0.1), cex=0.4, xlab = "Difference within", ylab = "Difference between")
+      title(main = "Effect Plot")
+    }
+    if (input$update_points == 0){
+      return()
+    } else {
+      point.colour()
+    }
+  }
+})
+
+#effect plots for inputted aldex table
+output$table_bland <- renderPlot({
+  effect <- effect_input()
+  point.colour <- input$point.colour
+
+  if (input$effectplot_ab2) {
+    if (is.null(effect)){
+      return(NULL)
+    } else {
+      plot(effect$rab.all, effect$diff.btw, pch = 19, col=rgb(0,0,0,0.1), cex=0.4, xlab = "CLR abundance", ylab = "Difference within")
+      title(main = "Bland-Altman Plot")
+    }
+    if (input$update_points == 0){
+      return()
+    } else {
+      BA.point.colour()
+    }
+  }
+})
+
+#display information of hovered point
+output$ma_hovertext <- renderUI({
+  x.all <- aldex.obj()
+
+  row <- nearPoints(x.all, input$ma_hover, xvar = "rab.all", yvar = "diff.btw")
+
+  x <- paste("Sample Id: ", rownames(row))
+  y <- paste("Median Log2 relative abundance: ", round(row$rab.all, digits =3))
+  z <- paste("Between condition difference size: ", round(row$diff.btw, digits = 3))
+  e <- paste("Effect size: ", round(row$effect, digits = 3))
+  a <- ""
+  HTML(paste(x, y, z, e, a, sep = "<br/>"))
+})
+
+#display information of hovered point
+output$mw_hovertext <- renderUI({
+  x.all <- aldex.obj()
+  a <- d.clr()
+
+  row <- nearPoints(x.all, input$mw_hover, xvar = "diff.win", yvar = "diff.btw", maxpoints = 1)
+
+  if (is.null(input$mw_hover)) {
+    HTML("Hover over MW plot with mouse")
+
+  } else {
+    x <- paste("Sample Id: ", rownames(row))
+    y <- paste("Within condition difference size: ", round(row$diff.win, digits =3))
+    z <- paste("Between condition difference size: ", round(row$diff.btw, digits = 3))
+    e <- paste("Effect size: ", round(row$effect, digits = 3))
+    a <- ""
+    HTML(paste(x, y, z, e, a, sep = "<br/>"))
+  }
+})
+
+#strip chart of expected CLR values for each sample per condition of hovered
+# point
+output$stripchart <- renderPlot({
+  x <- data()
+  cond1 <- input$group1s
+  cond2 <- input$group2s
+  g1s <- input$group1s
+  g2s <- input$group2s
+  obj <- clr.strip()
+  x.all <- aldex.obj()
+  meta <- metadata()
+  cn <- input$colselect
+  group1 <- input$group1
+  group2 <- input$group2
+
+  if (is.null(x$taxonomy)) {
+    d <- x
+  } else {
+    d <- x[, 0:(dim(x)[2] - 1)]
+    taxon <- x[(dim(x)[2])]
+  }
+
+  row <- nearPoints(x.all, input$mw_hover, xvar = "diff.win", yvar = "diff.btw", maxpoints = 1)
+
+  feature <- rownames(row)
+
+  if (length(feature) == 0) {
+    return(NULL)
+  }
+
+  if (input$ep_chooseconds == 1) {
+    cond1.clr <- obj[feature,1:cond1]
+    cond2.clr <- obj[feature,(cond1+1):(cond1+cond2)]
+
+    #make conditions vector
+    conds <- c(rep("group1", g1s),
+    rep("group2", g2s))
+  }
+
+  if (input$ep_chooseconds ==2) {
+    #filter the meta and keep on the data which have been chosen
+    group1 <- rownames(meta[which(meta[[cn]] == group1), ])
+    group1.filt <- group1[group1 %in% (colnames(x))]
+    data1.filt <- x[,which(colnames(x) %in% group1.filt)]
+    one <- length(data1.filt)
+
+    group2 <- rownames(meta[which(meta[[cn]] == group2), ])
+    group2.filt <- group2[group2 %in% (colnames(x))]
+    data2.filt <- x[,which(colnames(x) %in% group2.filt)]
+    two <- length(data2.filt)
+
+    cond1.clr <- obj[feature,1:one]
+    cond2.clr <- obj[feature,(one+1):(one+two)]
+
+    #make condition vector
+    conds <- c(rep("Group 1", one),
+    rep("Group 2", two))
+
+  }
+
+  s <- cbind(cond1.clr, cond2.clr)
+
+  #clr values for each condition for the otu
+  s.clr <- list("Condition 1" = cond1.clr, "Condition 2" = cond2.clr)
+
+
+  stripchart(s.clr, main = c("Difference between conditions for: ", feature), xlab = "Conditions", ylab = "Expected CLR values",
+  col = c("black", "red"), pch =16, vertical = TRUE, method = "jitter", jitter = 0.10)
+  #text(0, labels = txt)
+})
+
+#displays row name for plots when inputting ALDEx2 table
+output$featurename<- renderUI({
+  x.all <- effect_input()
+
+  row <- nearPoints(x.all, input$mw_hover2, xvar = "diff.win", yvar = "diff.btw")
+
+  ba.row <- nearPoints(x.all, input$ma_hover, xvar = "rab.all", yvar = "diff.btw")
+
+  feature <- rownames(row)
+
+  feature2 <- rownames(ba.row)
+
+  number <- c(rownames(x.all[feature,]), rownames(x.all[feature2,]))
+  return(number)
+})
+
+output$effectwarning <- renderText({
+  "See the GitHub Wiki for more information on how to select conditions"
+})
 }

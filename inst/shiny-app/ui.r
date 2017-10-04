@@ -238,7 +238,7 @@ ui <- fluidPage(theme= "bootstrap.css",
                                         id = "ma_hover"
                                       ))
                           ),
-                          uiOutput("stripchart2"),
+                          uiOutput("featurename"),
                           textInput("point.colour", label = "Colour points by name",
                           placeholder = "Input string to search in row names..."
                         ),
