@@ -16,4 +16,4 @@
 #'
 #' @seealso \code{\link{otu_table}}
 #'
-NULL
+"metadata"
