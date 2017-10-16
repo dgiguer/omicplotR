@@ -7,6 +7,8 @@
 #'
 #' @name otu_table
 #'
+#' @usage data(otu_table)
+#'
 #' @docType data
 #'
 #' @references Macklaim et al (2014). Microb Ecol Health Dis.

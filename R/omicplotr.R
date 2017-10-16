@@ -21,12 +21,4 @@
 #'  \code{\link{omicplotr.clr}}, \code{\link{omicplotr.colvec}},
 #'  \code{\link{omicplotr.colouredPCA}}, \code{\link{omicplotr.run}}.
 #'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
 "_PACKAGE"

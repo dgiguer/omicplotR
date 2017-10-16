@@ -22,6 +22,8 @@ Imports:
     shiny,
     vegan,
     zCompositions
+Suggests: knitr, rmarkdown
+VignetteBuilder: knitr
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

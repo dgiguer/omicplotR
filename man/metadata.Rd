@@ -6,6 +6,9 @@
 \title{Vaginal microbiome OTU table metadata}
 \format{A data frame with 297 rows and 35 columns, where rows are samples
  and columns are collected metadata.}
+\usage{
+data(metadata)
+}
 \description{
 Associated metadata to \code{\link{otu_table}}.
 }

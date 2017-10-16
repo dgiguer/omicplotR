@@ -1,10 +1,12 @@
 #' Vaginal microbiome OTU table metadata
 #'
-#' Associated metadata to \code{\link{otu_table}}. 
+#' Associated metadata to \code{\link{otu_table}}.
 #'
 #' @name metadata
 #'
 #' @docType data
+#'
+#' @usage data(metadata)
 #'
 #' @references Macklaim et al (2014). Microb Ecol Health Dis.
 #' doi: http://dx.doi.org/10.3402/mehd.v26.27799
