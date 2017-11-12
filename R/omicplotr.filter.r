@@ -6,7 +6,7 @@
 #' @details See arguments for filtering details. This filter must be done prior
 #'  to generating \code{prcomp} object with \code{omicplotr.clr}.
 #'
-#' @param x Counts table as data frame.
+#' @param data Counts table as data frame.
 #' @param min.reads Removes any columns with sum less than or equal to input.
 #' @param min.count Removes any rows with maximum lower than input.
 #' @param min.sum Removes any rows with sum lower than input.
@@ -34,9 +34,9 @@
 #'
 #' @export
 
-omicplotr.filter <- function(x, min.reads = 0, min.count = 0, min.sum = 0, min.prop = 0, max.prop = 1) {
+omicplotr.filter <- function(data, min.reads = 0, min.count = 0, min.sum = 0, min.prop = 0, max.prop = 1) {
 
-        if (is.null(x$taxonomy)) {
+        if (is.null(data$taxonomy)) {
             taxCheck <- TRUE
             } else {
             taxCheck <- FALSE
@@ -44,7 +44,7 @@ omicplotr.filter <- function(x, min.reads = 0, min.count = 0, min.sum = 0, min.p
 
             if (isTRUE(taxCheck)) {
                 #order for colouring
-                x <- x[order(colnames(x))]
+                x <- data[order(colnames(data))]
 
                 #filter by min reads per sample
                 data.0 <- x[,which(apply(x,2,sum) > min.reads)]
@@ -62,8 +62,8 @@ omicplotr.filter <- function(x, min.reads = 0, min.count = 0, min.sum = 0, min.p
 
                 } else {
                     #order for colouring
-                    tax <- x$taxonomy
-                    x <- x[order(colnames(x[1:(ncol(x) - 1)]))]
+                    tax <- data$taxonomy
+                    x <- data[order(colnames(data[1:(ncol(data) - 1)]))]
                     x$taxonomy <- tax
 
                     #filter by min reads per sample

@@ -2,11 +2,13 @@
 #'
 #' Launches \code{Shiny} for \code{omicplotR} in default browser. This
 #'  graphical user interface facilitates visual exploration of datasets for
-#'  both new and experienced R users alike. 
+#'  both new and experienced R users alike.
 #'
 #' @author Daniel Giguere
 #'
 #' @export
+#'
+#' @import ALDEx2 igraph markdown propr
 #'
 
 omicplotr.run <- function() {

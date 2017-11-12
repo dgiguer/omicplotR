@@ -7,7 +7,7 @@
 #' @details If filtering by with \code{omicplotr.filter} or
 #'  \code{omicplotr.metadataFilter}, it must done before this step.
 #'
-#' @param x filtered data from \code{omicplotr.filter}.
+#' @param data filtered data from \code{omicplotr.filter}.
 #' @param var.filt variance cutoff to be applied after clr is computed,
 #'  default, 0.
 #'
@@ -19,14 +19,14 @@
 #'
 
 # replace zeros, calculate CLR and convert to prcomp object
-omicplotr.clr <- function(x, var.filt = 0) {
+omicplotr.clr <- function(data, var.filt = 0) {
 
     #replace zeros
     #catch error if no 0 present
-    if (any(x == 0)) {
-        data.0 <- cmultRepl(t(x), label = 0, method = "CZM")
+    if (any(data == 0)) {
+        data.0 <- cmultRepl(t(data), label = 0, method = "CZM")
         } else {
-            data.0 <- t(x)
+            data.0 <- t(data)
         }
 
         #calculate CLR

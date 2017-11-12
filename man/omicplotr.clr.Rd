@@ -4,10 +4,10 @@
 \alias{omicplotr.clr}
 \title{Calculate CLR and generate prcomp object for compositional biplot}
 \usage{
-omicplotr.clr(x, var.filt = 0)
+omicplotr.clr(data, var.filt = 0)
 }
 \arguments{
-\item{x}{filtered data from \code{omicplotr.filter}.}
+\item{data}{filtered data from \code{omicplotr.filter}.}
 
 \item{var.filt}{variance cutoff to be applied after clr is computed,
 default, 0.}

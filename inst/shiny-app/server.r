@@ -634,6 +634,13 @@ output$conditions<- renderUI({
     arrowcheck <- input$arrowcheckbox
     taxoncheck <- input$taxoncheckbox
     taxselect <- as.numeric(input$taxlevel)
+    title <- input$biplot_title
+
+    if (title == NULL) {
+      main <- "Principal Component Analysis Biplot"
+    } else {
+      main <- title
+    }
 
     x.var <- sum(data$sdev ^ 2)
     PC1 <- paste("PC 1 Variance: %", round(sum(data$sdev[1] ^ 2) / x.var * 100, 1))
@@ -688,7 +695,7 @@ output$conditions<- renderUI({
 
     biplot(
       data,
-      main = "Principal Component Analysis Biplot",
+      main = main
       cex.main = 1.5,
       cex = size,
       col = col,

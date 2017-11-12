@@ -4,11 +4,11 @@
 \alias{omicplotr.filter}
 \title{Filter data frame by read counts.}
 \usage{
-omicplotr.filter(x, min.reads = 0, min.count = 0, min.sum = 0,
+omicplotr.filter(data, min.reads = 0, min.count = 0, min.sum = 0,
   min.prop = 0, max.prop = 1)
 }
 \arguments{
-\item{x}{Counts table as data frame.}
+\item{data}{Counts table as data frame.}
 
 \item{min.reads}{Removes any columns with sum less than or equal to input.}
 

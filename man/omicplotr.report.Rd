@@ -14,5 +14,5 @@ omicplotr.report(x.all, feature = NULL)
 \description{
 Displays table of features found to be significantly different by
  \code{ALDEx2}, when effect size > 1 and expected Benjamini Hochberg
- corrected p-values. In progress and will show more.
+ corrected p-values are less than 0.1. In progress and will show more.
 }

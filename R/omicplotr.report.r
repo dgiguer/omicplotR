@@ -2,7 +2,7 @@
 #'
 #' Displays table of features found to be significantly different by
 #'  \code{ALDEx2}, when effect size > 1 and expected Benjamini Hochberg
-#'  corrected p-values. In progress and will show more.
+#'  corrected p-values are less than 0.1. In progress and will show more.
 #'
 #' @param x.all output from \code{ALDEx2}
 #' @param feature optional; report for single feature/OTU

@@ -17,4 +17,4 @@
 #' @format A data frame with 77 rows and 298 columns. The last column contains
 #'  taxonomic information for each OTU. Samples are columns, OTUs are rows.
 #'
-"otu_table"
+NULL
