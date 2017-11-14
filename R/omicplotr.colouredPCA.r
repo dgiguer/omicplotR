@@ -40,7 +40,7 @@ omicplotr.colouredPCA <- function(data, colourvector, scale = 0, arrows = TRUE,
 
     points <- c(rep(".", length(dimnames(data$rotation)[[1]])))
     if ((isTRUE(show.taxonomy)) & (!is.null(taxonomy))) {
-        genus <- sapply(strsplit(as.character(taxonomy), ";"), "[", tax.level)
+        genus <- sapply(strsplit(as.character(taxonomy), "[[:punct:]]"), "[", tax.level)
     }
 
     col = c("black", rgb(0, 0, 0, 0.4))
