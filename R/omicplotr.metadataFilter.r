@@ -32,5 +32,11 @@ omicplotr.metadataFilter <- function(data, meta, column, values) {
     #filter the data based on which samples remain in metadata
     x <- data[which(colnames(data) %in% meta.filt)]
 
+    if (is.null(data$taxonomy)) {
+      x <- x
+    } else {
+      x$taxonomy <- data$taxonomy
+    }
+
     return(x)
 }
