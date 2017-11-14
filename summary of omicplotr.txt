@@ -1,1 +1,0 @@
-This project was a four-month long project required for the completion of my Master’s degree. I created an graphical user interface to explore high-throughput sequencing data in R called omicplotR. Typically, to explore 
