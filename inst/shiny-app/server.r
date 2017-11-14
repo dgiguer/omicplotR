@@ -695,7 +695,7 @@ output$conditions<- renderUI({
 
     biplot(
       data,
-      main = main
+      main = main,
       cex.main = 1.5,
       cex = size,
       col = col,
