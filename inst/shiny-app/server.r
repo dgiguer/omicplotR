@@ -269,7 +269,7 @@ output$conditions<- renderUI({
       taxselected <- input$taxlevel
 
       #get genus names
-      genus <- sapply(strsplit(as.character(tax), ";"), "[", taxselected)
+      genus <- sapply(strsplit(as.character(tax), ";:"), "[", taxselected)
     }
   })
 
@@ -651,7 +651,7 @@ output$conditions<- renderUI({
     taxonomy <- tax$taxonomy
 
     #get genus (or other level)
-    genus <- sapply(strsplit(as.character(taxonomy), ";"), "[", taxselect)
+    genus <- sapply(strsplit(as.character(taxonomy), ";:"), "[", taxselect)
 
     #makes the points on the graphs periods
     points <- c(rep(".", length(dimnames(data$rotation)[[1]])))
@@ -1016,7 +1016,7 @@ output$conditions<- renderUI({
       # Get genera
       genera <- c()
       for (i in 1:dim(taxon)[1]) {
-        genera <- c(genera, sapply(strsplit(as.character(taxon[i,]), ";"),
+        genera <- c(genera, sapply(strsplit(as.character(taxon[i,]), ";:"),
         "[", 6))
       }
 
@@ -1078,7 +1078,7 @@ output$conditions<- renderUI({
     # Get genera
     genera <- c()
     for(i in 1:dim(taxon)[1]){
-      genera <- c(genera, sapply(strsplit(as.character(taxon[i, ]), ";"),
+      genera <- c(genera, sapply(strsplit(as.character(taxon[i, ]), ";:"),
       "[", 6))
     }
 
@@ -1158,7 +1158,7 @@ output$conditions<- renderUI({
     # Get genera
     genera <- c()
     for(i in 1:dim(taxon)[1]){
-      genera <- c(genera, sapply(strsplit(as.character(taxon[i, ]), ";"),
+      genera <- c(genera, sapply(strsplit(as.character(taxon[i, ]), ";:"),
       "[", 6))
     }
 
