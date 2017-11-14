@@ -636,12 +636,6 @@ output$conditions<- renderUI({
     taxselect <- as.numeric(input$taxlevel)
     title <- input$biplot_title
 
-    if (title == NULL) {
-      main <- "Principal Component Analysis Biplot"
-    } else {
-      main <- title
-    }
-
     x.var <- sum(data$sdev ^ 2)
     PC1 <- paste("PC 1 Variance: %", round(sum(data$sdev[1] ^ 2) / x.var * 100, 1))
     PC2 <- paste("PC 2 Variance: %", round(sum(data$sdev[2] ^ 2) / x.var*100, 1))
