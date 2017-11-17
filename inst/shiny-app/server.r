@@ -781,7 +781,7 @@ output$conditions<- renderUI({
     #colouring options
     if (input$colouringtype == 1) {
 
-      validate(need(is.integer(meta[[cn]]), "Nonnumeric data detected. Please click 'Nonnumeric metadata'"))
+      validate(need(is.numeric(meta[[cn]]), "Nonnumeric data detected. Please click 'Nonnumeric metadata'"))
 
       #get length of unique values
       #dont laugh at my variables
@@ -804,7 +804,7 @@ output$conditions<- renderUI({
       )
     } else if (input$colouringtype == 2) {
 
-      validate(need(is.integer(meta[[cn]]), "Nonnumeric data detected. Please click 'Nonnumeric metadata'"))
+      validate(need(is.numeric(meta[[cn]]), "Nonnumeric data detected. Please click 'Nonnumeric metadata'"))
 
       #calculate quartile
       q <- quantile(meta[[cn]])
