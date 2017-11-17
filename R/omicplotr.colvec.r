@@ -92,7 +92,7 @@ omicplotr.colvec <- function(data, meta, column, type = 3) {
   if (type == 1) {
 
       #TODO get rid of this if using command line
-    validate(need(is.integer(meta[[column]]), "Nonnumeric data detected. Please
+    validate(need(is.numeric(meta[[column]]), "Nonnumeric data detected. Please
     click 'Nonnumeric metadata'"))
 
     #get rid of old column made
@@ -144,7 +144,7 @@ omicplotr.colvec <- function(data, meta, column, type = 3) {
 
   } else if (type == 2) {
 
-    validate(need(is.integer(meta[[column]]), "Nonnumeric data detected. Please
+    validate(need(is.numeric(meta[[column]]), "Nonnumeric data detected. Please
     click 'Nonnumeric metadata'"))
 
     #quartile
