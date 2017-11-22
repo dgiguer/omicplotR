@@ -8,6 +8,12 @@
 #'
 #' @export
 #'
+#' @examples
+#' # To run omicplotR, use `omicplotr.run()` function. This will open the shiny
+#' # app in your default browser.
+#'
+#' #omicplotr.run()
+#'
 #' @import ALDEx2 igraph markdown propr
 #'
 
