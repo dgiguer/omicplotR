@@ -14,6 +14,15 @@
 #'
 #' #omicplotr.run()
 #'
+#' # After running omicplotr.run(), it will filtered your data and make a PCA
+#' # biplot. There are internal functions.
+#'
+#' data(otu_table)
+#' d.filt <- omicplotr.filter(otu_table)
+#'
+#' @value
+#' Will launch the Shiny App. There is no value.
+#'
 #' @import ALDEx2 igraph markdown propr
 #'
 

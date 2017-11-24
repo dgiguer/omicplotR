@@ -11,11 +11,20 @@ Launches \code{Shiny} for \code{omicplotR} in default browser. This
  graphical user interface facilitates visual exploration of datasets for
  both new and experienced R users alike.
 }
+\value{
+There is no value!
+}
 \examples{
 # To run omicplotR, use `omicplotr.run()` function. This will open the shiny
 # app in your default browser.
 
-omicplotr.run()
+#omicplotr.run()
+
+# After running omicplotr.run(), it will filtered your data and make a PCA
+# biplot. There are internal functions.
+
+data(otu_table)
+d.filt <- omicplotr.filter(otu_table)
 
 }
 \author{
