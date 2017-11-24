@@ -1,6 +1,6 @@
 #' Internal omicplotR functions.
 #'
-#' Internal functions for the app which are not intended to be called by the
+#' Internal functions for the app are not intended to be called by the
 #'  user. Please refer to \link{omicplotr.run}.
 #'
 #' @author Daniel Giguere, Greg Gloor.

@@ -18,10 +18,10 @@ There is no value!
 # To run omicplotR, use `omicplotr.run()` function. This will open the shiny
 # app in your default browser.
 
-#omicplotr.run()
+# omicplotr.run()
 
-# After running omicplotr.run(), it will filtered your data and make a PCA
-# biplot. There are internal functions.
+# After running omicplotr.run(), you can filter your data and make a PCA
+# biplot. Internal functions are not mean to be called by the user.
 
 data(otu_table)
 d.filt <- omicplotr.filter(otu_table)

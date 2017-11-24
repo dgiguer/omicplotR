@@ -23,10 +23,8 @@ To launch the \code{shiny} app in your default browser, type
  \code{omicplotr.run()}.
 }
 \seealso{
-\code{\link{omicplotr.filter}}, \code{\link{omicplotr.clr}},
- \code{\link{omicplotr.clr}}, \code{\link{omicplotr.colvec}},
- \code{\link{omicplotr.colouredPCA}}, \code{\link{omicplotr.run}}.
+\code{\link{omicplotr.run}}.
 }
 \author{
-Daniel Giguere
+Daniel Giguere, Jean Macklaim, Greg Gloor
 }
