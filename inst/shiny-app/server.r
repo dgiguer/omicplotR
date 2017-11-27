@@ -309,12 +309,10 @@ output$conditions<- renderUI({
       taxCheck <- FALSE
     }
 
+    #get filtered data if filtered
     if (is.null(vals$data)) {
       x <- x
     } else {
-
-      #filtering metadata location
-      ("www/omicplotr.metadataFilter.r")
 
       x <- omicplotr.metadataFilter(x, meta, column = metaval$data, values = vals$data)
     }
@@ -366,6 +364,16 @@ output$conditions<- renderUI({
 
     #require user to click action button
     validate(need(input$effectplot_ab, ""))
+
+    #get filtered metadata if it is filtered
+    if (is.null(vals$data)) {
+      x <- x
+    } else {
+
+      x <- omicplotr.metadataFilter(x, meta, column = metaval$data, values = vals$data)
+
+      #meta <- meta[which(rownames(meta) %in% colnames(x)),]
+  }
 
     # Separate the taxonomy column from the counts
     if (is.null(x$taxonomy)) {
@@ -428,6 +436,16 @@ output$conditions<- renderUI({
     g1s <- input$group1s
     g2s <- input$group2s
 
+    #get filtered data if filtered
+    if (is.null(vals$data)) {
+      x <- x
+    } else {
+
+      x <- omicplotr.metadataFilter(x, meta, column = metaval$data, values = vals$data)
+
+      #meta <- meta[which(rownames(meta) %in% colnames(x)),]
+  }
+
     if (is.null(x$taxonomy)) {
       d <- x
     } else {
@@ -441,10 +459,18 @@ output$conditions<- renderUI({
     }
 
     if (input$ep_chooseconds ==2) {
-      #filter the meta and keep on the data which have been chosen
+      #filter the meta and keep only the data which have been chosen
+
+      #make group of samples from metadata which are chosen by user
       group1 <- rownames(meta[which(meta[[cn]] == group1), ])
+
+      #make sure these are actually in the otu table
       group1.filt <- group1[group1 %in% (colnames(x))]
+
+      #subset dataframe to take samples that are only in the filtered group
       data1.filt <- x[,which(colnames(x) %in% group1.filt)]
+
+      #get length for later
       one <- length(data1.filt)
 
       group2 <- rownames(meta[which(meta[[cn]] == group2), ])
@@ -587,6 +613,14 @@ output$conditions<- renderUI({
   })
 
   output$test <- renderText({
+    if (!is.null(vals$data)) {
+      c("Data filtered by metadata column:", metaval$data,  "value:", vals$data)
+    } else {
+      return(NULL)
+    }
+  })
+
+  output$filter_warning_effect <- renderText({
     if (!is.null(vals$data)) {
       c("Data filtered by metadata column:", metaval$data,  "value:", vals$data)
     } else {
@@ -1075,12 +1109,10 @@ output$conditions<- renderUI({
       }
     })
 
+    #get filtered data if filtered
     if (is.null(vals$data)) {
       x <- x
     } else {
-
-      #filtering metadata location
-      ("www/omicplotr.metadataFilter.r")
 
       x <- omicplotr.metadataFilter(x, meta, column = metaval$data, values = vals$data)
     }
@@ -1166,12 +1198,10 @@ output$conditions<- renderUI({
       }
     })
 
+    #get filtered data if filtered
     if (is.null(vals$data)) {
       x <- x
     } else {
-
-      #filtering metadata location
-      ("www/omicplotr.metadataFilter.r")
 
       x <- omicplotr.metadataFilter(x, meta, column = metaval$data, values = vals$data)
     }
@@ -1397,6 +1427,15 @@ output$stripchart <- renderPlot({
   cn <- input$colselect
   group1 <- input$group1
   group2 <- input$group2
+
+  if (is.null(vals$data)) {
+    x <- x
+  } else {
+
+    x <- omicplotr.metadataFilter(x, meta, column = metaval$data, values = vals$data)
+
+    #meta <- meta[which(rownames(meta) %in% colnames(x)),]
+}
 
   if (is.null(x$taxonomy)) {
     d <- x

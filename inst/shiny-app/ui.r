@@ -196,7 +196,8 @@ ui <- fluidPage(theme= "bootstrap.css",
                               conditionalPanel("input.ep_chooseconds == '2'",
                                                uiOutput("colselectcond")),
                               uiOutput("conditions"),
-                              textOutput("effectwarning")
+                              textOutput("effectwarning"),
+                              textOutput("filter_warning_effect")
                             ),
                             tabPanel("Input",
 
