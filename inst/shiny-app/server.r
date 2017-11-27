@@ -588,11 +588,19 @@ output$conditions<- renderUI({
 
   output$test <- renderText({
     if (!is.null(vals$data)) {
-      c("Filtering PCA biplot with metadata:", vals$data)
+      c("Data filtered by metadata column:", metaval$data,  "value:", vals$data)
     } else {
       return(NULL)
     }
   })
+
+    output$filter_warning_dendro <- renderText({
+      if (!is.null(vals$data)) {
+        c("Data filtered by metadata column:", metaval$data,  "value:", vals$data)
+      } else {
+        return(NULL)
+      }
+    })
 
   output$datatable <- renderDataTable({
     validate((need(input$showdata, "Click 'Show data' to display table")))
@@ -1053,6 +1061,7 @@ output$conditions<- renderUI({
   #dendrogram
   output$dendrogram <- renderPlot({
     x <- data()
+    meta <- metadata()
     abund <- input$abundcutoffbarplot
 
     observeEvent(input$dendro_dblclick, {
@@ -1065,6 +1074,16 @@ output$conditions<- renderUI({
         ranges$y <- NULL
       }
     })
+
+    if (is.null(vals$data)) {
+      x <- x
+    } else {
+
+      #filtering metadata location
+      ("www/omicplotr.metadataFilter.r")
+
+      x <- omicplotr.metadataFilter(x, meta, column = metaval$data, values = vals$data)
+    }
 
     if (is.null(x$taxonomy)) {
       d <- x
@@ -1133,6 +1152,7 @@ output$conditions<- renderUI({
   #taoxnomic distribution
   output$barplot <- renderPlot({
     x <- data()
+    meta <- metadata()
     abund <- input$abundcutoffbarplot
 
     observeEvent(input$bp_dblclick, {
@@ -1145,6 +1165,16 @@ output$conditions<- renderUI({
         bp_ranges$y <- NULL
       }
     })
+
+    if (is.null(vals$data)) {
+      x <- x
+    } else {
+
+      #filtering metadata location
+      ("www/omicplotr.metadataFilter.r")
+
+      x <- omicplotr.metadataFilter(x, meta, column = metaval$data, values = vals$data)
+    }
 
     if (is.null(x$taxonomy)) {
       d <- x

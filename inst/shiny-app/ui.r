@@ -164,7 +164,8 @@ ui <- fluidPage(theme= "bootstrap.css",
                           selectInput("clustermethod", "Select clustering method",
                                       choices = list("complete" = 1, "single" = 2, "ward.D2" = 3), selected = 3),
                           selectInput("dismethod", "Select distance matrix method",
-                                      choices = list("euclidean" = 1, "maximum" = 2, "manhattan" = 3), selected = 1)
+                                      choices = list("euclidean" = 1, "maximum" = 2, "manhattan" = 3), selected = 1),
+                                      textOutput("filter_warning_dendro")
                         ),
                         mainPanel(
                           textOutput("dendrotext"),

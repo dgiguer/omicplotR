@@ -50,7 +50,7 @@ Additionional features include:
 * Interact with effect plots to visualize difference between groups
 * Plot pre-calculated `ALDEx2` tables to colour points by matching search terms
 
-# Installation
+# Installation and example
 
 Install the latest version of `omicplotR`. Make sure you have the newest version of R, `ALDEx2`, and other dependancies. `omicplotR` requires you to have at least R version 3.4.
 
@@ -61,18 +61,17 @@ library(omicplotR)
 omicplotr.run()
 ```
 
-Included datasets can be viewed by loading them. 
+# Input data
 
-```{r, eval=FALSE}
-data(otu_table)
-data(metadata)
+The tabs on the sidebar panel allow you to choose your own datafile by clicking 'Browse', or to select a provided dataset. To follow along with this vignette, please click the 'Example data' tab on the sidebar panel, and click the checkbox for the 'Vaginal dataset'. Return to the 'Data' tab on the sidebar panel to view the data and metadata by clicking 'Show data' and 'Show metadata'. The tabs on the main panel allow you to switch between displaying your data and metadata tables. 
+
+```{r, echo = FALSE, fig.align='center', fig.cap="Screenshot of input data page. Click on 'Example data' to access the provided datasets within the Shiny app"}
+knitr::include_graphics("inputdata.png")
 ```
 
-# Input requirements 
-
-For both metadata and data, each sample name and operational taxonomic unit (OTU) name **must be unique**.
-
 ## Data
+
+For both metadata and data, each sample name and operational taxonomic unit (OTU) name **must be unique**. An example of an appropriate data file is shown in Figure 1.
 
 1. The data file must be a **tab delimited .txt** (this is an option when you click 'Save as' from Excel).
 2. The first column must contain gene/OTU identifier.
@@ -80,47 +79,35 @@ For both metadata and data, each sample name and operational taxonomic unit (OTU
 4. The last column may contain taxonomic level information, but is not required. If present, it must be labelled 'taxonomy'. **Taxonomy column must have at least four levels, separated by a semi colon.**
 5. Data table must have all blank rows removed (this may require you to check in a text editor like Notepad ++ or Atom before using the app)
 
-An example of an appropriate data file is shown in Figure 1.
-
 ```{r, echo = FALSE, out.width='80%', fig.align='center', fig.cap="Example data. If taxonomy column introduced, it must use the column name 'taxonomy'."}
 knitr::include_graphics("./example_data.png")
 ```
 
-## Metadata  
+Your metadata file must follow this format. An example of an appropriate metadata file is shown in Figure 2.
 
 1. Must be a **tab delimited .txt** (this is an option when you click 'Save as' from Excel).
 2. The first column must contain sample identifiers. The sample identifiers must be identical to the data file (not required to be in the same order).
 3. The first row must contain phenotypic information.
-
-An example of an appropriate metadata file is shown in Figure 2. 
+ 
 ```{r, echo = FALSE, out.width='70%', fig.align='center', fig.cap="Example metadata file. Metadata maybe be numerical or categorical. Any blank spaces will be replaced as NA when importing the file."}
 knitr::include_graphics("./example_metadata.png")
 ```
 
-# Coloured Principal Component Analysis (PCA) plot example
+## Example Data
 
-The PCA plot can show whether your samples separate or cluster into groups and what taxa are driving this separation. More information about how to interpret PCA plots and how they can be used can be found by clicking [here.](https://github.com/ggloor/CoDa_microbiome_tutorial/blob/master/first_biplot.pdf)
-
-Metadata is not required to use the biplot function, but is necessary to use the Colored Biplot function. We will be using the example dataset ('Vaginal microbiome dataset' available under Input data and Example data tab) for this vignette.
-
-First launch the `Shiny` app. 
-
-```{r, eval=FALSE}
-library(omicplotR)
-omicplotr.run()
-```
-
-We will be loading the example dataset[^4] by clicking 1. 'Input data' and 2. 'Example data'. Alternatively you can load your data and metadata by clicking the 'Browse...' button under the 'Input data' tab. **Please ensure the input requirements are met before inputting your own data**. You can click 'Show data' under the 'Data' tab to view your data and metadata in a table format. 
+This tab on the sidebar panel provides access to two example datasets. For this vignette, follow along by clicking the checkbox next to 'Vaginal dataset'[^4]. Return to the 'Data' tab to and click 'Show data' to view the data. You can view the metadata by clicking 'Show metadata' and switching the tab in the main panel to 'Metadata'. 
 
 [^4]: Macklaim et al (2015) Microb. Ecol. Heal. Dis. https://doi.org/10.3402/mehd.v26.27799.
 
-```{r, echo = FALSE, fig.align='center', fig.cap="Screenshot of input data page. Click on 'Example data' to access the provided datasets within the Shiny app"}
-knitr::include_graphics("inputdata.png")
-```
+# PCA Biplots
 
-## Filtering options
+The tabs within the sidebar panel allow you to choose filtering options under the 'Filtering' tab. Colouring options for a coloured PCA biplot and the ability to filter the data used for a plot by using metadata is available under the 'Colouring options' tab. The tabs within the main panel allow you to switch between displaying a non-coloured biplot under 'Biplot', a coloured biplot under 'Coloured Biplot', and a visualization of the removed samples from filtering under 'Removed data'.
 
-There are several ways you can filter your data before a biplot is made. Each input is independent of each other, so you can filter by several different methods. Presence (or absence) of a taxonomy column does not influence the filtering. We will use the default settings for this vignette.
+## Filtering
+
+Reasonable filtering of sparse features (ie, row) from your dataset **should not** affect any conclusions made from the PCA biplots. Conclusions based on seperations or clustering driven by sparse OTUs are not reliable. Filtering is exploratory, and you should experiment to see how removing sparse data affects the structure of your dataset within the PCA biplot. The default filtering removes any feature that has a maximum value less than 10. This is the filtering we will use for the purposes of this vignette.
+
+Under the 'Filtering' tab within the sidebar panel, the following options are available to filter your data. 
 
 1. **Minimum count per OTU**  
 This filter removes any rows with a maximum sample count less than the input. Default is 10 to remove sparse OTUs. 
@@ -145,15 +132,13 @@ This filter calculates the variance for each OTU (row), and removes any rows tha
 
 This changes the scale of the biplot. When set to zero, it shows the relationship between samples (columns), while being set to 1 shows the relationship between OTUs (rows). Data is not filtered from this operation.
 
-## Generating coloured PCA biplot
+## Colouring options
 
-The coloured PCA biplot uses an associated metadata file to colour the sample names. Click on 1. 'PCA biplots' 2. Click on 'Colouring Options' 3. Choose a numerical column for continuous colouring (age). For categorical metadata (in the example metadata, 'probio'), make sure to click on the 'nonnumeric metadata' radio button. 4. Click on 'Coloured Biplot' to generate the coloured biplot. A histogram displaying the frequency of each samples age is also generated. 
+To view the coloured PCA biplot, click the 'Coloured Biplot' tab within the main panel. The 'Colouring options' panel within the side bar panel allows you to choose which metadata to colour your plot by. Choose the column 'study' to view the data coloured by study. You will need to click the 'nonnumeric metadata' radio button since the values of the column are categorical. The sample names (ie, 128bvvc) that are black on the PCA biplot represent samples without metadata. We can easily filter the dataset to replot only the samples from the 'b_bv' study by clicking on 'Filter by metadata values' under the 'Colouring options' tab of the side bar panel. In the pop up, select the 'study' column, and input 'b_bv' into the text field for Value 1. Click 'Update Biplot' to update the biplot, or 'Reset Filter' to reset the filter. 
 
 ```{r, echo = FALSE, fig.align='center', fig.cap="Screen of coloured principal component analysis biplot. Steps to recreate this plot are lablled 1-4."}
 knitr::include_graphics("col_PCA.png")
 ```
-
-## Filter data table by metadata
 
 Click the 'Filter by metadata values' to replot samples according the groups in the metadata. For example, we can filter the dataset to only plot the samples that are either positive or negative for bacterial vaginosis according to nugest status by inputting 'bv' or 'n' for the column 'n_status' from the data table. This allows the user to explore virtually all variables in their dataset. 
 
@@ -163,7 +148,14 @@ knitr::include_graphics("metafilter.png")
 
 We will continue using the example dataset to generate effect plots using `ALDEx2`
 
-# Generating ALDEx2 effect plots 
+# Relative abundance plots
+
+The sidebar panel allows you to choose an abundance cutoff for the data. This may be useful if not all your taxa fit in to the legend space provided. 
+
+
+
+
+# Effect plots
 
 `ALDEx2` is an R package for analyze differential abundance of HTS data as compositions between two groups. 
 
