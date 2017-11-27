@@ -967,84 +967,84 @@ output$conditions<- renderUI({
 
   ################################################################################
 
-  #association plot
-
-  output$associationplot <- renderPlot({
-    d <- data()
-    rhocut <- input$rhocutoff
-
-    if (is.null(d)) {
-      return(NULL)
-    }
-    associationPlot <- function(x, cutoff = rhocut) {
-      # Separate out the taxonomy column from the counts
-      d <- x[, 0:(dim(x)[2] - 1)]
-      taxon <- x[(dim(x)[2])]
-
-      # Generate ALDEx2 object so values are centered log ratio transformed,
-      # then convert to propr object with a symmetric rho statistic matrix
-      d.clr <- aldex.clr(d, mc.samples = 128, verbose = TRUE)
-      d.sma.df <- aldex2propr(d.clr, how = "perb")
-
-      # Make a reference list with pairs related by a rho statistic
-      # less than the cutoff
-      d.sma.lo.rho <- d.sma.df["<", cutoff]
-
-      # **** propr and ALDEx stuff done ****
-
-      # igraph: Convert the connections into a graphical object using propr's
-      # cytescape function to first generate a table of indexed pairs and
-      # proportions
-      g <- graph.data.frame(cytescape(d.sma.lo.rho), directed = FALSE)
-
-      # igraph: Find the clusters
-      g.clust <- clusters(g)
-
-      # Make a table to examine the cluster membership by hand
-      g.df <-
-      data.frame(
-        Systematic.name = V(g)$name,
-        cluster = g.clust$membership,
-        cluster.size = g.clust$csize[g.clust$membership]
-      )
-
-      # Generate a set of clusters larger than some size
-      # Minimum cluster size is 2 (obviously)
-      big <- g.df[which(g.df$cluster.size >= 2), ]
-      colnames(big) <- colnames(g.df)
-
-      # Get genera
-      genera <- c()
-      for (i in 1:dim(taxon)[1]) {
-        genera <- c(genera, sapply(strsplit(as.character(taxon[i,]), "[[:punct:]]"),
-        "[", 6))
-      }
-
-      # igraph: Rename the cluster members by their genus name
-      # gsub(pattern, replacement, strings, perl-syntax)
-      V(g)$name <- gsub("(^[A-Za-z]{3}).+", "\\1",
-      as.vector(genera[V(g)]), perl = TRUE)
-
-      plot.new()
-
-      # igraph:
-      # vertex.size controls point and text color
-      # vertex.color controls point color
-      # vertex.frame controls point outline color
-      plot(
-        g,
-        vertex.size = 5,
-        vertex.color = rgb(0, 0, 0, 0.2),
-        vertex.frame.color = "white"
-      )
-    }
-    associationPlot(d)
-  })
-
-  output$associationtext <- renderText({
-    "This association plot uses Spearman's rho to measure the strength and direction of association between two variables.
-    The cutoff values ranges from -1 to 1. If greater than 1000 features are detected, input will be required on the R console."
-  })
+  # #association plot
+  #
+  # output$associationplot <- renderPlot({
+  #   d <- data()
+  #   rhocut <- input$rhocutoff
+  #
+  #   if (is.null(d)) {
+  #     return(NULL)
+  #   }
+  #   associationPlot <- function(x, cutoff = rhocut) {
+  #     # Separate out the taxonomy column from the counts
+  #     d <- x[, 0:(dim(x)[2] - 1)]
+  #     taxon <- x[(dim(x)[2])]
+  #
+  #     # Generate ALDEx2 object so values are centered log ratio transformed,
+  #     # then convert to propr object with a symmetric rho statistic matrix
+  #     d.clr <- aldex.clr(d, mc.samples = 128, verbose = TRUE)
+  #     d.sma.df <- aldex2propr(d.clr, how = "perb")
+  #
+  #     # Make a reference list with pairs related by a rho statistic
+  #     # less than the cutoff
+  #     d.sma.lo.rho <- d.sma.df["<", cutoff]
+  #
+  #     # **** propr and ALDEx stuff done ****
+  #
+  #     # igraph: Convert the connections into a graphical object using propr's
+  #     # cytescape function to first generate a table of indexed pairs and
+  #     # proportions
+  #     g <- graph.data.frame(cytescape(d.sma.lo.rho), directed = FALSE)
+  #
+  #     # igraph: Find the clusters
+  #     g.clust <- clusters(g)
+  #
+  #     # Make a table to examine the cluster membership by hand
+  #     g.df <-
+  #     data.frame(
+  #       Systematic.name = V(g)$name,
+  #       cluster = g.clust$membership,
+  #       cluster.size = g.clust$csize[g.clust$membership]
+  #     )
+  #
+  #     # Generate a set of clusters larger than some size
+  #     # Minimum cluster size is 2 (obviously)
+  #     big <- g.df[which(g.df$cluster.size >= 2), ]
+  #     colnames(big) <- colnames(g.df)
+  #
+  #     # Get genera
+  #     genera <- c()
+  #     for (i in 1:dim(taxon)[1]) {
+  #       genera <- c(genera, sapply(strsplit(as.character(taxon[i,]), "[[:punct:]]"),
+  #       "[", 6))
+  #     }
+  #
+  #     # igraph: Rename the cluster members by their genus name
+  #     # gsub(pattern, replacement, strings, perl-syntax)
+  #     V(g)$name <- gsub("(^[A-Za-z]{3}).+", "\\1",
+  #     as.vector(genera[V(g)]), perl = TRUE)
+  #
+  #     plot.new()
+  #
+  #     # igraph:
+  #     # vertex.size controls point and text color
+  #     # vertex.color controls point color
+  #     # vertex.frame controls point outline color
+  #     plot(
+  #       g,
+  #       vertex.size = 5,
+  #       vertex.color = rgb(0, 0, 0, 0.2),
+  #       vertex.frame.color = "white"
+  #     )
+  #   }
+  #   associationPlot(d)
+  # })
+  #
+  # output$associationtext <- renderText({
+  #   "This association plot uses Spearman's rho to measure the strength and direction of association between two variables.
+  #   The cutoff values ranges from -1 to 1. If greater than 1000 features are detected, input will be required on the R console."
+  # })
 
   ################################################################################
 

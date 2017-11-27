@@ -148,15 +148,15 @@ ui <- fluidPage(theme= "bootstrap.css",
                           )
                         )))#sidebarlayout
              ), #tabpanel
-             tabPanel("Association plots",
-                      sidebarLayout(
-                        sidebarPanel(width = 3,
-                          numericInput("rhocutoff",
-                                       label = "Input rho cutoff",
-                                       value = -0.25),
-                          textOutput("associationtext")),
-                        mainPanel(plotOutput("associationplot"))
-                      )),
+            #  tabPanel("Association plots",
+            #           sidebarLayout(
+            #             sidebarPanel(width = 3,
+            #               numericInput("rhocutoff",
+            #                            label = "Input rho cutoff",
+            #                            value = -0.25),
+            #               textOutput("associationtext")),
+            #             mainPanel(plotOutput("associationplot"))
+            #           )),
              tabPanel("Relative abundance plots",
                       sidebarLayout(
                         sidebarPanel(width = 3,
