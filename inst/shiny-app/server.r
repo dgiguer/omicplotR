@@ -351,16 +351,28 @@ output$conditions<- renderUI({
     return(data.pr)
   })
 
+
+cn <- ""
+group1 <- ""
+group2 <- ""
+denom <- ""
+
+
+#forces effect plot to update ONLY when generate action button is clicked
+#these values are needed for d.clr and ald.obj
+observeEvent(input$effectplot_ab, {
+          cn <<- input$colselect
+          group1 <<- input$group1
+          group2 <<- input$group2
+          denom <<- input$denomchoice
+  })
+
   #computing aldex object
   d.clr <- reactive({
     x <- data()
     g1s <- input$group1s
     g2s <- input$group2s
     meta <- metadata()
-    cn <- input$colselect
-    group1 <- input$group1
-    group2 <- input$group2
-    denom <- input$denomchoice
 
     #require user to click action button
     validate(need(input$effectplot_ab, ""))
@@ -430,9 +442,9 @@ output$conditions<- renderUI({
     x <- data()
     d.clr <- d.clr()
     meta <- metadata()
-    cn <- input$colselect
-    group1 <- input$group1
-    group2 <- input$group2
+    # cn <- input$colselect
+    # group1 <- input$group1
+    # group2 <- input$group2
     g1s <- input$group1s
     g2s <- input$group2s
 
@@ -1314,28 +1326,30 @@ BA.point.colour <- eventReactive(input$update_points, {
 output$effectMW <- renderPlot({
   x.all <- aldex.obj()
 
-  if (input$effectplot_ab) {
-    if (is.null(x.all)){
-      return(NULL)
-    } else {
-      aldex.plot(x.all, type="MW", test="welch", all.cex = 1.5, rare.cex = 1.5, called.cex = 1.5, xlab = "Dispersion", ylab = "Difference")
-      title(main = "Effect Plot")
-    }
-  }
-})
+
+ if (input$effectplot_ab) {
+
+        if (is.null(x.all)){
+          return(NULL)
+        } else {
+          aldex.plot(x.all, type="MW", test="welch", all.cex = 1.5, rare.cex = 1.5, called.cex = 1.5, xlab = "Dispersion", ylab = "Difference")
+          title(main = "Effect Plot")
+        }
+}
+  })
 
 output$effectMA <- renderPlot({
   x.all <- aldex.obj()
-
-  if (input$effectplot_ab) {
+ if (input$effectplot_ab) {
     if (is.null(x.all)){
       return(NULL)
     } else {
       aldex.plot(x.all, type="MA", test="welch", all.cex = 1.5, rare.cex = 1.5, called.cex = 1.5, xlab = "CLR abundance", ylab = "Difference between")
       title(main = "Bland-Altman Plot")
     }
-  }
+}
 })
+
 
 
 #effect plots for inputted aldex table
@@ -1407,7 +1421,7 @@ output$mw_hovertext <- renderUI({
     y <- paste("Within condition difference size: ", round(row$diff.win, digits =3))
     z <- paste("Between condition difference size: ", round(row$diff.btw, digits = 3))
     e <- paste("Effect size: ", round(row$effect, digits = 3))
-    p <- paste("Benjami Hochberg corrected p-value:", round(row$we.eBH, digist = 3))
+    p <- paste("Benjami Hochberg corrected p-value:", round(row$we.eBH, digits = 3))
     a <- ""
     HTML(paste(x, y, z, e, p, a, sep = "<br/>"))
   }
