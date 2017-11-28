@@ -1,9 +1,7 @@
 exportPattern("^[^\\.]")
 
 import("ALDEx2")
-importFrom("igraph", "graph.data.frame", "clusters")
 import("markdown")
-importFrom("propr", "aldex2propr")
 importFrom("grDevices", "colorRampPalette", "rgb")
 importFrom("stats", "dist", "prcomp", "quantile", "var")
 importFrom("compositions", "coloredBiplot")

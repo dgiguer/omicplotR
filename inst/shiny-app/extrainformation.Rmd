@@ -31,14 +31,9 @@ This filter calculates the variance for each OTU (row), and removes any rows tha
 
 This changes the scale of the biplot. When set to zero, it shows the relationship between samples (columns), while being set to 1 shows the relationship between OTUs (rows). Data is not filtered from this operation.
 
-```{r, eval = FALSE, echo = FALSE}
-### Association Plot
-
-#Association plots can show positively correlated taxa, where the ratio between two or more taxa is approximately constant in all samples. The *phi* metric is used, which can be changed depending on the strength of assocation you wish to display (more information about the *phi* metric can be found from [Lovell et al. (2015).](https://doi.org/10.1371/journal.pcbi.1004075) A guide to your first association plot can be found [here.](https://github.com/ggloor/CoDa_microbiome_tutorial/blob/master/first_association.pdf)
-```
 ### Relative Abundance Plots
 
-A dendrogram and stacked barplot calculates the sum of counts based on genera, showing the relative abundance of each genera for each sample, colour coded by taxonomy. For this to work, you must have a taxonomy column that has at least 6 taxonomic levels. Different method of calculating the distance matrix and .Information about the different clustering methods are available under the details section [of this article.](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/hclust.html)
+A dendrogram and stacked barplot calculates the sum of counts based on genera, showing the relative abundance of each genera for each sample, colour coded by taxonomy. For this to work, you must have a taxonomy column that has at least 6 taxonomic levels. Different method of calculating the distance matrix and. Information about the different clustering methods are available under the details section [of this article.](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/hclust.html)
 
 ### Effect plots
 

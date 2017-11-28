@@ -52,7 +52,7 @@ server <- function(input, output) {
           options <- colnames(metadata)
           selectInput(
             "select_biplot_filter",
-            label = h3("Filter biplot by metadata column"),
+            label = h3("Filter data by metadata column"),
             choices = options,
             selected = 1
           )
@@ -67,7 +67,7 @@ server <- function(input, output) {
       The biplot will be replotted with only the samples identified by
       the metadata values. Leave inputs blank if you don't need them.
       Samples that do not have metadata will be coloured black",
-      footer = tagList(actionButton("update", "Update Biplot"),
+      footer = tagList(actionButton("update", "Update Filter"),
       actionButton("reset", "Reset Filter"),
       modalButton("Cancel")),
       easyClose = TRUE
