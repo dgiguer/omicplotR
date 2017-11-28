@@ -526,7 +526,6 @@ output$conditions<- renderUI({
         }
 
         # Turn the vector of medians into a matrix and then data frame with
-        # appropriate labels
         result <- matrix(MC.means, nrow = numFeatures(x), ncol = numConditions(x))
         result <- data.frame(result, row.names = getFeatureNames(x))
         colnames(result) <- getSampleIDs(x)
@@ -1408,8 +1407,9 @@ output$mw_hovertext <- renderUI({
     y <- paste("Within condition difference size: ", round(row$diff.win, digits =3))
     z <- paste("Between condition difference size: ", round(row$diff.btw, digits = 3))
     e <- paste("Effect size: ", round(row$effect, digits = 3))
+    p <- paste("Benjami Hochberg corrected p-value:", round(row$we.eBH, digist = 3))
     a <- ""
-    HTML(paste(x, y, z, e, a, sep = "<br/>"))
+    HTML(paste(x, y, z, e, p, a, sep = "<br/>"))
   }
 })
 
