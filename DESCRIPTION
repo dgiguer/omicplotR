@@ -16,7 +16,7 @@ Description: A Shiny app for visual exploration of omic datasets as
     user interface facilitates visual exploration for new and experienced users
     of R alike.
 Imports:
-    ALDEx2 (>= 1.10.0),
+    ALDEx2 (>= 1.8.0),
     compositions,
     grDevices,
     rmarkdown,
