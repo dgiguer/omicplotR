@@ -1,7 +1,7 @@
 exportPattern("^[^\\.]")
 
 import("ALDEx2")
-import("markdown")
+import("rmarkdown")
 importFrom("grDevices", "colorRampPalette", "rgb")
 importFrom("stats", "dist", "prcomp", "quantile", "var")
 importFrom("compositions", "coloredBiplot")

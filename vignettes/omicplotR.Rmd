@@ -1,13 +1,15 @@
 ---
 title: "omicplotR: A tool for visualization of omic datasets as compositions"
-author: "Daniel Giguere"
-date: '2017-11-21'
+author: "Daniel Giguere, Jean Macklaim, Greg Gloor"
+date: "11-30-2017"
 output:
-  pdf_document:
+  html_document:
     toc: true
+    toc_float: true
+    toc_depth: 3
     number_sections: true
 vignette: >
-  %\VignetteIndexEntry{Introduction to omicplotR package}
+  %\VignetteIndexEntry{omicplotR: A tool for visualization of omic datasets as compositions}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -69,7 +71,7 @@ After launching the `Shiny` app, click the 'Input data' tab to get started.
 
 The 'Data' tab on the sidebar panel (grey) allows you to choose your own data and metadata by clicking 'Browse'. To follow along with this vignette, please click the 'Example data' tab on the sidebar panel, and click the checkbox for the 'Vaginal dataset'. This dataset, which includes associated metadata, is from a study that characterized the changes in the vaginal microbiome following antibiotic and probiotic treatment by 16s rRNA gene sequencing[^4]. Return to the 'Data' tab on the sidebar panel to view the data and metadata by clicking 'Show data' and 'Show metadata'. The tabs on the main panel allow you to switch between displaying your data and metadata tables.
 
-```{r, echo = FALSE, fig.align='center', fig.cap="Screenshot of input data page. The 'Example data' tab on the sidebar panel provides access to the provided datasets within the Shiny app."}
+```{r, echo = FALSE, fig.align='center', fig.cap="Figure 1: Screenshot of input data page. The 'Example data' tab on the sidebar panel provides access to the provided datasets within the Shiny app."}
 knitr::include_graphics("inputdata.png")
 ```
 
@@ -83,7 +85,7 @@ When choosing your own data set, input requirements are as follows: for both met
 4. The last column may contain taxonomic level information, but is not required. If present, it must be labelled exactly 'taxonomy'. **The taxonomy column must have at least four levels, separated by a semi colon or colon.**
 5. Data table must have all blank rows removed (this may require you to check in a text editor like Notepad ++ or Atom before using the app). This should be especially checked if you are using a Windows based computer, since they use different line feeds.
 
-```{r, echo = FALSE, out.width='80%', fig.align='center', fig.cap="Example data. If taxonomy column is present, it must use the column name 'taxonomy'. Image taken from modified version of Vaginal dataset."}
+```{r, echo = FALSE, out.width='80%', fig.align='center', fig.cap="Figure 2: Example data. If taxonomy column is present, it must use the column name 'taxonomy'. Image taken from modified version of Vaginal dataset."}
 knitr::include_graphics("./example_data.png")
 ```
 
@@ -93,7 +95,7 @@ Your metadata file must follow the following format. An example of an appropriat
 2. The first column must contain sample identifiers. The sample identifiers must be identical to the data file, however, they are not required to be in the same order.
 3. The first row must contain phenotypic information, or descriptions of each variable.
  
-```{r, echo = FALSE, out.width='70%', fig.align='center', fig.cap="Example metadata file. Metadata maybe be numerical or categorical. Any blank spaces will be replaced as NA when importing the file. Any values of T or F will be read as TRUE or FALSE. Image taken from modified version of Vaginal dataset."}
+```{r, echo = FALSE, out.width='70%', fig.align='center', fig.cap="Figure 3: Example metadata file. Metadata maybe be numerical or categorical. Any blank spaces will be replaced as NA when importing the file. Any values of T or F will be read as TRUE or FALSE. Image taken from modified version of Vaginal dataset."}
 knitr::include_graphics("./example_metadata.png")
 ```
 
@@ -108,7 +110,7 @@ The 'Example data' tab on the sidebar panel provides access to two example datas
 
 The 'Filtering' tab within the sidebar panel allows you to choose filtering options for your dataset. Colouring options for a coloured PCA biplot are available under the 'Colouring options' tab. The tabs within the main panel allow you to switch between displaying a biplot under 'Biplot', a biplot coloured by metadata under 'Coloured Biplot', and visualizations of the removed samples/features from filtering under the 'Removed data' tab.
 
-```{r, echo = FALSE, fig.align='center', fig.cap="Screenshot of coloured PCA biplot."}
+```{r, echo = FALSE, fig.align='center', fig.cap="Figure 4: Screenshot of coloured PCA biplot."}
 knitr::include_graphics("col_PCA.png")
 ```
 
@@ -147,7 +149,7 @@ To view the coloured PCA biplot, click the 'Coloured Biplot' tab within the main
 
 Under the 'Colouring options' tab in the sidebar panel, click on 'Filter by metadata values' to replot samples belonging to certain groups according to the metadata. This will generate a pop-up (Figure 5). Filter the dataset to replot only the samples at time zero by selecting the 'time' column, and inputting '0' into the text field for Value 1. This should update the coloured PCA biplot to show samples that were taken from time = 0. Click 'Update Filter' to update the filter, or 'Reset Filter' to reset it. **This filter is applied to the data for all other plots (relative abundance, effect plots).**
 
-```{r, echo = FALSE, fig.align='center', out.width='50%', fig.cap="Pop-up generated from clicking 'Filter by metadata values'. Select a column and enter values from the column to re-plot only those values. They must match exactly. The filter can be reset or updated."}
+```{r, echo = FALSE, fig.align='center', out.width='50%', fig.cap="Figure 5: Pop-up generated from clicking 'Filter by metadata values'. Select a column and enter values from the column to re-plot only those values. They must match exactly. The filter can be reset or updated."}
 knitr::include_graphics("metafilter.png")
 ```
 
@@ -165,7 +167,7 @@ Click on the 'From metadata' radio button since we are selecting conditions usin
 
 By hovering your cursor over a point on the effect plot, a stripchart of the expected CLR abundance (see `ALDEx2`) for each sample will be shown, allowing you to compare the differences between your samples for a given feature (Figure 6). It also displays information from the effect table generated by `ALDEx2`, such as the effect size, median difference between groups, and median difference within groups.
 
-```{r, echo = FALSE, fig.align='center', fig.cap="Screenshot of effect plots. Hovering over a feature's point in the effect plot generates a stripchart to compare the relative abundances calculated by ALDEx2 for each sample."}
+```{r, echo = FALSE, fig.align='center', fig.cap="Figure 6: Screenshot of effect plots. Hovering over a feature's point in the effect plot generates a stripchart to compare the relative abundances calculated by ALDEx2 for each sample."}
 knitr::include_graphics("effect.png")
 ```
 

@@ -19,7 +19,7 @@ Imports:
     ALDEx2 (>= 1.10.0),
     compositions,
     grDevices,
-    markdown,
+    rmarkdown,
     shiny,
     stats,
     vegan,
