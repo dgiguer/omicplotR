@@ -26,113 +26,326 @@
 
 
 omicplotr.anosim <- function(x, conds) {
-  #get rid of tax column
-  x$taxonomy <- NULL
+    #get rid of tax column
+    x$taxonomy <- NULL
 
-  #replace zeros
-  d <- cmultRepl(t(x), label = 0, method = "CZM")
+    #replace zeros
+    d <- cmultRepl(t(x), label = 0, method = "CZM")
 
-  #calculate clr
-  d.clr <- apply(d, 1, function(x) {
-    log(x) - mean(log(x))
-  })
+    #calculate clr
+    d.clr <- apply(d, 1, function(x) {
+        log(x) - mean(log(x))
+    })
 
-  #dissimilarity matrix
-  d.dist <- dist(d.clr)
+    #dissimilarity matrix
+    d.dist <- dist(d.clr)
 
-  #calculate anosim, requires
-  anosim(d.dist, conds, permutations = 999)
+    #calculate anosim, requires
+    anosim(d.dist, conds, permutations = 999)
 
-  #p-value of between conditions
-  return(anosim$signif)
+    #p-value of between conditions
+    return(anosim$signif)
 }
 
 omicplotr.clr <- function(data, var.filt = 0) {
 
-  #replace zeros
-  #catch error if no 0 present
-  if (any(data == 0)) {
-    data.0 <- cmultRepl(t(data), label = 0, method = "CZM")
-  } else {
-    data.0 <- t(data)
-  }
+    #replace zeros
+    #catch error if no 0 present
+    if (any(data == 0)) {
+        data.0 <- cmultRepl(t(data), label = 0, method = "CZM")
+    } else {
+        data.0 <- t(data)
+    }
 
-  #calculate CLR
-  x.clr <-
-  t(apply(data.0, 1, function(x) {
-    log(x) - mean(log(x))
-  }))
+    #calculate CLR
+    x.clr <-
+    t(apply(data.0, 1, function(x) {
+        log(x) - mean(log(x))
+    }))
 
-  #filter by variance
-  if (var.filt == 0) {
-    x.clr.var <- x.clr
-  } else {
-    var.clr <- apply(x.clr, 2, var)
-    names.hvar <- names(var.clr)[which(var.clr > var.filt)]
-    x.clr.var <- x.clr[,names.hvar]
-  }
+    #filter by variance
+    if (var.filt == 0) {
+        x.clr.var <- x.clr
+    } else {
+        var.clr <- apply(x.clr, 2, var)
+        names.hvar <- names(var.clr)[which(var.clr > var.filt)]
+        x.clr.var <- x.clr[,names.hvar]
+    }
 
-  #generate prcomp object
-  x.pcx <- prcomp(x.clr.var)
+    #generate prcomp object
+    x.pcx <- prcomp(x.clr.var)
 }
 
 omicplotr.colouredPCA <- function(data, colourvector, scale = 0,
-  arrows = TRUE, taxonomy = NULL, show.taxonomy = FALSE,
-  tax.level = 6, removenames = FALSE, names.cex = 1.0,
-  points.cex = 0.8, main = "Principal Component Analysis Biplot")
-  {
-    x.var <- sum(data$sdev ^ 2)
-    PC1 <- paste("PC 1 Variance: %",
-    round(sum(data$sdev[1] ^ 2) / x.var * 100, 1))
-    PC2 <- paste("PC 2 Variance: %",
-    round(sum(data$sdev[2] ^ 2) / x.var*100, 1))
-
-    points <- c(rep(".", length(dimnames(data$rotation)[[1]])))
-    if ((isTRUE(show.taxonomy)) & (!is.null(taxonomy)))
+    arrows = TRUE, taxonomy = NULL, show.taxonomy = FALSE,
+    tax.level = 6, removenames = FALSE, names.cex = 1.0,
+    points.cex = 0.8, main = "Principal Component Analysis Biplot")
     {
-      genus <- sapply(strsplit(as.character(taxonomy),
-      ";"), "[", tax.level)
+        x.var <- sum(data$sdev ^ 2)
+        PC1 <- paste("PC 1 Variance: %",
+        round(sum(data$sdev[1] ^ 2) / x.var * 100, 1))
+        PC2 <- paste("PC 2 Variance: %",
+        round(sum(data$sdev[2] ^ 2) / x.var*100, 1))
+
+        points <- c(rep(".", length(dimnames(data$rotation)[[1]])))
+        if ((isTRUE(show.taxonomy)) & (!is.null(taxonomy)))
+        {
+            genus <- sapply(strsplit(as.character(taxonomy),
+            ";"), "[", tax.level)
+        }
+
+        col = c("black", rgb(0, 0, 0, 0.4))
+
+        #remove sample names
+        if (isTRUE(removenames)) {
+            xlabs <- c(rep(".", length(dimnames(data$x)[[1]])))
+            names.cex = 5*names.cex
+            points.cex = points.cex
+        } else {
+            xlabs = unlist(dimnames(data$x)[1])
+            names.cex = names.cex
+            points.cex = points.cex
+        }
+
+        #if taxonomy is present, plot using taxonomies
+        if (!isTRUE(show.taxonomy)) {
+            points <- points
+        } else {
+            if (isTRUE(show.taxonomy)) {
+                points <- genus
+            } else {
+                points <- points
+            }
+        }
+
+        coloredBiplot(
+            data,
+            col = col,
+            main = main,
+            cex.main = 1.5,
+            cex = c(names.cex, points.cex),
+            xlabs.col = colourvector,
+            var.axes = arrows,
+            scale = scale,
+            xlab = PC1,
+            ylab = PC2,
+            xlabs = xlabs,
+            ylabs = points
+        )
     }
 
-    col = c("black", rgb(0, 0, 0, 0.4))
 
-    #remove sample names
-    if (isTRUE(removenames)) {
-      xlabs <- c(rep(".", length(dimnames(data$x)[[1]])))
-      names.cex = 5*names.cex
-      points.cex = points.cex
-    } else {
-      xlabs = unlist(dimnames(data$x)[1])
-      names.cex = names.cex
-      points.cex = points.cex
-    }
+    omicplotr.getRemovedFeatures <- function(x,
+        x.clr) {
 
-    #if taxonomy is present, plot using taxonomies
-    if (!isTRUE(show.taxonomy)) {
-      points <- points
-    } else {
-      if (isTRUE(show.taxonomy)) {
-        points <- genus
-      } else {
-        points <- points
-      }
-    }
+            #get rid of taxonomy column if it exists.
+            x$taxonomy <- NULL
 
-    coloredBiplot(
-      data,
-      col = col,
-      main = main,
-      cex.main = 1.5,
-      cex = c(names.cex, points.cex),
-      xlabs.col = colourvector,
-      var.axes = arrows,
-      scale = scale,
-      xlab = PC1,
-      ylab = PC2,
-      xlabs = xlabs,
-      ylabs = points
-    )
-  }
+            #get original samples and retained samples
+            otu.names <- rownames(x)
+            otus <- dimnames(x.clr$rotation)[[1]]
+
+            otu.missing <- c()
+
+            #samples
+            for (i in 1:length(otu.names)) {
+                if (!(otu.names[i] %in% otus)) {
+                    otu.missing[i] <- otu.names[i]
+                }
+            }
+
+            otu.missing <- otu.missing[!is.na(otu.missing)]
+
+            output <- x[otu.missing,]
+
+            #include OTUs as column because renderDataTable
+            # doesn't include rownames
+            output <- cbind(OTUs = rownames(output), output)
+
+            return(output)
+
+        }
+
+
+        omicplotr.getRemovedSamples <- function(x, x.clr)
+        {
+
+            #get rid of taxonomy column if it exists
+            x$taxonomy <- NULL
+
+            #get original samples and retained samples
+            names <- colnames(x)
+            samples <- dimnames(x.clr$x)[[1]]
+
+            missing <- c()
+
+            #samples
+            for (i in 1:length(names)) {
+                if (!(names[i] %in% samples)) {
+                    missing[i] <- names[i]
+                }
+            }
+
+            missing <- missing[!is.na(missing)]
+
+            if (is.null(missing)) {
+                output <- missing
+            } else {
+                output <- x[, missing]
+
+                #work around for including rownames in
+                # dataTableOutput
+                output <- cbind(OTUs = rownames(output),
+                output)
+            }
+
+            return(output)
+
+        }
+
+        omicplotr.metadataFilter <- function(data, meta, column, values) {
+
+            #order the metadata
+            meta <- meta[order(rownames(meta)), ]
+
+            #get rid of blank values
+            s <- values[values != ""]
+
+            #make list of samples
+            meta.filt <- rownames(meta[which(meta[[column]]
+                %in% s), ])
+
+                #filter the data based on which samples remain
+                # in metadata
+                x <- data[which(colnames(data) %in% meta.filt)]
+
+                if (is.null(data$taxonomy)) {
+                    x <- x
+                } else {
+                    x$taxonomy <- data$taxonomy
+                }
+
+                return(x)
+            }
+
+
+            omicplotr.permanova <- function(x, conds) {
+
+                d.clr <- apply(x, 1, function(x) {log(x) - mean(log(x))})
+
+                dist.clr <- dist(d.clr)
+
+                conds <- data.frame(conds)
+
+                colnames(conds) <- "grp"
+
+                test <- adonis(dist.clr~grp, data=conds, method="euclidean",
+                    permutations=10000)
+
+                    return(test$`Pr(>F)`)
+
+                }
+
+
+
+                omicplotr.report <- function(x.all, feature = NULL) {
+
+                    features <-
+                    rownames(x.all)[which(abs(x.all$effect) > 1 &
+                    x.all$we.eBH
+                    < 0.1)]
+
+                    #effect sizes
+                    effect <- x.all$effect[which(abs(x.all$effect)
+                    > 1 & x.all$we.eBH < 0.1)]
+
+                    #diff btw and diff win
+                    diff.btw <-
+                    x.all$diff.btw[which(abs(x.all$effect) > 1 &
+                    x.all$we.eBH
+                    < 0.1)]
+                    diff.win <-
+                    x.all$diff.win[which(abs(x.all$effect) > 1 &
+                    x.all$we.eBH
+                    < 0.1)]
+
+                    #table of of significantly different OTUs with
+                    # BH fdr < 0.1.
+                    sig.output <- cbind(features, effect, diff.btw, diff.win)
+
+                    }
+
+
+
+                    omicplotr.filter <- function(data, min.reads = 0, min.count
+                        = 0, min.sum = 0, min.prop = 0, max.prop = 1) {
+
+                            if (is.null(data$taxonomy)) {
+                                taxCheck <- TRUE
+                            } else {
+                                taxCheck <- FALSE
+                            }
+
+                            if (isTRUE(taxCheck)) {
+                                #order for colouring
+                                x <- data[order(colnames(data))]
+
+                                #filter by min reads per sample
+                                data.0 <- x[,which(apply(x,2,sum) > min.reads)]
+
+                                #filter by min count per feature
+                                data.1 <-  data.0[which(apply(data.0, 1, max) >=
+                                min.count), ]
+
+                                #filter by sum of count per feature
+                                data.2 <- data.1[which(apply(data.1, 1, sum) >
+                                min.sum), ]
+
+                                #filter by proportion
+                                d.frac <- apply(data.2, 2,
+                                    function(x){x/sum(x)})
+                                x.filt <- data.2[ (which((apply(d.frac,1,max) >
+                                min.prop) &
+                                (apply(d.frac,1,max) < max.prop))),]
+
+                            } else {
+                                #order for colouring
+                                tax <- data$taxonomy
+                                x <- data[order(colnames(data[1:(ncol(data) -
+                                 1)]))]
+                                x$taxonomy <- tax
+
+                                #filter by min reads per sample
+                                data.0 <-  data.frame(x[,which(apply
+                                    (x[, 1:(ncol(x) - 1)], 2, sum) >=
+                                     min.reads)], check.names = FALSE)
+
+                                    #put tax back in
+                                    data.0$taxonomy <- tax
+                                    #filter by min count per feature
+                                    data.1 <-  data.frame(data.0[which(apply
+                                        (data.0[,1:(ncol(data.0) - 1)], 1, max)
+                                         >= min.count),], check.names = FALSE)
+
+                                        #filter by sum of count per feature
+                                        data.2 <- data.frame(data.1[which(apply
+                                            (data.1[, 1:(ncol(data.1) - 1)], 1,
+                                             max) >= min.sum), ], check.names =
+                                              FALSE)
+
+                                            #filter by proportion
+                                            d.frac <-
+                                             apply(data.2[,1:(ncol(data.2) -
+                                            1)], 2,
+                                            function(x){x/sum(x)})
+                                            x.filt <- data.2[
+                                             (which((apply(d.frac,1,max)
+                                            > min.prop) &
+                                            (apply(d.frac,1,max) < max.prop))),]
+                                        }
+                                        return(x.filt)
+                                    }
+
 
   omicplotr.colvec <- function(data, meta, column, type = 3) {
 
@@ -318,215 +531,3 @@ omicplotr.colouredPCA <- function(data, colourvector, scale = 0,
                         }
                         return(sorted$col)
                       }
-
-                      omicplotr.filter <- function(data, min.reads = 0,
-                         min.count = 0, min.sum = 0,
-                          min.prop = 0, max.prop = 1) {
-
-                          if (is.null(data$taxonomy)) {
-                            taxCheck <- TRUE
-                          } else {
-                            taxCheck <- FALSE
-                          }
-
-                          if (isTRUE(taxCheck)) {
-                            #order for colouring
-                            x <- data[order(colnames(data))]
-
-                            #filter by min reads per sample
-                            data.0 <- x[,which(apply(x,2,sum) > min.reads)]
-
-                            #filter by min count per feature
-                            data.1 <-  data.0[which(apply(data.0, 1, max) >=
-                             min.count), ]
-
-                            #filter by sum of count per feature
-                            data.2 <- data.1[which(apply(data.1, 1, sum) >
-                             min.sum), ]
-
-                            #filter by proportion
-                            d.frac <- apply(data.2, 2, function(x){x/sum(x)})
-                            x.filt <- data.2[ (which((apply(d.frac,1,max) >
-                             min.prop) &
-                            (apply(d.frac,1,max) < max.prop))),]
-
-                          } else {
-                            #order for colouring
-                            tax <- data$taxonomy
-                            x <- data[order(colnames(data[1:(ncol(data) - 1)]))]
-                            x$taxonomy <- tax
-
-                            #filter by min reads per sample
-                            data.0 <-  data.frame(x[,which(apply
-                              (x[, 1:(ncol(x) - 1)], 2, sum) >= min.reads)],
-                              check.names = FALSE)
-
-                              #put tax back in
-                              data.0$taxonomy <- tax
-                              #filter by min count per feature
-                              data.1 <-  data.frame(data.0[which(apply
-                                (data.0[,1:(ncol(data.0) - 1)], 1, max) >=
-                                 min.count),],
-                                check.names = FALSE)
-
-                                #filter by sum of count per feature
-                                data.2 <- data.frame(data.1[which(apply
-                                  (data.1[, 1:(ncol(data.1) - 1)], 1, max) >=
-                                   min.sum), ],
-                                  check.names = FALSE)
-
-                                  #filter by proportion
-                                  d.frac <- apply(data.2[,1:(ncol(data.2) -
-                                   1)], 2,
-                                  function(x){x/sum(x)})
-                                  x.filt <- data.2[ (which((apply(d.frac,1,max)
-                                   > min.prop) &
-                                  (apply(d.frac,1,max) < max.prop))),]
-                                }
-                                return(x.filt)
-                              }
-
-                              omicplotr.getRemovedFeatures <- function(x,
-                                 x.clr) {
-
-                                #get rid of taxonomy column if it exists.
-                                x$taxonomy <- NULL
-
-                                #get original samples and retained samples
-                                otu.names <- rownames(x)
-                                otus <- dimnames(x.clr$rotation)[[1]]
-
-                                otu.missing <- c()
-
-                                #samples
-                                for (i in 1:length(otu.names)) {
-                                  if (!(otu.names[i] %in% otus)) {
-                                    otu.missing[i] <- otu.names[i]
-                                  }
-                                }
-
-                                otu.missing <- otu.missing[!is.na(otu.missing)]
-
-                                output <- x[otu.missing,]
-
-                                #include OTUs as column because renderDataTable
-                                # doesn't include rownames
-                                output <- cbind(OTUs = rownames(output), output)
-
-                                return(output)
-
-                              }
-
-
-                              omicplotr.getRemovedSamples <- function(x, x.clr)
-                               {
-
-                                #get rid of taxonomy column if it exists
-                                x$taxonomy <- NULL
-
-                                #get original samples and retained samples
-                                names <- colnames(x)
-                                samples <- dimnames(x.clr$x)[[1]]
-
-                                missing <- c()
-
-                                #samples
-                                for (i in 1:length(names)) {
-                                  if (!(names[i] %in% samples)) {
-                                    missing[i] <- names[i]
-                                  }
-                                }
-
-                                missing <- missing[!is.na(missing)]
-
-                                if (is.null(missing)) {
-                                  output <- missing
-                                } else {
-                                  output <- x[, missing]
-
-                                  #work around for including rownames in
-                                  # dataTableOutput
-                                  output <- cbind(OTUs = rownames(output),
-                                   output)
-                                }
-
-                                return(output)
-
-                              }
-
-                              omicplotr.metadataFilter <- function(data, meta,
-                                 column, values) {
-
-                                #order the metadata
-                                meta <- meta[order(rownames(meta)), ]
-
-                                #get rid of blank values
-                                s <- values[values != ""]
-
-                                #make list of samples
-                                meta.filt <- rownames(meta[which(meta[[column]]
-                                   %in% s), ])
-
-                                #filter the data based on which samples remain
-                                # in metadata
-                                x <- data[which(colnames(data) %in% meta.filt)]
-
-                                if (is.null(data$taxonomy)) {
-                                  x <- x
-                                } else {
-                                  x$taxonomy <- data$taxonomy
-                                }
-
-                                return(x)
-                              }
-
-
-                              omicplotr.permanova <- function(x, conds) {
-
-                                d.clr <- apply(x, 1, function(x) {log(x) -
-                                   mean(log(x))})
-
-                                dist.clr <- dist(d.clr)
-
-                                conds <- data.frame(conds)
-
-                                colnames(conds) <- "grp"
-
-                                test <- adonis(dist.clr~grp, data=conds,
-                                   method="euclidean",
-                                permutations=10000)
-
-                                return(test$`Pr(>F)`)
-
-                              }
-
-
-
-                              omicplotr.report <- function(x.all, feature =
-                                 NULL) {
-
-                                features <-
-                                 rownames(x.all)[which(abs(x.all$effect) > 1 &
-                                 x.all$we.eBH
-                                < 0.1)]
-
-                                #effect sizes
-                                effect <- x.all$effect[which(abs(x.all$effect)
-                                 > 1 & x.all$we.eBH < 0.1)]
-
-                                #diff btw and diff win
-                                diff.btw <-
-                                 x.all$diff.btw[which(abs(x.all$effect) > 1 &
-                                  x.all$we.eBH
-                                < 0.1)]
-                                diff.win <-
-                                 x.all$diff.win[which(abs(x.all$effect) > 1 &
-                                  x.all$we.eBH
-                                < 0.1)]
-
-                                #table of of significantly different OTUs with
-                                # BH fdr < 0.1.
-                                sig.output <- cbind(features, effect, diff.btw,
-                                   diff.win)
-
-                              }

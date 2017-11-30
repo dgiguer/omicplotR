@@ -1398,7 +1398,7 @@ output$ma_hovertext <- renderUI({
 
   row <- nearPoints(x.all, input$ma_hover, xvar = "rab.all", yvar = "diff.btw")
 
-  x <- paste("Sample Id: ", rownames(row))
+  x <- paste("Feature Id: ", rownames(row))
   y <- paste("Median Log2 relative abundance: ", round(row$rab.all, digits =3))
   z <- paste("Between condition difference size: ", round(row$diff.btw, digits = 3))
   e <- paste("Effect size: ", round(row$effect, digits = 3))
@@ -1417,11 +1417,14 @@ output$mw_hovertext <- renderUI({
     HTML("Hover over MW plot with mouse")
 
   } else {
-    x <- paste("Sample Id: ", rownames(row))
+
+    p.v <- round(row$we.eBH, digits = 4)
+    ps <- format(p.v, scientific=TRUE)
+    x <- paste("Feature Id: ", rownames(row))
     y <- paste("Within condition difference size: ", round(row$diff.win, digits =3))
     z <- paste("Between condition difference size: ", round(row$diff.btw, digits = 3))
     e <- paste("Effect size: ", round(row$effect, digits = 3))
-    p <- paste("Benjami Hochberg corrected p-value:", round(row$we.eBH, digits = 3))
+    p <- paste("Benjami Hochberg corrected p-value:", ps)
     a <- ""
     HTML(paste(x, y, z, e, p, a, sep = "<br/>"))
   }
@@ -1502,7 +1505,7 @@ output$stripchart <- renderPlot({
   s.clr <- list("Condition 1" = cond1.clr, "Condition 2" = cond2.clr)
 
 
-  stripchart(s.clr, main = c("Difference between conditions for: ", feature), xlab = "Conditions", ylab = "Expected CLR values",
+  stripchart(s.clr, main = c("Difference between conditions for feature ", feature), xlab = "Conditions", ylab = "Expected CLR values",
   col = c("black", "red"), pch =16, vertical = TRUE, method = "jitter", jitter = 0.10)
   #text(0, labels = txt)
 })
