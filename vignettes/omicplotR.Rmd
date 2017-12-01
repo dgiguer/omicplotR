@@ -5,9 +5,9 @@ date: "11-30-2017"
 output:
   html_document:
     toc: true
-    toc_float: true
     toc_depth: 3
     number_sections: true
+    toc_float: true
 vignette: >
   %\VignetteIndexEntry{omicplotR: A tool for visualization of omic datasets as compositions}
   %\VignetteEngine{knitr::rmarkdown}

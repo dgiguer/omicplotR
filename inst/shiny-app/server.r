@@ -369,7 +369,7 @@ observeEvent(input$effectplot_ab, {
 
   #computing aldex object
   d.clr <- reactive({
-    x <- data()
+    x <- data.t()
     g1s <- input$group1s
     g2s <- input$group2s
     meta <- metadata()
@@ -439,7 +439,7 @@ observeEvent(input$effectplot_ab, {
   })
 
   aldex.obj <- reactive({
-    x <- data()
+    x <- data.t()
     d.clr <- d.clr()
     meta <- metadata()
     # cn <- input$colselect
@@ -1105,7 +1105,7 @@ observeEvent(input$effectplot_ab, {
 
   #dendrogram
   output$dendrogram <- renderPlot({
-    x <- data()
+    x <- data.t()
     meta <- metadata()
     abund <- input$abundcutoffbarplot
 
@@ -1194,7 +1194,7 @@ observeEvent(input$effectplot_ab, {
 
   #taoxnomic distribution
   output$barplot <- renderPlot({
-    x <- data()
+    x <- data.t()
     meta <- metadata()
     abund <- input$abundcutoffbarplot
 
@@ -1433,7 +1433,7 @@ output$mw_hovertext <- renderUI({
 #strip chart of expected CLR values for each sample per condition of hovered
 # point
 output$stripchart <- renderPlot({
-  x <- data()
+  x <- data.t()
   cond1 <- input$group1s
   cond2 <- input$group2s
   g1s <- input$group1s
