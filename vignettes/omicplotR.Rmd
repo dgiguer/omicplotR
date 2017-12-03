@@ -3,11 +3,10 @@ title: "omicplotR: A tool for visualization of omic datasets as compositions"
 author: "Daniel Giguere, Jean Macklaim, Greg Gloor"
 date: "11-30-2017"
 output:
-  html_document:
+  pdf_document:
     toc: true
     toc_depth: 3
     number_sections: true
-    toc_float: true
 vignette: >
   %\VignetteIndexEntry{omicplotR: A tool for visualization of omic datasets as compositions}
   %\VignetteEngine{knitr::rmarkdown}
@@ -27,7 +26,7 @@ knitr::opts_chunk$set(fig.pos = "h")
 
 # Introduction
 
-High-throughput sequencing (HTS) instruments generate an amount of reads that is constrained by limitations of the sequencing instrument itself, and do not represent the absolute number of DNA molecules in a sample. For example, an Illumina NextSeq can deliver up to 400 million single-end reads, whereas an Illumina MiSeq2 can only deliver up to 15 million single-end reads[^2]. This type of data, which is constrained by an arbitrary or constant sum, is referred to as compositional data, and high-throughput sequencing data must be treated as such[^3]. See `ALDEx2` for more information. 
+High-throughput sequencing (HTS) instruments generate an amount of reads that is constrained by limitations of the sequencing instrument itself, and do not represent the absolute number of DNA molecules in a sample. For example, an Illumina NextSeq can deliver up to 400 million single-end reads, whereas an Illumina MiSeq2 can only deliver up to 15 million single-end reads[^2]. This type of data, which is constrained by an arbitrary or constant sum, is referred to as compositional data, and high-throughput sequencing data must be treated as such[^3]. See `ALDEx2` for more information.
 
 Although several R packages exist for exploring high-throughput sequencing data, they are typically command line based, which presents a barrier for users without any significant command line or scripting experience. `omicplotR` was created to facilitate the exploratory phase of high-throughput sequencing data analysis allowing the generation of basic exploratory plots automatically with adjustable features and filters.
 
@@ -38,14 +37,14 @@ This vignette provides an overview of the R package `omicplotR` and the input re
 
 # Features
 
-`omicplotR` provides a graphical user interface using the `Shiny` package for the following visualizations for HTS data: 
+`omicplotR` provides a graphical user interface using the `Shiny` package for the following visualizations for HTS data:
 
-* Compositional Principal Component Analysis (PCA) biplots 
+* Compositional Principal Component Analysis (PCA) biplots
 * Dendrograms
 * Stacked barplots of relative taxonomic abundance
 * Compositional differential abundance analysis
 
-Additional features include:  
+Additional features include:
 
 * Filtering count tables per sample or feature by counts
 * Filtering data into groups using metadata to compare groups within the data
@@ -56,7 +55,7 @@ Additional features include:
 
 # Installation and example
 
-Install the latest version of `omicplotR`. Make sure you have the newest version of R, `ALDEx2`, and other dependancies. `omicplotR` requires you to have at least R version 3.4. 
+Install the latest version of `omicplotR`. Make sure you have the newest version of R, `ALDEx2`, and other dependancies. `omicplotR` requires you to have at least R version 3.4.
 
 First, load the `omicplotR` package. All other dependencies will be loaded automatically. This will launch the `Shiny` app in your default browser. For this vignette, we will be using the example data and metadata provided.
 
@@ -94,7 +93,7 @@ Your metadata file must follow the following format. An example of an appropriat
 1. Must be a **tab delimited .txt** (this is an option when you click 'Save as' from Excel).
 2. The first column must contain sample identifiers. The sample identifiers must be identical to the data file, however, they are not required to be in the same order.
 3. The first row must contain phenotypic information, or descriptions of each variable.
- 
+
 ```{r, echo = FALSE, out.width='70%', fig.align='center', fig.cap="Figure 3: Example metadata file. Metadata maybe be numerical or categorical. Any blank spaces will be replaced as NA when importing the file. Any values of T or F will be read as TRUE or FALSE. Image taken from modified version of Vaginal dataset."}
 knitr::include_graphics("./example_metadata.png")
 ```
@@ -118,32 +117,32 @@ knitr::include_graphics("col_PCA.png")
 
 "Reasonable" filtering of sparse features (rows) from your dataset **should not** affect any conclusions made from the PCA biplots. Filtering is exploratory, and should be experimented with to see how removing sparse data affects the structure of your dataset within the PCA biplot. The default filtering removes any feature that has a maximum value less than 10. We will not change the default filtering for the purposes of the vignette.
 
-Under the 'Filtering' tab within the sidebar panel, the following options are available to filter your data. 
+Under the 'Filtering' tab within the sidebar panel, the following options are available to filter your data.
 
-1. **Minimum count per OTU**  
-This filter removes any rows with a maximum sample count less than the input. Default is 10 to remove sparse OTUs. 
+1. **Minimum count per OTU**
+This filter removes any rows with a maximum sample count less than the input. Default is 10 to remove sparse OTUs.
 
-2. **Minimum count sum per sample**  
-This filter removes any columns that have a lower sum of counts than the filter. You can visualize which samples are being removed when applying this filter using the 'Filtering by counts per sample' graph under the 'Removed data' tab. 
+2. **Minimum count sum per sample**
+This filter removes any columns that have a lower sum of counts than the filter. You can visualize which samples are being removed when applying this filter using the 'Filtering by counts per sample' graph under the 'Removed data' tab.
 
-3. **Minimum proportional abundance**  
+3. **Minimum proportional abundance**
 This filter calculates frequency for each sample (by column) after filters 1 and 2 are applied, and removes any rows that have all frequencies below the threshold.
 
-4. **Maximum proportional abundance**  
+4. **Maximum proportional abundance**
 This filter calculates frequency for each sample, and removes any rows that have no frequencies below the threshold.
 
-5. **Minimum count sum per OTU**  
+5. **Minimum count sum per OTU**
 This filter removes any rows that have a lower sum of counts than the filter. You can visualize which rows are removed with the 'Filtering by counts per row' graph under the 'Removed data' tab.
 
-6. **Variance cutoff**  
+6. **Variance cutoff**
 This filter calculates the variance for each OTU (row), and removes any rows that have lower variance than the filter. Variance is calculated after all other filters, and after the reads have been transformed by the centre-log ratio.
 
-7. **Adjust scale**  
+7. **Adjust scale**
 This changes the scale of the biplot. When set to zero, it shows the relationship between samples (columns), while being set to 1 shows the relationship between OTUs (rows). Data is not filtered from this operation.
 
 ## Colouring options
 
-To view the coloured PCA biplot, click the 'Coloured Biplot' tab within the main panel. Clicking the 'Colouring options' panel within the side bar panel allows you to choose which metadata to colour your plot by. We will be colouring the samples based on whether or not they were positive for bacterial vaginosis as defined by Nugent status. Choose the column 'n_status' to colour the data by Nugent status. You will need to click the 'nonnumeric metadata' radio button since the values of the column are categorical. The sample names that are black (ie, 128bvvc) on the PCA biplot represent samples without metadata. 
+To view the coloured PCA biplot, click the 'Coloured Biplot' tab within the main panel. Clicking the 'Colouring options' panel within the side bar panel allows you to choose which metadata to colour your plot by. We will be colouring the samples based on whether or not they were positive for bacterial vaginosis as defined by Nugent status. Choose the column 'n_status' to colour the data by Nugent status. You will need to click the 'nonnumeric metadata' radio button since the values of the column are categorical. The sample names that are black (ie, 128bvvc) on the PCA biplot represent samples without metadata.
 
 ### Filter by metadata
 
@@ -155,7 +154,7 @@ knitr::include_graphics("metafilter.png")
 
 # Relative abundance plots
 
-Click the 'Relative abundance plots' main tab to continue. The sidebar panel allows you to filter the data by choosing an abundance cutoff, select the clustering method, and select the distance matrix method. The main panel displays a dendrogram above a stacked barplot, and both can be zoomed in by dragging your mouse over a selected region and double clicking. 
+Click the 'Relative abundance plots' main tab to continue. The sidebar panel allows you to filter the data by choosing an abundance cutoff, select the clustering method, and select the distance matrix method. The main panel displays a dendrogram above a stacked barplot, and both can be zoomed in by dragging your mouse over a selected region and double clicking.
 
 Any filtering by metadata will be reflected in the dendrogram and stacked barplot as well.
 
@@ -171,9 +170,9 @@ By hovering your cursor over a point on the effect plot, a stripchart of the exp
 knitr::include_graphics("effect.png")
 ```
 
-If you are using your own data and want to select groups by columns, you will need to reorder your file to have the first *n* columns as group 1, and the last *n* columns as group 2. 
+If you are using your own data and want to select groups by columns, you will need to reorder your file to have the first *n* columns as group 1, and the last *n* columns as group 2.
 
-When running `omicplotR`, your R console will be be unavailable. To quit the app, click the 'More' main tab and click 'Quit omicplotR'. Alternatively, you can click `command` `.` on Mac. 
+When running `omicplotR`, your R console will be be unavailable. To quit the app, click the 'More' main tab and click 'Quit omicplotR'. Alternatively, you can click `command` `.` on Mac.
 
 # Contributors
 
@@ -186,5 +185,3 @@ Currently version 0.99.0.
 For more information about how to use `omicplotR`, please visit the wiki on my Github page:
 
 [https://github.com/dgiguer/omicplotR/wiki](https://github.com/dgiguer/omicplotR/wiki)
-
-
