@@ -19,14 +19,14 @@ Imports:
     ALDEx2 (>= 1.8.0),
     compositions,
     grDevices,
+    knitr,
     rmarkdown,
     shiny,
     stats,
     vegan,
     zCompositions
-Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
-Depends: R (>= 3.4)
+Depends: R (>= 3.5)
 License: MIT + file LICENSE
 LazyData: true
 Encoding: UTF-8

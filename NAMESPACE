@@ -2,6 +2,7 @@ exportPattern("^[^\\.]")
 
 import("ALDEx2")
 import("rmarkdown")
+import("knitr")
 importFrom("grDevices", "colorRampPalette", "rgb")
 importFrom("stats", "dist", "prcomp", "quantile", "var")
 importFrom("compositions", "coloredBiplot")
