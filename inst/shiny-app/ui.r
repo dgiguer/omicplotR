@@ -107,8 +107,8 @@ ui <- fluidPage(theme= "bootstrap.css",
                                      checkboxInput("removesamplenames", label = "Remove sample names"),
                                      checkboxInput("arrowcheckbox", label = "Show arrows", value = FALSE),
                                      checkboxInput("taxoncheckbox", label = "Show taxonomy", value = FALSE),
-                                     uiOutput("taxchoice"),
-                                     textInput("biplot_title", label = "Biplot title", placeholder = "Title for biplot")
+                                     uiOutput("taxchoice")#,
+                                     #textInput("biplot_title", label = "Biplot title", placeholder = "Title for biplot")
                                      )
                           )
                         ),

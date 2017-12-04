@@ -24,7 +24,6 @@ server <- function(input, output) {
     c(input$cnname, input$cnname2, input$cnname3, input$cnname4)
     metaval$data <- input$select_biplot_filter
     removeModal()
-
   })
 
   #dendrogram brush ranges
@@ -245,7 +244,6 @@ output$conditions<- renderUI({
   vals <- reactiveValues(data = NULL)
   metaval <- reactiveValues(data = NULL)
 
-
   #get column selection for metadata
   column <- reactive({
     cn <- input$selectcolumn
@@ -289,8 +287,6 @@ output$conditions<- renderUI({
     x <- data()
     meta <- metadata()
     cn <- column()
-    abund <- input$abundance
-    varcut <- input$varslider
 
     #set to zero, but inputs from sliders/numeric inputs
     min.count <- input$mincounts
@@ -351,12 +347,11 @@ output$conditions<- renderUI({
     return(data.pr)
   })
 
-
+#these are for effect plot choices by metadata
 cn <- ""
 group1 <- ""
 group2 <- ""
 denom <- ""
-
 
 #forces effect plot to update ONLY when generate action button is clicked
 #these values are needed for d.clr and ald.obj
@@ -384,7 +379,7 @@ observeEvent(input$effectplot_ab, {
 
       x <- omicplotr.metadataFilter(x, meta, column = metaval$data, values = vals$data)
 
-      #meta <- meta[which(rownames(meta) %in% colnames(x)),]
+      meta <- meta[which(rownames(meta) %in% colnames(x)),]
   }
 
     # Separate the taxonomy column from the counts
@@ -442,9 +437,6 @@ observeEvent(input$effectplot_ab, {
     x <- data.t()
     d.clr <- d.clr()
     meta <- metadata()
-    # cn <- input$colselect
-    # group1 <- input$group1
-    # group2 <- input$group2
     g1s <- input$group1s
     g2s <- input$group2s
 
@@ -455,7 +447,7 @@ observeEvent(input$effectplot_ab, {
 
       x <- omicplotr.metadataFilter(x, meta, column = metaval$data, values = vals$data)
 
-      #meta <- meta[which(rownames(meta) %in% colnames(x)),]
+      meta <- meta[which(rownames(meta) %in% colnames(x)),]
   }
 
     if (is.null(x$taxonomy)) {
@@ -603,8 +595,6 @@ observeEvent(input$effectplot_ab, {
     "Choose filtering options"
   })
 
-
-
   output$nometadata <- renderText({
     metadata <- metadata()
     if (is.null(metadata)) {
@@ -673,7 +663,7 @@ observeEvent(input$effectplot_ab, {
     data()
   })
 
-  ################################################################################
+  ##############################################################################
 
   # PCA biplots
 
@@ -1018,7 +1008,8 @@ observeEvent(input$effectplot_ab, {
     }
   })
 
-  ################################################################################
+  ##############################################################################
+  #this will be implemented in a later version
 
   # #association plot
   #
@@ -1326,7 +1317,6 @@ BA.point.colour <- eventReactive(input$update_points, {
 output$effectMW <- renderPlot({
   x.all <- aldex.obj()
 
-
  if (input$effectplot_ab) {
 
         if (is.null(x.all)){
@@ -1349,8 +1339,6 @@ output$effectMA <- renderPlot({
     }
 }
 })
-
-
 
 #effect plots for inputted aldex table
 output$table_effect <- renderPlot({
