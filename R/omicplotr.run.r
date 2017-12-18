@@ -27,11 +27,11 @@
 #'
 
 omicplotr.run <- function() {
-
+    
     appDir <- system.file("shiny-app", package = "omicplotR")
     if (appDir == "") {
-        stop("Could not find directory. Try reinstalling omicplotR", call=FALSE)
+        stop("Could not find directory. Try reinstalling omicplotR", call = FALSE)
     }
-
+    
     shiny::runApp(appDir)
 }

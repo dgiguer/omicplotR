@@ -175,9 +175,7 @@ output$conditions<- renderUI({
           row.names = 1,
           check.names = FALSE,
           comment.char = "",
-          na.strings = ""
-
-        )
+          na.strings = "")
       }
     }
   })
@@ -264,10 +262,10 @@ output$conditions<- renderUI({
       tax <- data$taxonomy
       data$taxonomy <- NULL
 
-      taxselected <- input$taxlevel
+
 
       #get genus names
-      genus <- sapply(strsplit(as.character(tax), "[[:punct:]]"), "[", taxselected)
+      genus <- vapply(strsplit(as.character(tax), "[[:punct:]]"), "[", taxselected, FUN.VALUE=character(1))
     }
   })
 
@@ -314,6 +312,7 @@ output$conditions<- renderUI({
     }
 
     x.filt <- omicplotr.filter(x, min.reads = min.reads, min.count = min.count, min.prop = min.prop, max.prop = max.prop, min.sum = min.sum)
+
   })
 
   #prcomp object
@@ -343,6 +342,7 @@ output$conditions<- renderUI({
       }
 
       data.pr <- omicplotr.clr(data.t, var.filt)
+
     }
     return(data.pr)
   })
@@ -412,6 +412,7 @@ observeEvent(input$effectplot_ab, {
 
       #combine
       d <- cbind(data1.filt, data2.filt)
+
     }
 
     # Generate ALDEx2 object and get a distribution of values that are centered
@@ -512,15 +513,16 @@ observeEvent(input$effectplot_ab, {
         # Initialize medians vector to be reshaped later to matrix
         MC.means <- numeric()
 
+
         # Iterating all samples
-        for(i in 1:numConditions(x)) {
+        for(i in seq_len(numConditions(x))) {
           sample.means <- numeric()
 
           # Get sample's MC Instances for features
           MC.matrix <- getMonteCarloReplicate(x, i)
 
           # Iterating features
-          for(j in 1:numFeatures(x)){
+          for(j in seq_len(numFeatures(x))) {
             feature.means <- mean(MC.matrix[j, ])
             sample.means <- append(sample.means, feature.means)
           }
@@ -693,8 +695,14 @@ observeEvent(input$effectplot_ab, {
 
     taxonomy <- tax$taxonomy
 
+    if (isTRUE(taxoncheck)) {
+        taxselect <- as.numeric(input$taxlevel)
+    } else {
+        taxselect <- 6
+    }
+
     #get genus (or other level)
-    genus <- sapply(strsplit(as.character(taxonomy), "[[:punct:]]"), "[", taxselect)
+    genus <- vapply(strsplit(as.character(taxonomy), "[[:punct:]]"), "[", taxselect, FUN.VALUE=character(1))
 
     #makes the points on the graphs periods
     points <- c(rep(".", length(dimnames(data$rotation)[[1]])))
@@ -711,15 +719,12 @@ observeEvent(input$effectplot_ab, {
 
     #if taxonomy is is null, use normal points.
     #if taxoncheckbox is checked, show genus instead of points
-    if (is.null(taxonomy)) {
-      points <- points
-    } else {
+
       if (isTRUE(taxoncheck)) {
         points <- genus
       } else {
         points <- points
       }
-    }
 
     #remove sample names
     if (isTRUE(removenames)) {
@@ -907,12 +912,11 @@ observeEvent(input$effectplot_ab, {
       #so you need to order t based on the order of the unique values found in meta
       t <- t[match(u, t$Var1), ]
 
-      #made brandons solution to colour into one line
       #colour NAs black or follow color scheme
       if (NA %in% t$Var1) {
         y <- which(is.na(t$Var1))
         t$col[y] <- "black"
-        for (i in 1:(length(t$Var1))) {
+        for (i in (seq_len(length(t$Var1)))) {
           if (is.na(t$Var1[i])) {
             next
           } else {
@@ -922,7 +926,7 @@ observeEvent(input$effectplot_ab, {
 
         #colour NAs black
       } else {
-        for (i in 1:(length(t$Var1))) {
+        for (i in (seq_len(length(t$Var1)))) {
           t$col[i] <- colours[i]
         }
       }
@@ -966,13 +970,13 @@ observeEvent(input$effectplot_ab, {
     if (is.null(data$taxonomy)){
       x <- colSums(data)
 
-      plot(x, ylab = "Counts", xlab = "Sample Number", pch = 19, col = ifelse({x > ab}, "gray0", "red"), main = "Samples removed by filtering")
+      plot(x, ylab = "Counts", xlab = "Sample Number", pch = 19, col = ifelse({x > ab}, "gray0", "red"), main = "Samples removed by filtering (count sum)")
 
       abline(h = ab, col = "red", lty = 2, lwd = 2)
       legend("topright", legend = c("Remaining", "Removed"), col = c("black", "red"), pch = 19)
 
     } else {
-      x <- colSums(data[,1:(ncol(data) - 1)])
+      x <- colSums(data[,(seq_along(data) - 1)])
 
       plot(x, ylab = "Counts", xlab = "Sample Number", pch = 19, col = ifelse({x > ab}, "gray0", "red"), main = "Samples removed by filtering")
 
@@ -993,13 +997,13 @@ observeEvent(input$effectplot_ab, {
     if (is.null(data$taxonomy)){
       x <- rowSums(data)
 
-      plot(x, ylab = "Counts", xlab = "Row Number", pch = 19, col = ifelse({x > ab}, "gray0", "grey"), main = "Rows removed by filtering")
+      plot(x, ylab = "Counts", xlab = "Row Number", pch = 19, col = ifelse({x > ab}, "gray0", "grey"), main = "Rows removed by filtering (count sum)")
 
       abline(h = ab, col = "grey", lty = 2, lwd = 2)
       legend("topright", legend = c("Remaining", "Removed"), col = c("black", "grey"), pch = 19)
 
     } else {
-      x <- rowSums(data[,1:(ncol(data) - 1)])
+      x <- rowSums(data[,(seq_along(data) - 1)])
 
       plot(x, ylab = "Counts", xlab = "Row Number", pch = 19, col = ifelse({x > ab}, "gray0", "grey"), main = "Rows removed by filtering")
 
@@ -1122,7 +1126,7 @@ observeEvent(input$effectplot_ab, {
     if (is.null(x$taxonomy)) {
       d <- x
     } else {
-      d <- x[, 0:(dim(x)[2] - 1)]
+      d <- x[, seq_along(x) - 1]
       taxon <- x[(dim(x)[2])]
     }
 
@@ -1130,9 +1134,9 @@ observeEvent(input$effectplot_ab, {
 
     # Get genera
     genera <- c()
-    for(i in 1:dim(taxon)[1]){
-      genera <- c(genera, sapply(strsplit(as.character(taxon[i, ]), "[[:punct:]]"),
-      "[", 6))
+    for(i in (seq_len(nrow(taxon)))) {
+      genera <- c(genera, vapply(strsplit(as.character(taxon[i, ]), "[[:punct:]]"),
+      "[", 6, FUN.VALUE=character(1)))
     }
 
     # sum counts by name
@@ -1219,9 +1223,9 @@ observeEvent(input$effectplot_ab, {
 
     # Get genera
     genera <- c()
-    for(i in 1:dim(taxon)[1]){
-      genera <- c(genera, sapply(strsplit(as.character(taxon[i, ]), "[[:punct:]]"),
-      "[", 6))
+    for(i in (seq_len(nrow(taxon)))) {
+      genera <- c(genera, vapply(strsplit(as.character(taxon[i, ]), "[[:punct:]]"),
+      "[", 6, FUN.VALUE=character(1)))
     }
 
     # sum counts by name
@@ -1281,7 +1285,7 @@ observeEvent(input$effectplot_ab, {
     par(fig=c(0.8,1, 0, 1), new=TRUE)
     par(xpd = TRUE)
 
-    leg.col <- rev(colours[1:nrow(d.P)])
+    leg.col <- rev(colours[seq_len(nrow(d.P))])
 
     legend(x="center", legend=rev(tax.abund), col=leg.col, lwd=5, cex=0.8,
     border=NULL)

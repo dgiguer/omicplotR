@@ -57,7 +57,7 @@ Additional features include:
 
 Install the latest version of `omicplotR`. Make sure you have the newest version of R, `ALDEx2`, and other dependancies. `omicplotR` requires you to have at least R version 3.4.
 
-First, load the `omicplotR` package. All other dependencies will be loaded automatically. This will launch the `Shiny` app in your default browser. For this vignette, we will be using the example data and metadata provided.
+First, load the `omicplotR` package. All other dependencies will be loaded automatically. This will launch the `Shiny` app in your default browser. For this vignette, we will be using the example data and metadata provided. Example data and metadata are accessible by `data(otu_table)` and `data(metadata)`. They are also available as .txt files in `~/omicplotR/shiny-app/`.
 
 ```{r, eval=FALSE}
 library(omicplotR)
