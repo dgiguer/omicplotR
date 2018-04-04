@@ -1,12 +1,12 @@
 ---
-title: "omicplotR: A tool for visualization of omic datasets as compositions"
+title: "omicplotR: A tool for visualizating omic datasets as compositions"
 author: "Daniel Giguere, Jean Macklaim, Greg Gloor"
-date: "11-30-2017"
+date: "04-04-2018"
 output:
-  pdf_document:
+  html_document:
     toc: true
+    toc_float: true
     toc_depth: 3
-    number_sections: true
 vignette: >
   %\VignetteIndexEntry{omicplotR: A tool for visualization of omic datasets as compositions}
   %\VignetteEngine{knitr::rmarkdown}
@@ -180,7 +180,7 @@ Daniel J Giguere wrote the original `omicplotR` code and designed the `Shiny` ap
 
 # Version information
 
-Currently version 0.99.0.
+Currently version 0.99.3.
 
 For more information about how to use `omicplotR`, please visit the wiki on my Github page:
 

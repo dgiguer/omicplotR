@@ -36,7 +36,7 @@ sidebarLayout(
                     'text/comma-separated-values,text/plain',
                     '.csv')
                 ),
-                actionButton("showdata", "Show data"),
+                actionButton("showdata", "Check data"),
 
                 fileInput(
                     'file2',
@@ -44,7 +44,7 @@ sidebarLayout(
                     accept = c('text/csv',
                     'text/comma-separated-values,text/plain', '.csv')
                 ),
-                actionButton("showmetadata", "Show metadata")),
+                actionButton("showmetadata", "Check metadata")),
                 tabPanel(
                     "Example Data",
                     checkboxInput("exampledata", "Vaginal dataset (data and metadata)"),
@@ -122,7 +122,8 @@ mainPanel(
                 cellWidths = c("60%", "40%"),
                 plotOutput("biplot", width = 600, height = 600),
                 plotOutput("screeplot")
-            )
+            ),
+            downloadButton("PCA_download", "Download script")
         ),
         tabPanel(
             "Colored Biplot",

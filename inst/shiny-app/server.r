@@ -1,5 +1,44 @@
 server <- function(input, output) {
-  ##############################################################################
+
+################################################################################
+    #downloads
+
+    filtering_options <- reactive({
+        #get the reactive inputs for downloadable file
+        reactive_values <- paste("min.count <- ", input$mincounts, "\n",
+        "min.prop <- ", input$minprop, "\n",
+        "max.prop <- ", input$maxprop, "\n",
+        "min.sum <- ", input$minsum, "\n",
+        "min.reads <- ", input$minreads, "\n",
+        "taxselect <- ", as.numeric(input$taxlevel), "\n",
+        "taxoncheck <- ", as.numeric(input$taxlevel), "\n",
+        "arrowcheck <- ", input$arrowcheckbox, "\n",
+        "scale.slider <- ", input$scale, "\n",
+        "removenames <- ", input$removesamplenames, "\n",
+        "var.filt <- ", input$varslider, "\n",
+        sep = "")
+    })
+
+    #combine reactive values with script for PCA biplot
+    PCA_script <- reactive({
+        y <- filtering_options()
+        PCA_script <- c(y, readLines("./PCA_script.R"))
+    })
+
+    file_name <- reactive({
+        inFile <- input$file1
+        file_name <- inFile$name
+    })
+
+    #download script for PCA biplot
+    output$PCA_download <- downloadHandler(
+        filename=function(){paste(file_name(), "_PCA.r", sep = "")},
+        content= function(file) {
+            writeLines(PCA_script(), file)
+        }
+    )
+
+################################################################################
   #observe events
   #quit button
   options(shiny.maxRequestSize=70*1024^2)
@@ -166,7 +205,8 @@ output$conditions<- renderUI({
         return(NULL)
 
         #reads the file
-        read.table(
+        #if there's an error, it doesn't quit omicplotR
+        data <- try(read.table(
           inFile$datapath,
           header = TRUE,
           sep = "\t",
@@ -175,7 +215,15 @@ output$conditions<- renderUI({
           row.names = 1,
           check.names = FALSE,
           comment.char = "",
-          na.strings = "")
+          na.strings = ""), silent = TRUE)
+
+        #if rownames error
+        if(grepl("duplicate 'row.names'", data[1], fixed = TRUE)) {
+          showModal(rownamesModal())
+        } else {
+          #if no error, then continue
+          data <- data
+        }
       }
     }
   })
@@ -215,6 +263,69 @@ output$conditions<- renderUI({
       )
     }
   })
+
+################################################################################
+#tests to make sure input is correct format
+formatModal <- function(failed = FALSE) {
+    modalDialog(
+        title="Incorrect format",
+        "There are duplicate column names. Ensure all column names unique, then re-import your file.",
+        easyClose = TRUE,
+        footer = modalButton("Dismiss")
+    )
+}
+
+  rownamesModal <- function(failed = FALSE) {
+    modalDialog(
+      title="Incorrect format",
+      "There are duplicate row names. Ensure all row names unique, then re-import your file.",
+      easyClose = TRUE,
+      footer = modalButton("Dismiss")
+    )
+  }
+
+#check data format
+   observeEvent(input$showdata, {
+     inFile <- data()
+
+     #return NULL when no file is uploaded
+     if (is.null(inFile)) {
+         return(NULL)
+     }
+
+     #make frequency table of occurence of colnames
+     c_occur <- data.frame(table(colnames(inFile)))
+
+     #if frequency is more than one, show the "your format is wrong" modalDialog
+     if (max(c_occur$Freq) > 1) {
+         showModal(formatModal())
+     } else {
+         return(NULL)
+     }
+ })
+
+#metadata check format
+ observeEvent(input$showmetadata, {
+   inFile2 <- metadata()
+
+   #return NULL when no file is uploaded
+   if (is.null(inFile2)) {
+     return(NULL)
+   }
+
+   #make frequency table of occurence of colnames
+   c_occur <- data.frame(table(colnames(inFile2)))
+
+   #if frequency is more than one, show the "your format is wrong" modalDialog
+   if (max(r_occur$Freq) > 1) {
+     showModal(formatModal())
+   } else {
+     return(NULL)
+   }
+ })
+
+################################################################################
+
 
   #input ALDEx2 table
   effect_input <- reactive({
@@ -261,8 +372,6 @@ output$conditions<- renderUI({
       #remove taxonomy column
       tax <- data$taxonomy
       data$taxonomy <- NULL
-
-
 
       #get genus names
       genus <- vapply(strsplit(as.character(tax), "[[:punct:]]"), "[", taxselected, FUN.VALUE=character(1))
@@ -640,7 +749,7 @@ observeEvent(input$effectplot_ab, {
     })
 
   output$datatable <- renderDataTable({
-    validate((need(input$showdata, "Click 'Show data' to display table")))
+    validate((need(input$showdata, "Click 'Check data' to check format and display table")))
 
     if (input$showdata) {
       data <- data()
@@ -652,7 +761,7 @@ observeEvent(input$effectplot_ab, {
 
   output$metadatatable <- renderDataTable({
 
-    validate((need(input$showmetadata, "Click 'Show metadata' to display table")))
+    validate((need(input$showmetadata, "Click 'Check metadata' to check format and display table")))
 
     if (input$showmetadata) {
       meta <- metadata()
@@ -671,6 +780,7 @@ observeEvent(input$effectplot_ab, {
 
   #biplot
   output$biplot <- renderPlot({
+
     #get reactive objects
     data <- data.prcomp()
     tax <- data.t()
@@ -695,6 +805,7 @@ observeEvent(input$effectplot_ab, {
 
     taxonomy <- tax$taxonomy
 
+    #if Show taxonomy checkbox is clicked, take chosen level
     if (isTRUE(taxoncheck)) {
         taxselect <- as.numeric(input$taxlevel)
     } else {
@@ -703,9 +814,6 @@ observeEvent(input$effectplot_ab, {
 
     #get genus (or other level)
     genus <- vapply(strsplit(as.character(taxonomy), "[[:punct:]]"), "[", taxselect, FUN.VALUE=character(1))
-
-    #makes the points on the graphs periods
-    points <- c(rep(".", length(dimnames(data$rotation)[[1]])))
 
     #biplot colouring options
     col = c("black", rgb(0, 0, 0, 0.2))
@@ -717,13 +825,12 @@ observeEvent(input$effectplot_ab, {
       arrows = TRUE
     }
 
-    #if taxonomy is is null, use normal points.
-    #if taxoncheckbox is checked, show genus instead of points
-
+    #if taxonomy is is null, use periods as points for features..
+    #if taxoncheckbox is checked, show genus instead of points, otherwise
       if (isTRUE(taxoncheck)) {
         points <- genus
       } else {
-        points <- points
+        points <- c(rep(".", length(dimnames(data$rotation)[[1]])))
       }
 
     #remove sample names
