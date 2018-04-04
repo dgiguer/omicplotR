@@ -252,7 +252,7 @@ actionButton("update_points", label = "Update")
 navbarMenu("More",
 tabPanel("Instructions",
 fluidRow(
-    (column(6, offset = 3, includeMarkdown("extrainformation.rmd")))
+    (column(6, offset = 3, includeMarkdown("extrainformation.Rmd")))
 )
 ),
 tabPanel("Quit omicplotR",
