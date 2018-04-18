@@ -6,6 +6,12 @@ library(zCompositions)
 library(ALDEx2)
 library(omicplotR)
 
+##################################################################
+#                                                                #
+# You must change the file variable to your ownfilename           #
+#                                                                #
+#                                                                #
+##################################################################
 #change filename.txt to your filename, make sure it follow input requirements
 file <- "filename.txt"
 
