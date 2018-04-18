@@ -1,9 +1,9 @@
 ---
-title: "omicplotR: A tool for visualization of omic datasets as compositions"
+title: "omicplotR: A tool for visualizing omic datasets as compositions"
 author: "Daniel Giguere, Jean Macklaim, Greg Gloor"
-date: "11-30-2017"
+date: "04-18-2018"
 output:
-  pdf_document:
+  html_document:
     toc: true
     toc_depth: 3
     number_sections: true
@@ -20,7 +20,7 @@ knitr::opts_chunk$set(fig.pos = "h")
 
 # What is omicplotR?
 
-`omicplotR` is an R package containing a `Shiny` app used to visually explore omic datasets, where the input is a table of read counts from high-throughput sequencing runs. It integrates the `ALDEx2`[^1] package for compositional analysis of differential abundance. `omicplotR` is intended facilitate exploring high-throughput sequencing datasets by providing an easy to use graphical user interface for users with and without experience in R.
+`omicplotR` is an R package containing a `Shiny` app used to visually explore omic datasets, where the input is a table of read counts from high-throughput sequencing runs. It integrates the `ALDEx2`[^1] package for compositional analysis of differential abundance. `omicplotR` is intended facilitate exploring high-throughput sequencing datasets by providing a graphical user interface for users with and without experience in R.
 
 [^1]: Fernandes et al (2013) PLOS ONE https://doi.org/10.1371/journal.pone.0067019
 
@@ -47,15 +47,15 @@ This vignette provides an overview of the R package `omicplotR` and the input re
 Additional features include:
 
 * Filtering count tables per sample or feature by counts
-* Filtering data into groups using metadata to compare groups within the data
+* Filtering data into groups using metadata to compare sub groups within the data
 * Colour PCA biplots using metadata (continuously, by quartile, categorical)
 * Generate effect plots between groups according to metadata using `ALDEx2`
 * Interactive effect plots to visualize difference between and within groups
-* Plot pre-calculated `ALDEx2` tables to colour points by rownames for large datasets
+* Plot pre-calculated `ALDEx2` tables and colour points by rownames for large datasets
 
 # Installation and example
 
-Install the latest version of `omicplotR`. Make sure you have the newest version of R, `ALDEx2`, and other dependancies. `omicplotR` requires you to have at least R version 3.4.
+Install the latest version of `omicplotR`. Make sure you have the newest version of R, `ALDEx2`, and other dependancies. `omicplotR` requires you to have at least R version 3.5. The most up to date version is available at www.github.com/dgiguer/omicplotr/, and is the dev branch.
 
 First, load the `omicplotR` package. All other dependencies will be loaded automatically. This will launch the `Shiny` app in your default browser. For this vignette, we will be using the example data and metadata provided. Example data and metadata are accessible by `data(otu_table)` and `data(metadata)`. They are also available as .txt files in `~/omicplotR/shiny-app/`.
 
@@ -68,9 +68,9 @@ After launching the `Shiny` app, click the 'Input data' tab to get started.
 
 # Input data
 
-The 'Data' tab on the sidebar panel (grey) allows you to choose your own data and metadata by clicking 'Browse'. To follow along with this vignette, please click the 'Example data' tab on the sidebar panel, and click the checkbox for the 'Vaginal dataset'. This dataset, which includes associated metadata, is from a study that characterized the changes in the vaginal microbiome following antibiotic and probiotic treatment by 16s rRNA gene sequencing[^4]. Return to the 'Data' tab on the sidebar panel to view the data and metadata by clicking 'Show data' and 'Show metadata'. The tabs on the main panel allow you to switch between displaying your data and metadata tables.
+The 'Data' tab on the sidebar panel allows you to choose your own data and metadata by clicking 'Browse'. To follow along with this vignette, please click the 'Example data' tab on the sidebar panel, and click the checkbox for the 'Vaginal dataset'. This dataset, which includes associated metadata, is from a study that characterized the changes in the vaginal microbiome following antibiotic and probiotic treatment by 16s rRNA gene sequencing[^4]. Return to the 'Data' tab on the sidebar panel to view the data and metadata by clicking 'Show data' and 'Show metadata'. The tabs on the main panel allow you to switch between displaying your data and metadata tables.
 
-```{r, echo = FALSE, fig.align='center', fig.cap="Figure 1: Screenshot of input data page. The 'Example data' tab on the sidebar panel provides access to the provided datasets within the Shiny app."}
+```{r, echo = FALSE, out.width='80%', fig.align='center', fig.cap="Figure 1: Screenshot of input data page. The 'Example data' tab on the sidebar panel provides access to the provided datasets within the Shiny app."}
 knitr::include_graphics("inputdata.png")
 ```
 
@@ -88,7 +88,7 @@ When choosing your own data set, input requirements are as follows: for both met
 knitr::include_graphics("./example_data.png")
 ```
 
-Your metadata file must follow the following format. An example of an appropriate metadata file is shown in Figure 3.
+Your metadata file must follow a similar format. An example of an appropriate metadata file is shown in Figure 3.
 
 1. Must be a **tab delimited .txt** (this is an option when you click 'Save as' from Excel).
 2. The first column must contain sample identifiers. The sample identifiers must be identical to the data file, however, they are not required to be in the same order.
@@ -115,12 +115,12 @@ knitr::include_graphics("col_PCA.png")
 
 ## Filtering
 
-"Reasonable" filtering of sparse features (rows) from your dataset **should not** affect any conclusions made from the PCA biplots. Filtering is exploratory, and should be experimented with to see how removing sparse data affects the structure of your dataset within the PCA biplot. The default filtering removes any feature that has a maximum value less than 10. We will not change the default filtering for the purposes of the vignette.
+"Reasonable" filtering of sparse features (rows) from your dataset **should not** affect any conclusions made from the PCA biplots. Filtering is exploratory, and should be experimented with to see how removing sparse data affects the structure of your dataset within the PCA biplot. By default, no filtering is applied. We will use a minimum count per OTU filter of 10 for this vignette.
 
 Under the 'Filtering' tab within the sidebar panel, the following options are available to filter your data.
 
 1. **Minimum count per OTU**
-This filter removes any rows with a maximum sample count less than the input. Default is 10 to remove sparse OTUs.
+This filter removes any rows with a maximum sample count less than the input. It is recommended to remove sparse features. Try setting this filter to 10.
 
 2. **Minimum count sum per sample**
 This filter removes any columns that have a lower sum of counts than the filter. You can visualize which samples are being removed when applying this filter using the 'Filtering by counts per sample' graph under the 'Removed data' tab.
@@ -180,7 +180,7 @@ Daniel J Giguere wrote the original `omicplotR` code and designed the `Shiny` ap
 
 # Version information
 
-Currently version 0.99.0.
+Currently version 0.99.4.
 
 For more information about how to use `omicplotR`, please visit the wiki on my Github page:
 
