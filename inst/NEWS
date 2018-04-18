@@ -1,3 +1,15 @@
+CHANGES IN VERSION 0.99.4
+--------------------------
+
+- changed vignette to html instead of pdf. 
+- edited vignette. 
+
+CHANGES IN VERSION 0.99.3
+--------------------------
+
+- bug fix. extrainformation.rmd changed to extrainformation.Rmd.
+
+
 CHANGES IN VERSION 0.99.0
 --------------------------
 
