@@ -1,4 +1,4 @@
-#in R studio, click Run App (i suggest Run External in browser)
+#in R studio, click Run App (Run External in browser)
 
 #required libraries
 require(shiny)
@@ -199,7 +199,8 @@ sidebarLayout(
             uiOutput("colselectcond")),
             uiOutput("conditions"),
             textOutput("effectwarning"),
-            textOutput("filter_warning_effect")
+            textOutput("filter_warning_effect"),
+            downloadButton("effect_download", "Download script")
         ),
         tabPanel("Input",
 

@@ -18,7 +18,9 @@ server <- function(input, output) {
         "var.filt <- ", input$varslider, "\n",
         "abund <- ", input$abundcutoffbarplot, "\n",
         "dist <- ", input$dismethod, "\n",
-        "clust <- ", input$clustermethod,
+        "clust <- ", input$clustermethod, "\n",
+        "vals <- ", vals$data, "\n",
+        "metaval <- ", metaval$data,
         sep = "")
     })
 
@@ -31,6 +33,11 @@ server <- function(input, output) {
     rab_script <- reactive({
         y <- filtering_options()
         rab_script <- c(y, readLines("./rab_script.R"))
+    })
+
+    effect_script <- reactive({
+        y <- filtering_options()
+        effect_script <- c(y, readLines("./effect_script.R"))
     })
 
     file_name <- reactive({
@@ -51,6 +58,14 @@ server <- function(input, output) {
         filename=function(){paste(file_name(), "_rab.r", sep = "")},
         content= function(file) {
             writeLines(rab_script(), file)
+        }
+    )
+
+    #download script for effect plots
+    output$effect_download <- downloadHandler(
+        filename=function(){paste(file_name(), "_effect.r", sep = "")},
+        content= function(file) {
+            writeLines(effect_script(), file)
         }
     )
 
