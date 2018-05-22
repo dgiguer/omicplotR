@@ -1,4 +1,4 @@
-#script for making reproducing the PCA plot. values chosen for filtering in omicplotR are listed above
+#script for reproducing the PCA plot. values chosen for filtering in omicplotR are listed above
 #subsetting by metadata is intended for coloured biplots so it isn't included here
 #all omicplotr functions can be found in inst/shiny-app/internal.r
 
@@ -8,7 +8,7 @@ library(omicplotR)
 
 ##################################################################
 #                                                                #
-# You must change the file variable to your ownfilename           #
+# You must change the file variable to your own file name        #
 #                                                                #
 #                                                                #
 ##################################################################

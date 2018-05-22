@@ -166,7 +166,8 @@ sidebarLayout(
         choices = list("complete" = 1, "single" = 2, "ward.D2" = 3), selected = 3),
         selectInput("dismethod", "Select distance matrix method",
         choices = list("euclidean" = 1, "maximum" = 2, "manhattan" = 3), selected = 1),
-        textOutput("filter_warning_dendro")
+        textOutput("filter_warning_dendro"),
+        downloadButton("rab_download", "Download script")
     ),
     mainPanel(
         textOutput("dendrotext"),

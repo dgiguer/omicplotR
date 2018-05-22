@@ -16,6 +16,9 @@ server <- function(input, output) {
         "scale.slider <- ", input$scale, "\n",
         "removenames <- ", input$removesamplenames, "\n",
         "var.filt <- ", input$varslider, "\n",
+        "abund <- ", input$abundcutoffbarplot, "\n",
+        "dist <- ", input$dismethod, "\n",
+        "clust <- ", input$clustermethod,
         sep = "")
     })
 
@@ -23,6 +26,11 @@ server <- function(input, output) {
     PCA_script <- reactive({
         y <- filtering_options()
         PCA_script <- c(y, readLines("./PCA_script.R"))
+    })
+
+    rab_script <- reactive({
+        y <- filtering_options()
+        rab_script <- c(y, readLines("./rab_script.R"))
     })
 
     file_name <- reactive({
@@ -35,6 +43,14 @@ server <- function(input, output) {
         filename=function(){paste(file_name(), "_PCA.r", sep = "")},
         content= function(file) {
             writeLines(PCA_script(), file)
+        }
+    )
+
+    #download script for rab plots
+    output$rab_download <- downloadHandler(
+        filename=function(){paste(file_name(), "_rab.r", sep = "")},
+        content= function(file) {
+            writeLines(rab_script(), file)
         }
     )
 
