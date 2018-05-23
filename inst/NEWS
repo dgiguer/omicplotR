@@ -1,3 +1,10 @@
+CHANGES IN VERSION 1.1.1
+--------------------------
+- added slider inputs to change size and opacity of sample names for biplot and coloured biplot
+- changed UI for filtering page
+- added downloadable scripts for PCA biplots, dendrogram/barplots, and effect plots (simple effect plot script).
+
+
 CHANGES IN VERSION 0.99.4
 --------------------------
 
