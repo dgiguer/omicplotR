@@ -77,21 +77,33 @@ sidebarLayout(
             column(6, numericInput("minreads", "Minimum count sum per sample", value = 0))),
             fluidRow(column(6, numericInput("minprop", "Minimum proportional abundance", value = 0.0)),
             column(6, numericInput("maxprop", "Maximum proportional abundance", value = 1))),
-            sliderInput("minsum", "Minimum count sum per OTU", min = 0, max = 10000, value = 1),
-            uiOutput("varianceslider"),
-            sliderInput(
+            fluidRow(column(6, sliderInput("minsum", "Minimum count sum per OTU", min = 0, max = 10000, value = 1)),
+            column(6, uiOutput("varianceslider"))),
+            fluidRow(column(6, sliderInput(
                 inputId = "scale",
                 label = "Adjust scale (0 = between samples, 1 = between OTUs)",
                 value = 0,
                 min = 0,
                 max = 1,
                 step = 1
-            ),
+            )),
+            downloadButton("PCA_download", "Download script")),
 
+            # sliderInput("minsum", "Minimum count sum per OTU", min = 0, max = 10000, value = 1),
+            # uiOutput("varianceslider"),
+            # sliderInput(
+            #     inputId = "scale",
+            #     label = "Adjust scale (0 = between samples, 1 = between OTUs)",
+            #     value = 0,
+            #     min = 0,
+            #     max = 1,
+            #     step = 1
+            # ),
+            # downloadButton("PCA_download", "Download script"),
             textOutput("removedsamples"),
             textOutput("removedotus")
         ),
-        tabPanel("Colouring Options",
+        tabPanel("Options",
         uiOutput("choose_column"),
         radioButtons(
             label = h4("Choose data type"),
@@ -102,12 +114,17 @@ sidebarLayout(
                 "Nonnumeric metadata (up to 10 categories)" = 3
             )
         ),
+        #change graphical parameters
+        #size of sample names
+        fluidRow(column(6, sliderInput("size_samples_pca", label = "Size of sample names", min = 0, max = 2, value = 1.0, step = 0.1)),
+        column(6, sliderInput("opacity_samples_pca", label = "Opacity of sample names", min = 0, max = 1, value = 1.0, step = 0.05))),
         actionButton("choosemeta", "Filter by metadata values"),
         textOutput("test"),
         checkboxInput("removesamplenames", label = "Remove sample names"),
-        checkboxInput("arrowcheckbox", label = "Show arrows", value = FALSE),
+        checkboxInput("arrowcheckbox", label = "Remove arrows", value = FALSE),
         checkboxInput("taxoncheckbox", label = "Show taxonomy", value = FALSE),
-        uiOutput("taxchoice")#,
+        uiOutput("taxchoice")
+        #,
         #textInput("biplot_title", label = "Biplot title", placeholder = "Title for biplot")
     )
 )
@@ -122,8 +139,7 @@ mainPanel(
                 cellWidths = c("60%", "40%"),
                 plotOutput("biplot", width = 600, height = 600),
                 plotOutput("screeplot")
-            ),
-            downloadButton("PCA_download", "Download script")
+            )
         ),
         tabPanel(
             "Colored Biplot",

@@ -820,7 +820,9 @@ observeEvent(input$effectplot_ab, {
     arrowcheck <- input$arrowcheckbox
     taxoncheck <- input$taxoncheckbox
     taxselect <- as.numeric(input$taxlevel)
-    title <- input$biplot_title
+    #title <- input$biplot_title
+    opacity <- input$opacity_samples_pca
+    sample_size <- input$size_samples_pca
 
     x.var <- sum(data$sdev ^ 2)
     PC1 <- paste("PC 1 Variance: %", round(sum(data$sdev[1] ^ 2) / x.var * 100, 1))
@@ -847,7 +849,7 @@ observeEvent(input$effectplot_ab, {
     genus <- vapply(strsplit(as.character(taxonomy), "[[:punct:]]"), "[", taxselect, FUN.VALUE=character(1))
 
     #biplot colouring options
-    col = c("black", rgb(0, 0, 0, 0.2))
+    col = c(rgb(0,0,0,opacity), rgb(0, 0, 0, 0.2))
 
     #do checks for arrows
     if (isTRUE(arrowcheck)) {
@@ -870,7 +872,7 @@ observeEvent(input$effectplot_ab, {
       size = c(5, 0.8)
     } else {
       xlabs = unlist(dimnames(data$x)[1])
-      size = c(1.0, 0.8)
+      size = c(sample_size, 0.8)
     }
 
     biplot(
@@ -900,6 +902,8 @@ observeEvent(input$effectplot_ab, {
     taxoncheck <- input$taxoncheckbox
     taxselect <- as.numeric(input$taxlevel)
     cols <- colours()
+    opacity <- input$opacity_samples_pca
+    sample_size <- input$size_samples_pca
 
     validate(need(input$selectcolumn, "Click 'Colouring Options' to choose metadata for colouring biplot"))
 
@@ -939,9 +943,9 @@ observeEvent(input$effectplot_ab, {
       d$taxonomy <- NULL
     }
 
-    colourvector <- omicplotr.colvec(data, meta, cn, type = input$colouringtype)
+    colourvector <- omicplotr.colvec(data, meta, opacity, cn, type = input$colouringtype)
 
-    omicplotr.colouredPCA(data, colourvector, scale = input$scale, arrows = input$arrowcheckbox, taxonomy = tax$taxonomy, show.taxonomy = taxoncheck, tax.level = taxselect, removenames = input$removesamplenames)
+    omicplotr.colouredPCA(data, colourvector, scale = input$scale, arrows = input$arrowcheckbox, taxonomy = tax$taxonomy, show.taxonomy = taxoncheck, tax.level = taxselect, removenames = input$removesamplenames, names.cex=sample_size)
   })
 
   #histograms
@@ -1008,7 +1012,7 @@ observeEvent(input$effectplot_ab, {
           t[, 1], quantile(meta[[cn]]), include.lowest = TRUE
         )))
 
-        c <- colorRampPalette(c("green", "blue"))(4)
+        c <- colorRampPalette(c("red", "blue"))(4)
 
         #replace with colours
         tn$quartile[tn$quartile == 1] <- c[1]

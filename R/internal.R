@@ -308,7 +308,7 @@ omicplotr.filter <- function(data, min.reads = 0, min.count = 0, min.sum = 0,
 }
 
 
-omicplotr.colvec <- function(data, meta, column, type = 3) {
+omicplotr.colvec <- function(data, meta, opacity = 1, column, type = 3) {
 
     df <- as.data.frame(unlist(dimnames(data$x)[1]))
 
@@ -380,17 +380,36 @@ omicplotr.colvec <- function(data, meta, column, type = 3) {
         len <- length(df.u)
 
         # generate colour function
-        c <- colorRampPalette(c("red", "blue"))(len)
+        c.hex <- colorRampPalette(c("red", "blue"))(len)
+
+        #convert colour value to rgb, get alpha input from opacity, convert
+        #back to hex
+
+        new.cols <- c()
+
+        for (i in seq_along(c.hex)) {
+            #get colour
+            col <- c.hex[i]
+
+            #convert to rgb
+            new.col <- col2rgb(col, alpha=TRUE)
+
+            #replace alpha with sliderInput
+                #convert colour with new opacity to hex
+                col.fin <- rgb(new.col["red",1], new.col["green",1], new.col["blue",1], (opacity*255), maxColorValue=255)
+
+            new.cols <- c(new.cols, col.fin)
+        }
 
         # colour each unique age
         for (i in seq_along(df.sort$age)) {
-            df.sort$col[df.sort$age == df.u[i]] <- c[i]
+            df.sort$col[df.sort$age == df.u[i]] <- new.cols[i]
         }
 
         # colour the NAs black. these are missing data points.
         for (i in seq_along(df.sort$age)) {
             if (is.na(df.sort$col[i])) {
-                df.sort$col[i] <- "#000000"
+                df.sort$col[i] <- rgb(0,0,0,opacity)
             }
         }
 
@@ -423,20 +442,55 @@ omicplotr.colvec <- function(data, meta, column, type = 3) {
 
         df$col <- NA
 
-        c <- colorRampPalette(c("green", "blue"))(4)
+        c <- colorRampPalette(c("red", "blue"))(4)
+
+        #convert into rgb
+
+        c.rgb <- col2rgb(c, alpha = TRUE)
+
+        #convert back to hex with new alpha
+        new.cols <- c()
+
+        for (i in seq(dim(c.rgb)[2])) {
+            #get colour as rgb
+            c.rgb.1 <- c.rgb[,i]
+
+            #replace alpha with sliderInput
+                #convert colour with new opacity to hex
+            col.fin <- rgb(c.rgb.1["red"], c.rgb.1["green"], c.rgb.1["blue"], (opacity*255), maxColorValue=255)
+
+            new.cols <- c(new.cols, col.fin)
+        }
 
         # make quartile rank column
         sorted <- within(df, col <- as.integer(cut(df$age, quantile(df$age,
             na.rm = TRUE), include.lowest = TRUE)))
 
-        sorted$col  <- c[sorted$col]
+        sorted$col  <- new.cols[sorted$col]
 
         # replace any NAs with black
-        sorted$col[is.na(sorted$col)] <- "#000000"
+        sorted$col[is.na(sorted$col)] <- rgb(0,0,0,opacity)
 
     } else if (type == 3) {
         sorted <- c()
-        sorted$col <- df$colour
+
+        c.rgb <- col2rgb(df$colour, alpha = TRUE)
+
+        #convert back to hex with new alpha
+        new.cols <- c()
+
+        for (i in seq(dim(c.rgb)[2])) {
+            #get colour as rgb
+            c.rgb.1 <- c.rgb[,i]
+
+            #replace alpha with sliderInput
+                #convert colour with new opacity to hex
+            col.fin <- rgb(c.rgb.1["red"], c.rgb.1["green"], c.rgb.1["blue"], (opacity*255), maxColorValue=255)
+
+            new.cols <- c(new.cols, col.fin)
+        }
+
+        sorted$col <- new.cols
     } else {
         return("")
     }
