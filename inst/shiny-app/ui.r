@@ -29,22 +29,28 @@ sidebarLayout(
             selected = "Data",
             tabPanel(
                 "Data",
-                fileInput(
-                    'file1',
-                    label = h3('Choose Data'),
-                    accept = c('text/csv',
-                    'text/comma-separated-values,text/plain',
-                    '.csv')
+                fluidRow(
+                    column(6, fileInput(
+                        'file1',
+                        label = h3('Choose Data'))
                 ),
-                actionButton("showdata", "Check data"),
-
-                fileInput(
+                    column(6, fileInput(
                     'file2',
-                    h3('Choose Metadata'),
-                    accept = c('text/csv',
-                    'text/comma-separated-values,text/plain', '.csv')
+                    h3('Choose Metadata')
+                ))
                 ),
-                actionButton("showmetadata", "Check metadata")),
+                checkboxInput("ebi_format", "Click if data is formatted as GO slim annotation"),
+                h3(textOutput("EBI_data")),
+                #input EBI project
+                actionButton("input_ebi_project", "Input EBI metgenomic project ID"),
+                h3(textOutput("check_data")),
+                fluidRow(
+                    column(6, actionButton("showdata", "Check data")),
+                    column(6, actionButton("showmetadata", "Check metadata"))
+            )
+
+
+            ),#tabpanel
                 tabPanel(
                     "Example Data",
                     checkboxInput("exampledata", "Vaginal dataset (data and metadata)"),
@@ -174,6 +180,10 @@ mainPanel(
 #               textOutput("associationtext")),
 #             mainPanel(plotOutput("associationplot"))
 #           )),
+tabPanel("GO slim annotation",
+wellPanel(plotOutput("ebi_stripchart", height = "1400px"), style = "overflow-y:scroll; max-height: 700px")
+),
+
 tabPanel("Relative abundance plots",
 sidebarLayout(
     sidebarPanel(width = 3,

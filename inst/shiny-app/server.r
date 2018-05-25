@@ -88,6 +88,31 @@ server <- function(input, output) {
     showModal(metaModal())
   })
 
+  #pop up the modal for EBI input
+  observeEvent(input$input_ebi_project, {
+    showModal(ebiModal())
+  })
+
+  #convert input to reactive object
+  observeEvent(input$update_EBI, {
+      #enter project ID in quotation marks, ensuring it is a string
+      projectid <- input$ebi_id
+      #enter pipeline version as an integer (single digit)
+      pipelineVersion <- input$ebi_pipeline
+
+      #function called GOslimfile, given parameters projectid and pipelineVersion and outputs the file as projectid.tsv
+      getGOslimfile <- function(projectid, pipelineVersion) {
+        url <- paste0("https://www.ebi.ac.uk/metagenomics/projects/", projectid ,"/download/", pipelineVersion,"/export?contentType=text&exportValue=GO-slim_abundances")
+        destfile <- paste0(projectid,".tsv")
+        vals$dest <- destfile
+        download.file(url, destfile, mode="wb")
+      }
+
+      getGOslimfile(projectid, pipelineVersion)
+
+    removeModal()
+  })
+
   #convert input to reactive object
   observeEvent(input$update, {
     vals$data <-
@@ -102,7 +127,21 @@ server <- function(input, output) {
 
   ###########################################################################
   #custom UIs
-  #make the pop up
+
+  #pop up for inputting ebi project numberq
+  ebiModal <- function (x) {
+      modalDialog(
+              textInput("ebi_id", "EBI Project ID", placeholder = "Project ID"),
+              textInput("ebi_pipeline", "EBI Pipeline version", placeholder = "Pipeline version (x.y)"),
+              title = "Download and explore EBI project",
+              "Enter the project number (for example: ERP015657) and pipeline version (for example: 2.0) to download the GO slim annotation file to your current working directory, and read into omicplotR.",
+            footer = tagList(actionButton("update_EBI", "Download and input"),
+              modalButton("Cancel")),
+              easyClose = TRUE
+      )
+  }
+
+  #make the pop up for choosing samples
   metaModal <- function (x) {
     modalDialog(
       renderUI({
@@ -214,8 +253,7 @@ output$conditions<- renderUI({
         comment.char = "",
         na.strings = ""
       )
-    } else {
-      if (input$exampledata2) {
+  } else if (input$exampledata2) {
         read.table(
           "selex.txt",
           header = TRUE,
@@ -227,7 +265,41 @@ output$conditions<- renderUI({
           comment.char = "",
           na.strings = ""
         )
-      } else{
+    }
+     else if (input$ebi_format == TRUE & input$update_EBI == FALSE) {
+              #reactive input file
+              inFile <- input$file1
+
+              #return NULL when no file is uploaded
+              if (is.null(inFile))
+              return(NULL)
+
+            read.table(
+              inFile$datapath,
+              header = TRUE,
+              sep = "\t",
+              stringsAsFactors = FALSE,
+              quote = "",
+              row.names = 2,
+              check.names = FALSE,
+              comment.char = "",
+              na.strings = ""
+            )
+        } else if (input$update_EBI == TRUE) {
+
+            destfile <- vals$dest
+            read.table(
+              destfile,
+              header = TRUE,
+              sep = "\t",
+              stringsAsFactors = FALSE,
+              quote = "",
+              row.names = 2,
+              check.names = FALSE,
+              comment.char = "",
+              na.strings = ""
+            )
+        } else {
         #reactive input file
         inFile <- input$file1
 
@@ -256,7 +328,7 @@ output$conditions<- renderUI({
           data <- data
         }
       }
-    }
+
   })
 
   #get metadata from uploaded file
@@ -443,6 +515,15 @@ formatModal <- function(failed = FALSE) {
       taxCheck <- FALSE
     }
 
+    #if EBI format, remove category / GO term for calculations
+    #or if the input is from the downloaded file
+    if (input$ebi_format == TRUE | input$update_EBI == TRUE) {
+
+        x.filt <- omicplotr.filter(x[,3:ncol(x)], min.reads = min.reads, min.count = min.count, min.prop = min.prop, max.prop = max.prop, min.sum = min.sum)
+
+        x.filt <- cbind(x[,1:2], x.filt)
+    } else {
+
     #get filtered data if filtered
     if (is.null(vals$data)) {
       x <- x
@@ -452,7 +533,7 @@ formatModal <- function(failed = FALSE) {
     }
 
     x.filt <- omicplotr.filter(x, min.reads = min.reads, min.count = min.count, min.prop = min.prop, max.prop = max.prop, min.sum = min.sum)
-
+}
   })
 
   #prcomp object
@@ -461,6 +542,11 @@ formatModal <- function(failed = FALSE) {
     data.t <- data.t()
     var.filt <- input$varslider
     data <- data()
+
+    if (input$ebi_format == TRUE | input$update_EBI == TRUE) {
+        lose <- c(1,2)
+        data.t <- data.t[,3:ncol(data.t)]
+    }
 
     validate(need(input$varslider, "Calculating..."))
 
@@ -737,6 +823,14 @@ observeEvent(input$effectplot_ab, {
     "Choose filtering options"
   })
 
+  output$check_data <- renderText({
+      "Check data and metadata"
+  })
+
+  output$EBI_data <- renderText({
+      "Input GO slim formatted data"
+  })
+
   output$nometadata <- renderText({
     metadata <- metadata()
     if (is.null(metadata)) {
@@ -808,6 +902,90 @@ observeEvent(input$effectplot_ab, {
   ##############################################################################
 
   # PCA biplots
+
+  output$ebi_stripchart <- renderPlot({
+
+      #get data
+      data <- data.t()
+
+      createStripcharts <- function(data) {
+
+          #create dataframe with 0.5 added so there are no zeros for log function later
+          data.n0 <- cbind(data[,1:3], data[,4:ncol(data)] + 0.5)
+
+          #create dataframes with information needed (calculated percent reads)
+          h1 <- subset(data.n0, category == "molecular function")
+          h11 <- (h1[,4:ncol(h1)]) / colSums(h1[,4:ncol(h1)])
+          #rownames(h11) <- h1[,2]
+
+          h2 <- subset(data.n0, category == "biological process")
+          h22 <- h2[,4:ncol(h2)] / colSums(h2[,4:ncol(h2)])
+          #rownames(h22) <- h2[,2]
+
+          h3 <- subset(data.n0, category == "cellular component")
+          h33 <- h3[,4:ncol(h3)] / colSums(h3[,4:ncol(h3)])
+          #rownames(h33) <- h3[,2]
+
+          #open pdf that stripcharts will be saved to
+          #pdf("GOslimstripcharts3.pdf", width = 25, height = nrow(data.n0)/6.8)
+          par(mfrow=c(1,3))
+
+          #create room for description titles
+          par(mar=c(5.1, 20.1, 4.1, 1.1))
+
+          #loop to create and colour stripcharts
+          for (i in 1:length(h11)) {
+              if (i == 1) {
+                  stripchart(h11[,i] ~ rownames(h11), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, cex.axis = 1.3, group.names = rownames(h11), xlab = "Log of Percent Reads", col = colors()[i], main = "Molecular Function", log = "x")
+              }
+              else {
+                  stripchart(h11[,i] ~ rownames(h11), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, add = TRUE, col = colors()[i], log = "x")
+              }
+          }
+
+          #loop to divide description from description and ease readability
+          for (j in 0.5:(length(rownames(h11))+0.5)){
+              abline(h=j, lty=3, col="grey80")
+          }
+
+          #loop to create and colour stripcharts
+          for (i in 1:length(h22)) {
+              if (i == 1) {
+                  stripchart(h22[,i] ~ rownames(h22), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, cex.axis = 1.3, group.names = rownames(h22), xlab = "Log of Percent Reads", col = colors()[i], main = "Biological Process", log = "x")
+              }
+              else {
+                  stripchart(h22[,i] ~ rownames(h22), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, add = TRUE, col = colors()[i], log = "x")
+              }
+          }
+
+          #loop to divide description from description and ease readability
+          for (j in 0.5:(length(rownames(h22))+0.5)){
+              abline(h=j, lty=3, col="grey80")
+          }
+
+          #loop to create and colour stripcharts
+          for (i in 1:length(h33)) {
+              if (i == 1) {
+                  stripchart(h33[,i] ~ rownames(h33), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, cex.axis = 1.3, group.names = rownames(h33), xlab = "Log of Percent Reads", col = colors()[i], main = "Cellular Component", log = "x")
+              }
+              else {
+                  stripchart(h33[,i] ~ rownames(h33), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, add = TRUE, col = colors()[i], log = "x")
+              }
+          }
+
+          #loop to divide description from description and ease readability
+          for (j in 0.5:(length(rownames(h33))+0.5)){
+              abline(h=j, lty=3, col="grey80")
+          }
+
+          #close off writing to pdf
+          #dev.off()
+      }
+
+      createStripcharts(data)
+
+
+  })
 
   #biplot
   output$biplot <- renderPlot({
