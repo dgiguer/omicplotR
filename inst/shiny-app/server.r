@@ -914,72 +914,81 @@ observeEvent(input$effectplot_ab, {
           data.n0 <- cbind(data[,1:3], data[,4:ncol(data)] + 0.5)
 
           #create dataframes with information needed (calculated percent reads)
-          h1 <- subset(data.n0, category == "molecular function")
-          h11 <- (h1[,4:ncol(h1)]) / colSums(h1[,4:ncol(h1)])
-          #rownames(h11) <- h1[,2]
+          molFunSet <- subset(data.n0, category == "molecular function")
+          logMFSet <- cbind(molFunSet[,1:3], log(molFunSet[,4:ncol(molFunSet)]))
+          finalMFSet <- (logMFSet[,4:ncol(logMFSet)]) - colMeans(logMFSet[,4:ncol(logMFSet)])
+          rownames(finalMFSet) <- molFunSet[,2]
 
-          h2 <- subset(data.n0, category == "biological process")
-          h22 <- h2[,4:ncol(h2)] / colSums(h2[,4:ncol(h2)])
-          #rownames(h22) <- h2[,2]
+          bioProcSet <- subset(data.n0, category == "biological process")
+          logBPSet <- cbind(bioProcSet[,1:3], log(bioProcSet[,4:ncol(bioProcSet)]))
+          finalBPSet <- (logBPSet[,4:ncol(logBPSet)]) - colMeans(logBPSet[,4:ncol(logBPSet)])
+          rownames(finalBPSet) <- bioProcSet[,2]
 
-          h3 <- subset(data.n0, category == "cellular component")
-          h33 <- h3[,4:ncol(h3)] / colSums(h3[,4:ncol(h3)])
-          #rownames(h33) <- h3[,2]
+          cellCompSet <- subset(data.n0, category == "cellular component")
+          logCCSet <- cbind(cellCompSet[,1:3], log(cellCompSet[,4:ncol(cellCompSet)]))
+          finalCCSet <- (logCCSet[,4:ncol(logCCSet)]) - colMeans(logCCSet[,4:ncol(logCCSet)])
+          rownames(finalCCSet) <- cellCompSet[,2]
 
-          #open pdf that stripcharts will be saved to
-          #pdf("GOslimstripcharts3.pdf", width = 25, height = nrow(data.n0)/6.8)
+          #three plots on same page
           par(mfrow=c(1,3))
 
           #create room for description titles
-          par(mar=c(5.1, 20.1, 4.1, 1.1))
+          par(mar=c(5.1, 23.1, 4.1, 1.1))
 
           #loop to create and colour stripcharts
-          for (i in 1:length(h11)) {
+          for (i in 1:length(finalMFSet)) {
               if (i == 1) {
-                  stripchart(h11[,i] ~ rownames(h11), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, cex.axis = 1.3, group.names = rownames(h11), xlab = "Log of Percent Reads", col = colors()[i], main = "Molecular Function", log = "x")
+                  stripchart(finalMFSet[,i] ~ rownames(finalMFSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, cex.axis = 0.8, group.names = rownames(finalMFSet), xlab = "Centered Log of Percent Reads", col = colors()[i], main = "Molecular Function")
               }
               else {
-                  stripchart(h11[,i] ~ rownames(h11), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, add = TRUE, col = colors()[i], log = "x")
+                  stripchart(finalMFSet[,i] ~ rownames(finalMFSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, add = TRUE, col = colors()[i])
               }
           }
 
           #loop to divide description from description and ease readability
-          for (j in 0.5:(length(rownames(h11))+0.5)){
+          for (j in 0.5:(length(rownames(finalMFSet))+0.5)){
               abline(h=j, lty=3, col="grey80")
           }
 
+          #add vertical line to mark x = 0
+          abline(v=0, lty=3, col = "black")
+
           #loop to create and colour stripcharts
-          for (i in 1:length(h22)) {
+          for (i in 1:length(finalBPSet)) {
               if (i == 1) {
-                  stripchart(h22[,i] ~ rownames(h22), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, cex.axis = 1.3, group.names = rownames(h22), xlab = "Log of Percent Reads", col = colors()[i], main = "Biological Process", log = "x")
+                  stripchart(finalBPSet[,i] ~ rownames(finalBPSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, cex.axis = 0.8, group.names = rownames(finalBPSet), xlab = "Centered Log of Percent Reads", col = colors()[i], main = "Biological Process")
               }
               else {
-                  stripchart(h22[,i] ~ rownames(h22), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, add = TRUE, col = colors()[i], log = "x")
+                  stripchart(finalBPSet[,i] ~ rownames(finalBPSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, add = TRUE, col = colors()[i])
               }
           }
 
           #loop to divide description from description and ease readability
-          for (j in 0.5:(length(rownames(h22))+0.5)){
+          for (j in 0.5:(length(rownames(finalBPSet))+0.5)){
               abline(h=j, lty=3, col="grey80")
           }
 
+          #add vertical line to mark x = 0
+          abline(v=0, lty=3, col = "black")
+
           #loop to create and colour stripcharts
-          for (i in 1:length(h33)) {
+          for (i in 1:length(finalCCSet)) {
               if (i == 1) {
-                  stripchart(h33[,i] ~ rownames(h33), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, cex.axis = 1.3, group.names = rownames(h33), xlab = "Log of Percent Reads", col = colors()[i], main = "Cellular Component", log = "x")
+                  stripchart(finalCCSet[,i] ~ rownames(finalCCSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, cex.axis = 0.8, group.names = rownames(finalCCSet), xlab = "Centered Log of Percent Reads", col = colors()[i], main = "Cellular Component")
               }
               else {
-                  stripchart(h33[,i] ~ rownames(h33), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, add = TRUE, col = colors()[i], log = "x")
+                  stripchart(finalCCSet[,i] ~ rownames(finalCCSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, add = TRUE, col = colors()[i])
               }
           }
 
           #loop to divide description from description and ease readability
-          for (j in 0.5:(length(rownames(h33))+0.5)){
+          for (j in 0.5:(length(rownames(finalCCSet))+0.5)){
               abline(h=j, lty=3, col="grey80")
           }
 
-          #close off writing to pdf
-          #dev.off()
+          #add vertical line to mark x = 0
+          abline(v=0, lty=3, col = "grey70")
+
       }
 
       createStripcharts(data)
