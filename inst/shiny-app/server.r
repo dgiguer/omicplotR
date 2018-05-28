@@ -917,17 +917,17 @@ observeEvent(input$effectplot_ab, {
           molFunSet <- subset(data.n0, category == "molecular function")
           logMFSet <- cbind(molFunSet[,1:3], log(molFunSet[,4:ncol(molFunSet)]))
           finalMFSet <- (logMFSet[,4:ncol(logMFSet)]) - colMeans(logMFSet[,4:ncol(logMFSet)])
-          rownames(finalMFSet) <- molFunSet[,2]
+          #rownames(finalMFSet) <- molFunSet[,2]
 
           bioProcSet <- subset(data.n0, category == "biological process")
           logBPSet <- cbind(bioProcSet[,1:3], log(bioProcSet[,4:ncol(bioProcSet)]))
           finalBPSet <- (logBPSet[,4:ncol(logBPSet)]) - colMeans(logBPSet[,4:ncol(logBPSet)])
-          rownames(finalBPSet) <- bioProcSet[,2]
+          #rownames(finalBPSet) <- bioProcSet[,2]
 
           cellCompSet <- subset(data.n0, category == "cellular component")
           logCCSet <- cbind(cellCompSet[,1:3], log(cellCompSet[,4:ncol(cellCompSet)]))
           finalCCSet <- (logCCSet[,4:ncol(logCCSet)]) - colMeans(logCCSet[,4:ncol(logCCSet)])
-          rownames(finalCCSet) <- cellCompSet[,2]
+          #rownames(finalCCSet) <- cellCompSet[,2]
 
           #three plots on same page
           par(mfrow=c(1,3))
@@ -938,7 +938,7 @@ observeEvent(input$effectplot_ab, {
           #loop to create and colour stripcharts
           for (i in 1:length(finalMFSet)) {
               if (i == 1) {
-                  stripchart(finalMFSet[,i] ~ rownames(finalMFSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, cex.axis = 0.8, group.names = rownames(finalMFSet), xlab = "Centered Log of Percent Reads", col = colors()[i], main = "Molecular Function")
+                  stripchart(finalMFSet[,i] ~ rownames(finalMFSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, cex.axis = 0.8, group.names = rownames(finalMFSet), xlab = "Centered log ratio of abundance", col = colors()[i], main = "Molecular Function")
               }
               else {
                   stripchart(finalMFSet[,i] ~ rownames(finalMFSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, add = TRUE, col = colors()[i])
@@ -956,7 +956,7 @@ observeEvent(input$effectplot_ab, {
           #loop to create and colour stripcharts
           for (i in 1:length(finalBPSet)) {
               if (i == 1) {
-                  stripchart(finalBPSet[,i] ~ rownames(finalBPSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, cex.axis = 0.8, group.names = rownames(finalBPSet), xlab = "Centered Log of Percent Reads", col = colors()[i], main = "Biological Process")
+                  stripchart(finalBPSet[,i] ~ rownames(finalBPSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, cex.axis = 0.8, group.names = rownames(finalBPSet), xlab = "Centered log ratio", col = colors()[i], main = "Biological Process")
               }
               else {
                   stripchart(finalBPSet[,i] ~ rownames(finalBPSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, add = TRUE, col = colors()[i])
@@ -974,7 +974,7 @@ observeEvent(input$effectplot_ab, {
           #loop to create and colour stripcharts
           for (i in 1:length(finalCCSet)) {
               if (i == 1) {
-                  stripchart(finalCCSet[,i] ~ rownames(finalCCSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, cex.axis = 0.8, group.names = rownames(finalCCSet), xlab = "Centered Log of Percent Reads", col = colors()[i], main = "Cellular Component")
+                  stripchart(finalCCSet[,i] ~ rownames(finalCCSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, cex.axis = 0.8, group.names = rownames(finalCCSet), xlab = "Centered log of abundance", col = colors()[i], main = "Cellular Component")
               }
               else {
                   stripchart(finalCCSet[,i] ~ rownames(finalCCSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, add = TRUE, col = colors()[i])
