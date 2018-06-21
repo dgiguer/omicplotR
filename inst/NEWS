@@ -1,3 +1,8 @@
+CHANGES IN VERSION 1.1.2
+--------------------------
+- updated install instructions to use `BiocManager`
+
+
 CHANGES IN VERSION 1.1.1
 --------------------------
 - added slider inputs to change size and opacity of sample names for biplot and coloured biplot
