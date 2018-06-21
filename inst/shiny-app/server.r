@@ -516,12 +516,14 @@ formatModal <- function(failed = FALSE) {
     }
 
     #if EBI format, remove category / GO term for calculations
-    #or if the input is from the downloaded file
-    if (input$ebi_format == TRUE | input$update_EBI == TRUE) {
+    if (input$ebi_format == TRUE) {
 
         x.filt <- omicplotr.filter(x[,3:ncol(x)], min.reads = min.reads, min.count = min.count, min.prop = min.prop, max.prop = max.prop, min.sum = min.sum)
 
-        x.filt <- cbind(x[,1:2], x.filt)
+        #get indices of rownames that are kept through filtering
+        kept <- which(rownames(x) %in% rownames(x.filt))
+
+        x.filt <- cbind(x[kept,], x.filt)
     } else {
 
     #get filtered data if filtered
@@ -543,7 +545,7 @@ formatModal <- function(failed = FALSE) {
     var.filt <- input$varslider
     data <- data()
 
-    if (input$ebi_format == TRUE | input$update_EBI == TRUE) {
+    if (input$ebi_format == TRUE) {
         lose <- c(1,2)
         data.t <- data.t[,3:ncol(data.t)]
     }
@@ -776,6 +778,11 @@ observeEvent(input$effectplot_ab, {
       data.in <- data()
 
       validate(need(input$showremoved, ""))
+
+      #without go and categories column if EBI format
+    if (input$ebi_format == TRUE) {
+        data.in <- data.in[,3:ncol(data.in)]
+    }
 
       omicplotr.getRemovedSamples(data.in, data.pr)
     },
@@ -1297,7 +1304,13 @@ observeEvent(input$effectplot_ab, {
     ab <- input$minreads
 
     if (is.null(data$taxonomy)){
-      x <- colSums(data)
+
+        if (input$ebi_format == TRUE) {
+            #remove GO term and category
+            x <- colSums(data[,3:ncol(data)])
+        } else {
+            x <- colSums(data)
+        }
 
       plot(x, ylab = "Counts", xlab = "Sample Number", pch = 19, col = ifelse({x > ab}, "gray0", "red"), main = "Samples removed by filtering (count sum)")
 
@@ -1305,6 +1318,7 @@ observeEvent(input$effectplot_ab, {
       legend("topright", legend = c("Remaining", "Removed"), col = c("black", "red"), pch = 19)
 
     } else {
+
       x <- colSums(data[,(seq_along(data) - 1)])
 
       plot(x, ylab = "Counts", xlab = "Sample Number", pch = 19, col = ifelse({x > ab}, "gray0", "red"), main = "Samples removed by filtering")
@@ -1324,7 +1338,13 @@ observeEvent(input$effectplot_ab, {
     ab <- input$minsum
 
     if (is.null(data$taxonomy)){
-      x <- rowSums(data)
+
+        if (input$ebi_format == TRUE) {
+            #remove GO term and category
+            x <- rowSums(data[,3:ncol(data)])
+        } else {
+            x <- rowSums(data)
+        }
 
       plot(x, ylab = "Counts", xlab = "Row Number", pch = 19, col = ifelse({x > ab}, "gray0", "grey"), main = "Rows removed by filtering (count sum)")
 

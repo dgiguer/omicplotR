@@ -42,7 +42,7 @@ sidebarLayout(
                 checkboxInput("ebi_format", "Click if data is formatted as GO slim annotation"),
                 h3(textOutput("EBI_data")),
                 #input EBI project
-                actionButton("input_ebi_project", "Input EBI metgenomic project ID"),
+                actionButton("input_ebi_project", "Download dataset from EBI"),
                 h3(textOutput("check_data")),
                 fluidRow(
                     column(6, actionButton("showdata", "Check data")),
