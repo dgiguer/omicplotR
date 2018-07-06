@@ -1151,7 +1151,12 @@ observeEvent(input$effectplot_ab, {
     d.abund <- d.agg[apply(d.prop, 1, max) > abund,]
     tax.abund.u <- tax.agg[apply(d.prop, 1, max) > abund]
 
-    d.abund <- t(cmultRepl(t(d.abund), label=0, method="CZM"))
+    # replace zeros catch error if no 0 present
+    if (any(d.abund == 0)) {
+        d.abund <- t(cmultRepl(t(d.abund), label = 0, method = "CZM")
+    } else {
+        d.abund <- d.abund
+    }
 
     # get proportions of the filtered data for plotting below
     # in log-ratio speak, you are re-closing your dataset
@@ -1239,7 +1244,13 @@ observeEvent(input$effectplot_ab, {
     d.abund <- d.agg[apply(d.prop, 1, max) > abund,]
     tax.abund.u <- tax.agg[apply(d.prop, 1, max) > abund]
 
-    d.abund <- t(cmultRepl(t(d.abund), label=0, method="CZM"))
+
+    # replace zeros catch error if no 0 present
+    if (any(d.abund == 0)) {
+        d.abund <- t(cmultRepl(t(d.abund), label = 0, method = "CZM")
+    } else {
+        d.abund <- d.abund
+    }
 
     # get proportions of the filtered data for plotting below
     # in log-ratio speak, you are re-closing your dataset
