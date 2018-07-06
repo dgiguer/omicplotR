@@ -1,6 +1,6 @@
 Package: omicplotR
 Title: Visual Exploration of Omic Datasets Using a Shiny App
-Version: 1.1.2
+Version: 1.1.3
 Date: 2018-05-23
 Authors@R: c(person("Daniel", "Giguere", email = "dgiguer@uwo.ca", role = c("aut", "cre")), person("Jean", "Macklaim", role = "aut"), person("Greg", "Gloor", role = "aut"))
 biocViews: Software, DifferentialExpression, GeneExpression, GUI, RNASeq, DNASeq, Metagenomics, Transcriptomics, Bayesian, Microbiome, Visualization, Sequencing
@@ -12,7 +12,7 @@ Description: A Shiny app for visual exploration of omic datasets as
     and effect plots (ALDEx2). Input is a table of counts and metadata file (if
     metadata exists), with options to filter data by count or by metadata to
     remove low counts, or to visualize select samples according to selected
-    metadata. 
+    metadata.
 Imports:
     ALDEx2 (>= 1.8.0),
     compositions,

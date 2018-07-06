@@ -1,5 +1,10 @@
 CHANGES IN VERSION 1.1.2
 --------------------------
+- bug fix for CZM in RAB plots. if not zeros, plots would fail. 
+
+
+CHANGES IN VERSION 1.1.2
+--------------------------
 - updated install instructions to use `BiocManager`
 
 
@@ -13,8 +18,8 @@ CHANGES IN VERSION 1.1.1
 CHANGES IN VERSION 0.99.4
 --------------------------
 
-- changed vignette to html instead of pdf. 
-- edited vignette. 
+- changed vignette to html instead of pdf.
+- edited vignette.
 
 CHANGES IN VERSION 0.99.3
 --------------------------
