@@ -1246,7 +1246,6 @@ observeEvent(input$effectplot_ab, {
 
 
     # replace zeros catch error if no 0 present
-    #it should work now
     if (any(d.abund == 0)) {
         d.abund <- t(cmultRepl(t(d.abund), label = 0, method = "CZM")
     } else {
