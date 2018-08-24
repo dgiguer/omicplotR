@@ -278,6 +278,25 @@ actionButton("update_points", label = "Update")
 )
 )
 ))),
+tabPanel("SDI boxplots",
+sidebarLayout(
+  sidebarPanel(
+    tabsetPanel(
+    tabPanel("Groupings for user data",
+    textInput("ui1",label = "group1",placeholder = "Input 1st grouping term (see 'Getting started')"),
+    textInput("ui2",label = "group2",placeholder = "Input 2nd grouping term (see 'Getting started')"),
+    textInput("ui3",label = "group3",placeholder = "Input 3rd grouping term (see 'Getting started')"),
+    textInput("ui4",label = "group4",placeholder = "Input 4th grouping term (see 'Getting started')"),
+    textInput("ui5",label = "group5",placeholder = "Input 5th grouping term (see 'Getting started')"),
+    actionButton("SDIplot_groups", "Generate Shannon's Diversity Index Plot")
+            )
+    )
+  ),
+mainPanel(if("exampledata2" == T){
+ h3(textOutput("error"))} else(
+            plotOutput("SDIboxplot")
+         )
+))),
 navbarMenu("More",
 tabPanel("Instructions",
 fluidRow(

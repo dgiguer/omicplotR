@@ -236,6 +236,7 @@ output$conditions<- renderUI({
     options <- colnames(meta)
     selectInput("colselect", "Select column from metadata", choices = options)
   })
+  #
 
   ###########################################################################
   #data input
@@ -1870,4 +1871,50 @@ output$featurename<- renderUI({
 output$effectwarning <- renderText({
   "See the GitHub Wiki for more information on how to select conditions"
 })
+################################################################################
+#output$error <- renderText({"Inapropriate dataset"})
+output$SDIboxplot <- renderPlot({
+if (input$exampledata2) { TRUE
+}
+#Shannon's diversity index boxplot
+else if (input$exampledata) {
+#Shannon's diversity index
+H <- (function(x){ -1 * sum( (x / sum(x) ) * log(x / sum(x) )) })
+data <- data()
+#Remove taxonomy column
+data.s <- data[,1:(ncol(data)-1)]
+#Remove zero values for log calculations
+data.s05 <- data.s +0.5
+#Apply the index calculation to the data
+data.t <- apply(data.s05, 2, H)
+#get the index values into a dataframe
+data.dr <- as.data.frame(data.t)
+#grep to create groups for boxplot
+data.dr$groups <- gsub("\\d+",replacement="",row.names(data.dr))
+boxplot(data.dr$data.t~data.dr$groups,main="Shannon's diversity index (SDI) boxplot", ylab="Shannon's diversity index", xlab= "samples")
+}
+else {
+    validate(need(input$SDIplot_groups, ""))
+    for(x in 1:nrow(data.dr)) {
+    name <- rownames(data.dr)[x]
+      if(grepl(input$ui1, name)) {
+      data.dr[x, "groups"] <- input$ui1
+      }
+      else if(grepl(input$ui2, name)) {
+      data.dr[x, "groups"] <- input$ui2
+      }
+      else if(grepl(input$ui3, name)) {
+      data.dr[x, "groups"] <- input$ui3
+      }
+      else if(grepl(input$ui4, name)) {
+      data.dr[x, "groups"] <- input$ui4
+      }
+      else if(grepl(input$ui5, name)) {
+      data.dr[x, "groups"] <- input$ui5
+      }
+    }
+boxplot(data.dr$data.t~data.dr$groups,main="test boxplot", ylab="Shannon's diversity index", xlab= "samples")
+}
+})
+output$error <- renderText({"Inapropriate dataset"})
 }
