@@ -526,16 +526,16 @@ formatModal <- function(failed = FALSE) {
       taxCheck <- FALSE
     }
 
-    #if EBI format, remove category / GO term for calculations
-    if (input$ebi_format == TRUE) {
-
-        x.filt <- omicplotr.filter(x[,3:ncol(x)], min.reads = min.reads, min.count = min.count, min.prop = min.prop, max.prop = max.prop, min.sum = min.sum)
-
-        #get indices of rownames that are kept through filtering
-        kept <- which(rownames(x) %in% rownames(x.filt))
-
-        x.filt <- cbind(x[kept,], x.filt)
-    } else {
+    # #if EBI format, remove category / GO term for calculations
+    # if (input$ebi_format == TRUE) {
+    #
+    #     x.filt <- omicplotr.filter(x[,3:ncol(x)], min.reads = min.reads, min.count = min.count, min.prop = min.prop, max.prop = max.prop, min.sum = min.sum)
+    #
+    #     #get indices of rownames that are kept through filtering
+    #     kept <- which(rownames(x) %in% rownames(x.filt))
+    #
+    #     x.filt <- cbind(x[kept,], x.filt)
+    # } else {
 
     #get filtered data if filtered
     if (is.null(vals$data)) {
@@ -546,7 +546,7 @@ formatModal <- function(failed = FALSE) {
     }
 
     x.filt <- omicplotr.filter(x, min.reads = min.reads, min.count = min.count, min.prop = min.prop, max.prop = max.prop, min.sum = min.sum)
-}
+# }
   })
 
   #prcomp object
@@ -556,10 +556,10 @@ formatModal <- function(failed = FALSE) {
     var.filt <- input$varslider
     data <- data()
 
-    if (input$ebi_format == TRUE) {
-        lose <- c(1,2)
-        data.t <- data.t[,3:ncol(data.t)]
-    }
+    # if (input$ebi_format == TRUE) {
+    #     lose <- c(1,2)
+    #     data.t <- data.t[,3:ncol(data.t)]
+    # }
 
     validate(need(input$varslider, "Calculating..."))
 
@@ -791,9 +791,9 @@ observeEvent(input$effectplot_ab, {
       validate(need(input$showremoved, ""))
 
       #without go and categories column if EBI format
-    if (input$ebi_format == TRUE) {
-        data.in <- data.in[,3:ncol(data.in)]
-    }
+    # if (input$ebi_format == TRUE) {
+    #     data.in <- data.in[,3:ncol(data.in)]
+    # }
 
       omicplotr.getRemovedSamples(data.in, data.pr)
     },
@@ -1316,12 +1316,12 @@ observeEvent(input$effectplot_ab, {
 
     if (is.null(data$taxonomy)){
 
-        if (input$ebi_format == TRUE) {
-            #remove GO term and category
-            x <- colSums(data[,3:ncol(data)])
-        } else {
+        # if (input$ebi_format == TRUE) {
+        #     #remove GO term and category
+        #     x <- colSums(data[,3:ncol(data)])
+        # } else {
             x <- colSums(data)
-        }
+        # }
 
       plot(x, ylab = "Counts", xlab = "Sample Number", pch = 19, col = ifelse({x > ab}, "gray0", "red"), main = "Samples removed by filtering (count sum)")
 
@@ -1350,12 +1350,12 @@ observeEvent(input$effectplot_ab, {
 
     if (is.null(data$taxonomy)){
 
-        if (input$ebi_format == TRUE) {
-            #remove GO term and category
-            x <- rowSums(data[,3:ncol(data)])
-        } else {
+        # if (input$ebi_format == TRUE) {
+        #     #remove GO term and category
+        #     x <- rowSums(data[,3:ncol(data)])
+        # } else {
             x <- rowSums(data)
-        }
+        # }
 
       plot(x, ylab = "Counts", xlab = "Row Number", pch = 19, col = ifelse({x > ab}, "gray0", "grey"), main = "Rows removed by filtering (count sum)")
 
