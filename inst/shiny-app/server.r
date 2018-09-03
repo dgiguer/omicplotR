@@ -241,6 +241,7 @@ output$conditions<- renderUI({
   #data input
   #get data from uploaded file
   data <- reactive({
+
     if (input$exampledata) {
       read.table(
         "example_data.txt",
@@ -253,7 +254,7 @@ output$conditions<- renderUI({
         comment.char = "",
         na.strings = ""
       )
-  } else if (input$exampledata2) {
+  }  else if (input$exampledata2) {
         read.table(
           "selex.txt",
           header = TRUE,
@@ -266,40 +267,50 @@ output$conditions<- renderUI({
           na.strings = ""
         )
     }
-     else if (input$ebi_format == TRUE & input$update_EBI == FALSE) {
-              #reactive input file
-              inFile <- input$file1
-
-              #return NULL when no file is uploaded
-              if (is.null(inFile))
-              return(NULL)
-
-            read.table(
-              inFile$datapath,
-              header = TRUE,
-              sep = "\t",
-              stringsAsFactors = FALSE,
-              quote = "",
-              row.names = 2,
-              check.names = FALSE,
-              comment.char = "",
-              na.strings = ""
-            )
-        } else if (input$update_EBI == TRUE) {
-
-            destfile <- vals$dest
-            read.table(
-              destfile,
-              header = TRUE,
-              sep = "\t",
-              stringsAsFactors = FALSE,
-              quote = "",
-              row.names = 2,
-              check.names = FALSE,
-              comment.char = "",
-              na.strings = ""
-            )
-        } else {
+    # else if (input$ebi_format == TRUE) {
+    #
+    #     observeEvent(input$update_EBI, {
+    #         updated <- TRUE
+    #     })
+    #
+    #     if (updated == TRUE) {
+    #         #reactive input file
+    #         inFile <- input$file1
+    #
+    #         #return NULL when no file is uploaded
+    #         if (is.null(inFile))
+    #         return(NULL)
+    #
+    #       read.table(
+    #         inFile$datapath,
+    #         header = TRUE,
+    #         sep = "\t",
+    #         stringsAsFactors = FALSE,
+    #         quote = "",
+    #         row.names = 2,
+    #         check.names = FALSE,
+    #         comment.char = "",
+    #         na.strings = ""
+    #       )
+    #     }
+    # }
+    #
+    #      else if (input$update_EBI == TRUE) {
+    #
+    #         destfile <- vals$dest
+    #         read.table(
+    #           destfile,
+    #           header = TRUE,
+    #           sep = "\t",
+    #           stringsAsFactors = FALSE,
+    #           quote = "",
+    #           row.names = 2,
+    #           check.names = FALSE,
+    #           comment.char = "",
+    #           na.strings = ""
+    #         )
+    #     }
+        else {
         #reactive input file
         inFile <- input$file1
 
