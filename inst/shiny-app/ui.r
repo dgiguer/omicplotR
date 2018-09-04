@@ -39,10 +39,10 @@ sidebarLayout(
                     h3('Choose Metadata')
                 ))
                 ),
-                checkboxInput("ebi_format", "Click if data is formatted as GO slim annotation"),
-                h3(textOutput("EBI_data")),
-                #input EBI project
-                actionButton("input_ebi_project", "Download dataset from EBI"),
+                # checkboxInput("ebi_format", "Click if data is formatted as GO slim annotation"),
+                # h3(textOutput("EBI_data")),
+                # #input EBI project
+                # actionButton("input_ebi_project", "Download dataset from EBI"),
                 h3(textOutput("check_data")),
                 fluidRow(
                     column(6, actionButton("showdata", "Check data")),
@@ -180,9 +180,9 @@ mainPanel(
 #               textOutput("associationtext")),
 #             mainPanel(plotOutput("associationplot"))
 #           )),
-tabPanel("GO slim annotation",
-wellPanel(plotOutput("ebi_stripchart", height = "1400px"), style = "overflow-y:scroll; max-height: 700px")
-),
+# tabPanel("GO slim annotation",
+# wellPanel(plotOutput("ebi_stripchart", height = "1400px"), style = "overflow-y:scroll; max-height: 700px")
+# ),
 
 tabPanel("Relative abundance plots",
 sidebarLayout(
