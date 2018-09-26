@@ -88,6 +88,31 @@ server <- function(input, output) {
     showModal(metaModal())
   })
 
+  #pop up the modal for EBI input
+  observeEvent(input$input_ebi_project, {
+    showModal(ebiModal())
+  })
+
+  #convert input to reactive object
+  observeEvent(input$update_EBI, {
+      #enter project ID in quotation marks, ensuring it is a string
+      projectid <- input$ebi_id
+      #enter pipeline version as an integer (single digit)
+      pipelineVersion <- input$ebi_pipeline
+
+      #function called GOslimfile, given parameters projectid and pipelineVersion and outputs the file as projectid.tsv
+      getGOslimfile <- function(projectid, pipelineVersion) {
+        url <- paste0("https://www.ebi.ac.uk/metagenomics/projects/", projectid ,"/download/", pipelineVersion,"/export?contentType=text&exportValue=GO-slim_abundances")
+        destfile <- paste0(projectid,".tsv")
+        vals$dest <- destfile
+        download.file(url, destfile, mode="wb")
+      }
+
+      getGOslimfile(projectid, pipelineVersion)
+
+    removeModal()
+  })
+
   #convert input to reactive object
   observeEvent(input$update, {
     vals$data <-
@@ -102,7 +127,21 @@ server <- function(input, output) {
 
   ###########################################################################
   #custom UIs
-  #make the pop up
+
+  #pop up for inputting ebi project numberq
+  ebiModal <- function (x) {
+      modalDialog(
+              textInput("ebi_id", "EBI Project ID", placeholder = "Project ID"),
+              textInput("ebi_pipeline", "EBI Pipeline version", placeholder = "Pipeline version (x.y)"),
+              title = "Download and explore EBI project",
+              "Enter the project number (for example: ERP015657) and pipeline version (for example: 2.0) to download the GO slim annotation file to your current working directory, and read into omicplotR.",
+            footer = tagList(actionButton("update_EBI", "Download and input"),
+              modalButton("Cancel")),
+              easyClose = TRUE
+      )
+  }
+
+  #make the pop up for choosing samples
   metaModal <- function (x) {
     modalDialog(
       renderUI({
@@ -214,8 +253,7 @@ output$conditions<- renderUI({
         comment.char = "",
         na.strings = ""
       )
-    } else {
-      if (input$exampledata2) {
+  } else if (input$exampledata2) {
         read.table(
           "selex.txt",
           header = TRUE,
@@ -227,7 +265,41 @@ output$conditions<- renderUI({
           comment.char = "",
           na.strings = ""
         )
-      } else{
+    }
+     else if (input$ebi_format == TRUE & input$update_EBI == FALSE) {
+              #reactive input file
+              inFile <- input$file1
+
+              #return NULL when no file is uploaded
+              if (is.null(inFile))
+              return(NULL)
+
+            read.table(
+              inFile$datapath,
+              header = TRUE,
+              sep = "\t",
+              stringsAsFactors = FALSE,
+              quote = "",
+              row.names = 2,
+              check.names = FALSE,
+              comment.char = "",
+              na.strings = ""
+            )
+        } else if (input$update_EBI == TRUE) {
+
+            destfile <- vals$dest
+            read.table(
+              destfile,
+              header = TRUE,
+              sep = "\t",
+              stringsAsFactors = FALSE,
+              quote = "",
+              row.names = 2,
+              check.names = FALSE,
+              comment.char = "",
+              na.strings = ""
+            )
+        } else {
         #reactive input file
         inFile <- input$file1
 
@@ -256,7 +328,7 @@ output$conditions<- renderUI({
           data <- data
         }
       }
-    }
+
   })
 
   #get metadata from uploaded file
@@ -443,6 +515,17 @@ formatModal <- function(failed = FALSE) {
       taxCheck <- FALSE
     }
 
+    #if EBI format, remove category / GO term for calculations
+    if (input$ebi_format == TRUE) {
+
+        x.filt <- omicplotr.filter(x[,3:ncol(x)], min.reads = min.reads, min.count = min.count, min.prop = min.prop, max.prop = max.prop, min.sum = min.sum)
+
+        #get indices of rownames that are kept through filtering
+        kept <- which(rownames(x) %in% rownames(x.filt))
+
+        x.filt <- cbind(x[kept,], x.filt)
+    } else {
+
     #get filtered data if filtered
     if (is.null(vals$data)) {
       x <- x
@@ -452,7 +535,7 @@ formatModal <- function(failed = FALSE) {
     }
 
     x.filt <- omicplotr.filter(x, min.reads = min.reads, min.count = min.count, min.prop = min.prop, max.prop = max.prop, min.sum = min.sum)
-
+}
   })
 
   #prcomp object
@@ -461,6 +544,11 @@ formatModal <- function(failed = FALSE) {
     data.t <- data.t()
     var.filt <- input$varslider
     data <- data()
+
+    if (input$ebi_format == TRUE) {
+        lose <- c(1,2)
+        data.t <- data.t[,3:ncol(data.t)]
+    }
 
     validate(need(input$varslider, "Calculating..."))
 
@@ -691,6 +779,11 @@ observeEvent(input$effectplot_ab, {
 
       validate(need(input$showremoved, ""))
 
+      #without go and categories column if EBI format
+    if (input$ebi_format == TRUE) {
+        data.in <- data.in[,3:ncol(data.in)]
+    }
+
       omicplotr.getRemovedSamples(data.in, data.pr)
     },
     #force datatable to size of window
@@ -735,6 +828,14 @@ observeEvent(input$effectplot_ab, {
 
   output$textTitle <- renderText({
     "Choose filtering options"
+  })
+
+  output$check_data <- renderText({
+      "Check data and metadata"
+  })
+
+  output$EBI_data <- renderText({
+      "Input GO slim formatted data"
   })
 
   output$nometadata <- renderText({
@@ -808,6 +909,99 @@ observeEvent(input$effectplot_ab, {
   ##############################################################################
 
   # PCA biplots
+
+  output$ebi_stripchart <- renderPlot({
+
+      #get data
+      data <- data.t()
+
+      createStripcharts <- function(data) {
+
+          #create dataframe with 0.5 added so there are no zeros for log function later
+          data.n0 <- cbind(data[,1:3], data[,4:ncol(data)] + 0.5)
+
+          #create dataframes with information needed (calculated percent reads)
+          molFunSet <- subset(data.n0, category == "molecular function")
+          logMFSet <- cbind(molFunSet[,1:3], log(molFunSet[,4:ncol(molFunSet)]))
+          finalMFSet <- (logMFSet[,4:ncol(logMFSet)]) - colMeans(logMFSet[,4:ncol(logMFSet)])
+          #rownames(finalMFSet) <- molFunSet[,2]
+
+          bioProcSet <- subset(data.n0, category == "biological process")
+          logBPSet <- cbind(bioProcSet[,1:3], log(bioProcSet[,4:ncol(bioProcSet)]))
+          finalBPSet <- (logBPSet[,4:ncol(logBPSet)]) - colMeans(logBPSet[,4:ncol(logBPSet)])
+          #rownames(finalBPSet) <- bioProcSet[,2]
+
+          cellCompSet <- subset(data.n0, category == "cellular component")
+          logCCSet <- cbind(cellCompSet[,1:3], log(cellCompSet[,4:ncol(cellCompSet)]))
+          finalCCSet <- (logCCSet[,4:ncol(logCCSet)]) - colMeans(logCCSet[,4:ncol(logCCSet)])
+          #rownames(finalCCSet) <- cellCompSet[,2]
+
+          #three plots on same page
+          par(mfrow=c(1,3))
+
+          #create room for description titles
+          par(mar=c(5.1, 23.1, 4.1, 1.1))
+
+          #loop to create and colour stripcharts
+          for (i in 1:length(finalMFSet)) {
+              if (i == 1) {
+                  stripchart(finalMFSet[,i] ~ rownames(finalMFSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, cex.axis = 0.8, group.names = rownames(finalMFSet), xlab = "Centered log ratio of abundance", col = colors()[i], main = "Molecular Function")
+              }
+              else {
+                  stripchart(finalMFSet[,i] ~ rownames(finalMFSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, add = TRUE, col = colors()[i])
+              }
+          }
+
+          #loop to divide description from description and ease readability
+          for (j in 0.5:(length(rownames(finalMFSet))+0.5)){
+              abline(h=j, lty=3, col="grey80")
+          }
+
+          #add vertical line to mark x = 0
+          abline(v=0, lty=3, col = "black")
+
+          #loop to create and colour stripcharts
+          for (i in 1:length(finalBPSet)) {
+              if (i == 1) {
+                  stripchart(finalBPSet[,i] ~ rownames(finalBPSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, cex.axis = 0.8, group.names = rownames(finalBPSet), xlab = "Centered log ratio", col = colors()[i], main = "Biological Process")
+              }
+              else {
+                  stripchart(finalBPSet[,i] ~ rownames(finalBPSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, add = TRUE, col = colors()[i])
+              }
+          }
+
+          #loop to divide description from description and ease readability
+          for (j in 0.5:(length(rownames(finalBPSet))+0.5)){
+              abline(h=j, lty=3, col="grey80")
+          }
+
+          #add vertical line to mark x = 0
+          abline(v=0, lty=3, col = "black")
+
+          #loop to create and colour stripcharts
+          for (i in 1:length(finalCCSet)) {
+              if (i == 1) {
+                  stripchart(finalCCSet[,i] ~ rownames(finalCCSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, cex.axis = 0.8, group.names = rownames(finalCCSet), xlab = "Centered log of abundance", col = colors()[i], main = "Cellular Component")
+              }
+              else {
+                  stripchart(finalCCSet[,i] ~ rownames(finalCCSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, add = TRUE, col = colors()[i])
+              }
+          }
+
+          #loop to divide description from description and ease readability
+          for (j in 0.5:(length(rownames(finalCCSet))+0.5)){
+              abline(h=j, lty=3, col="grey80")
+          }
+
+          #add vertical line to mark x = 0
+          abline(v=0, lty=3, col = "grey70")
+
+      }
+
+      createStripcharts(data)
+
+
+  })
 
   #biplot
   output$biplot <- renderPlot({
@@ -1110,7 +1304,13 @@ observeEvent(input$effectplot_ab, {
     ab <- input$minreads
 
     if (is.null(data$taxonomy)){
-      x <- colSums(data)
+
+        if (input$ebi_format == TRUE) {
+            #remove GO term and category
+            x <- colSums(data[,3:ncol(data)])
+        } else {
+            x <- colSums(data)
+        }
 
       plot(x, ylab = "Counts", xlab = "Sample Number", pch = 19, col = ifelse({x > ab}, "gray0", "red"), main = "Samples removed by filtering (count sum)")
 
@@ -1118,6 +1318,7 @@ observeEvent(input$effectplot_ab, {
       legend("topright", legend = c("Remaining", "Removed"), col = c("black", "red"), pch = 19)
 
     } else {
+
       x <- colSums(data[,(seq_along(data) - 1)])
 
       plot(x, ylab = "Counts", xlab = "Sample Number", pch = 19, col = ifelse({x > ab}, "gray0", "red"), main = "Samples removed by filtering")
@@ -1137,7 +1338,13 @@ observeEvent(input$effectplot_ab, {
     ab <- input$minsum
 
     if (is.null(data$taxonomy)){
-      x <- rowSums(data)
+
+        if (input$ebi_format == TRUE) {
+            #remove GO term and category
+            x <- rowSums(data[,3:ncol(data)])
+        } else {
+            x <- rowSums(data)
+        }
 
       plot(x, ylab = "Counts", xlab = "Row Number", pch = 19, col = ifelse({x > ab}, "gray0", "grey"), main = "Rows removed by filtering (count sum)")
 
@@ -1287,26 +1494,24 @@ observeEvent(input$effectplot_ab, {
     d.agg$Group.1 <- NULL
 
     # convert to abundances
-    d.prop <- apply(d.agg, 2, function(x){x/sum(x)})
+    d.prop <- t(t(d.agg) / rowSums(t(d.agg)))
 
     #filters by abundance (slider bar)
-    d.abund <- d.agg[apply(d.prop, 1, max) > abund,]
-    tax.abund.u <- tax.agg[apply(d.prop, 1, max) > abund]
+    d.abund <- d.agg[rowMaxs(as.matrix(d.prop)) > abund,]
 
-    if (any(d.abund == 0)) {
-    d.abund <- t(cmultRepl(t(d.abund), label = 0, method = "CZM"))
-    } else {
-        d.abund <- d.abund
-    }
+    tax.abund.u <- tax.agg[rowMaxs(as.matrix(d.prop)) > abund]
+
+    d.abund <- t(cmultRepl(t(d.abund), label=0, method="CZM"))
     # get proportions of the filtered data for plotting below
     # in log-ratio speak, you are re-closing your dataset
-    d.P.u <- apply(d.abund, 2, function(x){x/sum(x)})
+    d.P.u <- t(t(d.abund) / rowSums(t(d.abund)))
 
     # order by OTU abundances
-    new.order <- rownames(d.P.u)[order(apply(d.P.u, 1, sum), decreasing=T)]
-    tax.abund <- tax.abund.u[order(apply(d.P.u, 1, sum), decreasing=T)]
+    new.order <- rownames(d.P.u)[order(rowSums(d.P.u), decreasing=T)]
+    tax.abund <- tax.abund.u[order(rowSums(d.P.u), decreasing=T)]
+
     d.P <- d.P.u[new.order, ]
-    d.clr <- apply(d.P, 2, function(x){log2(x) - mean(log2(x))})
+    d.clr <- t(t(log2(d.P)) - rowMeans(t(log2(d.P))))
 
     #distance matrix
     inp <- as.numeric(input$dismethod)
@@ -1379,26 +1584,22 @@ observeEvent(input$effectplot_ab, {
     d.agg$Group.1 <- NULL
 
     # convert to abundances
-    d.prop <- apply(d.agg, 2, function(x){x/sum(x)})
+    d.prop <- t(t(d.agg) / rowSums(t(d.agg)))
 
-    d.abund <- d.agg[apply(d.prop, 1, max) > abund,]
-    tax.abund.u <- tax.agg[apply(d.prop, 1, max) > abund]
+    d.abund <- d.agg[max(d.prop) > abund,]
+    tax.abund.u <- tax.agg[max(d.prop) > abund]
 
-    if (any(d.abund == 0)) {
-    d.abund <- t(cmultRepl(t(d.abund), label = 0, method = "CZM"))
-    } else {
-        d.abund <- d.abund
-    }
+    d.abund <- t(cmultRepl(t(d.abund), label=0, method="CZM"))
 
     # get proportions of the filtered data for plotting below
     # in log-ratio speak, you are re-closing your dataset
-    d.P.u <- apply(d.abund, 2, function(x){x/sum(x)})
+    d.P.u <- t(t(d.abund) / rowSums(t(d.abund)))
 
-    # order by OTU abundances
-    new.order <- rownames(d.P.u)[order(apply(d.P.u, 1, sum), decreasing=T)]
-    tax.abund <- tax.abund.u[order(apply(d.P.u, 1, sum), decreasing=T)]
+    #order by OTU abundances
+    new.order <- rownames(d.P.u)[order(rowSums(d.P.u), decreasing=T)]
+    tax.abund <- tax.abund.u[order(rowSums(d.P.u), decreasing=T)]
     d.P <- d.P.u[new.order, ]
-    d.clr <- apply(d.P, 2, function(x){log2(x) - mean(log2(x))})
+    d.clr <- t(t(log2(d.P)) - rowMeans(t(log2(d.P))))
 
     #distance matrix
     inp <- as.numeric(input$dismethod)
