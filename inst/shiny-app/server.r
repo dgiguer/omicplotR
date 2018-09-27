@@ -1287,11 +1287,11 @@ observeEvent(input$effectplot_ab, {
     d.agg$Group.1 <- NULL
 
     # convert to abundances
-    d.prop <- apply(d.agg, 2, function(x){x/sum(x)})
+    d.prop <- t(t(d.agg) / rowSums(t(d.agg)))
 
     #filters by abundance (slider bar)
-    d.abund <- d.agg[apply(d.prop, 1, max) > abund,]
-    tax.abund.u <- tax.agg[apply(d.prop, 1, max) > abund]
+    d.abund <- d.agg[rowMaxs(as.matrix(d.prop)) > abund,]
+    tax.abund.u <- tax.agg[rowMaxs(as.matrix(d.prop)) > abund]
 
     if (any(d.abund == 0)) {
     d.abund <- t(cmultRepl(t(d.abund), label = 0, method = "CZM"))
@@ -1300,13 +1300,13 @@ observeEvent(input$effectplot_ab, {
     }
     # get proportions of the filtered data for plotting below
     # in log-ratio speak, you are re-closing your dataset
-    d.P.u <- apply(d.abund, 2, function(x){x/sum(x)})
+    d.P.u <- t(t(d.abund) / rowSums(t(d.abund)))
 
     # order by OTU abundances
-    new.order <- rownames(d.P.u)[order(apply(d.P.u, 1, sum), decreasing=T)]
-    tax.abund <- tax.abund.u[order(apply(d.P.u, 1, sum), decreasing=T)]
+    new.order <- rownames(d.P.u)[order(rowSums(d.P.u), decreasing=T)]
+    tax.abund <- tax.abund.u[order(rowSums(d.P.u), decreasing=T)]
     d.P <- d.P.u[new.order, ]
-    d.clr <- apply(d.P, 2, function(x){log2(x) - mean(log2(x))})
+    d.clr <- t(t(log2(d.P)) - rowMeans(t(log2(d.P))))
 
     #distance matrix
     inp <- as.numeric(input$dismethod)
@@ -1379,10 +1379,10 @@ observeEvent(input$effectplot_ab, {
     d.agg$Group.1 <- NULL
 
     # convert to abundances
-    d.prop <- apply(d.agg, 2, function(x){x/sum(x)})
+    d.prop <- t(t(d.agg) / rowSums(t(d.agg)))
 
-    d.abund <- d.agg[apply(d.prop, 1, max) > abund,]
-    tax.abund.u <- tax.agg[apply(d.prop, 1, max) > abund]
+    d.abund <- d.agg[max(d.prop) > abund,]
+    tax.abund.u <- tax.agg[max(d.prop) > abund]
 
     if (any(d.abund == 0)) {
     d.abund <- t(cmultRepl(t(d.abund), label = 0, method = "CZM"))
@@ -1392,13 +1392,13 @@ observeEvent(input$effectplot_ab, {
 
     # get proportions of the filtered data for plotting below
     # in log-ratio speak, you are re-closing your dataset
-    d.P.u <- apply(d.abund, 2, function(x){x/sum(x)})
+    d.P.u <- t(t(d.abund) / rowSums(t(d.abund)))
 
     # order by OTU abundances
-    new.order <- rownames(d.P.u)[order(apply(d.P.u, 1, sum), decreasing=T)]
-    tax.abund <- tax.abund.u[order(apply(d.P.u, 1, sum), decreasing=T)]
+    new.order <- rownames(d.P.u)[order(rowSums(d.P.u), decreasing=T)]
+    tax.abund <- tax.abund.u[order(rowSums(d.P.u), decreasing=T)]
     d.P <- d.P.u[new.order, ]
-    d.clr <- apply(d.P, 2, function(x){log2(x) - mean(log2(x))})
+    d.clr <- t(t(log2(d.P)) - rowMeans(t(log2(d.P))))
 
     #distance matrix
     inp <- as.numeric(input$dismethod)
