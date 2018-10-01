@@ -431,7 +431,7 @@ formatModal <- function(failed = FALSE) {
    c_occur <- data.frame(table(colnames(inFile2)))
 
    #if frequency is more than one, show the "your format is wrong" modalDialog
-   if (max(r_occur$Freq) > 1) {
+   if (max(c_occur$Freq) > 1) {
      showModal(formatModal())
    } else {
      return(NULL)
