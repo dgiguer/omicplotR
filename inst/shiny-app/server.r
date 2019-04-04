@@ -451,7 +451,15 @@ formatModal <- function(failed = FALSE) {
       x <- omicplotr.metadataFilter(x, meta, column = metaval$data, values = vals$data)
     }
 
+    if (input$ebi_format == TRUE) {
+
+        x.filt <- omicplotr.filter(x[,3:ncol(x)], min.reads = min.reads, min.count = min.count, min.prop = min.prop, max.prop = max.prop, min.sum = min.sum)
+
+    } else {
+
     x.filt <- omicplotr.filter(x, min.reads = min.reads, min.count = min.count, min.prop = min.prop, max.prop = max.prop, min.sum = min.sum)
+}
+    return(x.filt)
 
   })
 
@@ -481,6 +489,7 @@ formatModal <- function(failed = FALSE) {
         data.t$taxonomy <- NULL
       }
 
+      browser()
       data.pr <- omicplotr.clr(data.t, var.filt)
 
     }
