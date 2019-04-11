@@ -348,7 +348,7 @@ formatModal <- function(failed = FALSE) {
    c_occur <- data.frame(table(colnames(inFile2)))
 
    #if frequency is more than one, show the "your format is wrong" modalDialog
-   if (max(r_occur$Freq) > 1) {
+   if (max(c_occur$Freq) > 1) {
      showModal(formatModal())
    } else {
      return(NULL)
@@ -356,7 +356,6 @@ formatModal <- function(failed = FALSE) {
  })
 
 ################################################################################
-
 
   #input ALDEx2 table
   effect_input <- reactive({
@@ -489,7 +488,6 @@ formatModal <- function(failed = FALSE) {
         data.t$taxonomy <- NULL
       }
 
-      browser()
       data.pr <- omicplotr.clr(data.t, var.filt)
 
     }
@@ -695,10 +693,13 @@ observeEvent(input$effectplot_ab, {
     # outputs
     #show removed OTUs/samples
     output$removedDT <- renderDataTable({
-      data.pr <- data.prcomp()
-      data.in <- data()
 
-      validate(need(input$showremoved, ""))
+      # catch error message
+      validate(need(data() != "", ""),
+          need(input$showremoved, ""))
+
+          data.pr <- data.prcomp()
+          data.in <- data()
 
       omicplotr.getRemovedSamples(data.in, data.pr)
     },
@@ -707,10 +708,14 @@ observeEvent(input$effectplot_ab, {
   )
 
   output$removedDTotu <- renderDataTable({
+
+
+    validate(need(data() != "", ""),
+              need(input$showremoved, "Click 'Show removed samples/OTUs' to view removed OTUs"))
+
     data.pr <- data.prcomp()
     data.in <- data()
 
-    validate(need(input$showremoved, "Click 'Show removed samples/OTUs' to view removed OTUs"))
 
     omicplotr.getRemovedFeatures(data.in, data.pr)
   },
@@ -821,6 +826,8 @@ observeEvent(input$effectplot_ab, {
   #biplot
   output$biplot <- renderPlot({
 
+      validate(need(data() !="", "Input a correctly formatted data file"))
+
     #get reactive objects
     data <- data.prcomp()
     tax <- data.t()
@@ -901,16 +908,19 @@ observeEvent(input$effectplot_ab, {
 
   #coloured biplot
   output$coloredBiplot <- renderPlot({
+
+      #file check
+      validate(need(data() !="", "Input a correctly formatted data file"))
+
     #get reactive objects
     d <- data()
-    data <- data.prcomp()
+    data.prcomp <- data.prcomp()
     tax <- data.t()
     tax.check <- data.check()
     meta <- metadata()
     cn <- column()
     taxoncheck <- input$taxoncheckbox
     taxselect <- as.numeric(input$taxlevel)
-    cols <- colours()
     opacity <- input$opacity_samples_pca
     sample_size <- input$size_samples_pca
 
@@ -918,7 +928,7 @@ observeEvent(input$effectplot_ab, {
 
     if (is.null(vals$data)) {
       #reactive metadata instead
-      df <- as.data.frame(unlist(dimnames(data$x)[1]))
+      df <- as.data.frame(unlist(dimnames(data.prcomp$x)[1]))
 
     } else {
       #order the metadata
@@ -933,7 +943,7 @@ observeEvent(input$effectplot_ab, {
       #filter metatable if it was filtered
       meta <- meta[which(meta[[metaval$data]] %in% s),]
 
-      df <- unlist(dimnames(data$x)[1])
+      df <- unlist(dimnames(data.prcomp$x)[1])
 
       df <- as.data.frame(df[which(df %in% rownames(meta))])
 
@@ -952,13 +962,17 @@ observeEvent(input$effectplot_ab, {
       d$taxonomy <- NULL
     }
 
-    colourvector <- omicplotr.colvec(data, meta, opacity, cn, type = input$colouringtype)
+    colourvector <- omicplotr.colvec(data.prcomp, meta, opacity, cn, type = input$colouringtype)
 
-    omicplotr.colouredPCA(data, colourvector, scale = input$scale, arrows = input$arrowcheckbox, taxonomy = tax$taxonomy, show.taxonomy = taxoncheck, tax.level = taxselect, removenames = input$removesamplenames, names.cex=sample_size)
+    omicplotr.colouredPCA(data.prcomp, colourvector, scale = input$scale, arrows = input$arrowcheckbox, taxonomy = tax$taxonomy, show.taxonomy = taxoncheck, tax.level = taxselect, removenames = input$removesamplenames, names.cex=sample_size)
   })
 
   #histograms
   output$metahist <- renderPlot({
+
+      # file check
+      validate(need(data() !="", ""))
+
     #import reactive objects
     cn <- column()
     meta <- metadata()
@@ -1096,6 +1110,10 @@ observeEvent(input$effectplot_ab, {
 
   #generate screeplot
   output$screeplot <- renderPlot({
+
+      # file check
+      validate(need(data() !="", ""))
+
     data <- data.prcomp()
 
     #if no data don't display anything
@@ -1162,6 +1180,127 @@ observeEvent(input$effectplot_ab, {
       legend("topright", legend = c("Remaining", "Removed"), col = c("black", "grey"), pch = 19)
     }
   })
+
+##############################################################################
+
+goslim_stripchart <- reactive({
+
+        # sanity checks. user needs data and EBI formatted data.
+        validate(
+            need(data() != "", "You need data. Input your data."),
+            need(input$ebi_format == TRUE, "This page requires a GO Slim formatted count table. Input the correctly formatted data, and check the GO Slim format box to generate a plot.")
+        )
+
+         # get input date
+         data <- data()
+         data.prcomp <- data.prcomp()
+         meta <- metadata()
+         opacity <- input$opacity_samples_pca
+         cn <- column()
+
+
+
+         colourvector <- omicplotr.colvec(data.prcomp, meta, opacity, cn, type = input$colouringtype)
+
+
+
+         createStripcharts <- function(data) {
+
+             #create dataframe with 0.5 added so there are no zeros for log function later
+             data.n0 <- cbind(data[,1:2], data[,3:ncol(data)] + 0.5)
+
+             #create dataframes with information needed (calculated percent reads)
+             molFunSet <- subset(data.n0, category == "molecular function")
+             logMFSet <- cbind(molFunSet[,1:2], log(molFunSet[,3:ncol(molFunSet)]))
+             finalMFSet <- (logMFSet[,3:ncol(logMFSet)]) - colMeans(logMFSet[,3:ncol(logMFSet)])
+             rownames(finalMFSet) <- molFunSet[,1]
+
+             bioProcSet <- subset(data.n0, category == "biological process")
+             logBPSet <- cbind(bioProcSet[,1:2], log(bioProcSet[,3:ncol(bioProcSet)]))
+             finalBPSet <- (logBPSet[,3:ncol(logBPSet)]) - colMeans(logBPSet[,3:ncol(logBPSet)])
+             rownames(finalBPSet) <- bioProcSet[,1]
+
+             cellCompSet <- subset(data.n0, category == "cellular component")
+             logCCSet <- cbind(cellCompSet[,1:2], log(cellCompSet[,3:ncol(cellCompSet)]))
+             finalCCSet <- (logCCSet[,3:ncol(logCCSet)]) - colMeans(logCCSet[,3:ncol(logCCSet)])
+             rownames(finalCCSet) <- cellCompSet[,1]
+
+             #create room for description titles
+             par(mar=c(5.1, 23.1, 4.1, 1.1))
+             par(mfrow=c(1,3))
+
+             #loop to create and colour stripcharts
+             for (i in 1:length(finalMFSet)) {
+                 if (i == 1) {
+                     stripchart(finalMFSet[,i] ~ rownames(finalMFSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, cex.axis = 0.8, group.names = rownames(finalMFSet), xlab = "Centered Log of Percent Reads", col = colourvector[i], main = "Molecular Function")
+                 }
+                 else {
+                     stripchart(finalMFSet[,i] ~ rownames(finalMFSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, add = TRUE, col = colourvector[i])
+                 }
+             }
+
+             #loop to divide description from description and ease readability
+             for (j in 0.5:(length(rownames(finalMFSet))+0.5)){
+                 abline(h=j, lty=3, col="grey80")
+             }
+
+             #add vertical line to mark x = 0
+             abline(v=0, lty=3, col = "black")
+
+             #loop to create and colour stripcharts
+             for (i in 1:length(finalBPSet)) {
+                 if (i == 1) {
+                     stripchart(finalBPSet[,i] ~ rownames(finalBPSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, cex.axis = 0.8, group.names = rownames(finalBPSet), xlab = "Centered Log of Percent Reads", col = colourvector[i], main = "Biological Process")
+                 }
+                 else {
+                     stripchart(finalBPSet[,i] ~ rownames(finalBPSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, add = TRUE, col = colourvector[i])
+                 }
+             }
+
+             #loop to divide description from description and ease readability
+             for (j in 0.5:(length(rownames(finalBPSet))+0.5)){
+                 abline(h=j, lty=3, col="grey80")
+             }
+
+             #add vertical line to mark x = 0
+             abline(v=0, lty=3, col = "black")
+
+             #loop to create and colour stripcharts
+             for (i in 1:length(finalCCSet)) {
+                 if (i == 1) {
+                     stripchart(finalCCSet[,i] ~ rownames(finalCCSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, cex.axis = 0.8, group.names = rownames(finalCCSet), xlab = "Centered Log of Percent Reads", col = colourvector[i], main = "Cellular Component")
+                 }
+                 else {
+                     stripchart(finalCCSet[,i] ~ rownames(finalCCSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, add = TRUE, col = colourvector[i])
+                 }
+             }
+
+             #loop to divide description from description and ease readability
+             for (j in 0.5:(length(rownames(finalCCSet))+0.5)){
+                 abline(h=j, lty=3, col="grey80")
+             }
+
+             #add vertical line to mark x = 0
+             abline(v=0, lty=3, col = "black")
+         }
+
+         if (input$returnpdf) {
+             pdf("goslim_stripchart.pdf", width = 25, height = nrow(data)/6.8)
+            createStripcharts(data)
+            dev.off()
+         }
+         createStripcharts(data)
+     })
+
+output$ebi_stripchart <- renderPlot({goslim_stripchart()})
+output$pdflink <- downloadHandler(
+    filename <- "ebi_stripchart.pdf",
+    content <- function(file) {
+        file.copy("goslim_stripchart.pdf", file)
+    }
+)
+output$pdf_note <- renderText({"Note: it may take several seconds to generate the PDF before download is available."})
+
 
   ##############################################################################
   #this will be implemented in a later version
@@ -1251,6 +1390,9 @@ observeEvent(input$effectplot_ab, {
 
   #dendrogram
   output$dendrogram <- renderPlot({
+
+      validate(need(data.check() == FALSE, "These plots require a count table with the final column titled taxonomy. Ensure the input is correctly formatted."))
+
     x <- data.t()
     meta <- metadata()
     abund <- input$abundcutoffbarplot
@@ -1343,6 +1485,10 @@ observeEvent(input$effectplot_ab, {
 
   #taoxnomic distribution
   output$barplot <- renderPlot({
+
+      #no need for message to be repeated, but still squashes error.
+    validate(need(data.check() == FALSE, ""))
+
     x <- data.t()
     meta <- metadata()
     abund <- input$abundcutoffbarplot
@@ -1477,6 +1623,10 @@ BA.point.colour <- eventReactive(input$update_points, {
 
 #effect plots after calculating
 output$effectMW <- renderPlot({
+
+    # ensure data is inputted
+    validate(need(data() != "", ""))
+
   x.all <- aldex.obj()
 
  if (input$effectplot_ab) {
@@ -1491,6 +1641,10 @@ output$effectMW <- renderPlot({
   })
 
 output$effectMA <- renderPlot({
+
+    # ensure data is inputted
+    validate(need(data() != "", ""))
+
   x.all <- aldex.obj()
  if (input$effectplot_ab) {
     if (is.null(x.all)){
@@ -1504,6 +1658,10 @@ output$effectMA <- renderPlot({
 
 #effect plots for inputted aldex table
 output$table_effect <- renderPlot({
+
+    # ensure data is inputted
+    validate(need(data() != "", ""))
+
   effect <- effect_input()
   point.colour <- input$point.colour
 
@@ -1524,6 +1682,10 @@ output$table_effect <- renderPlot({
 
 #effect plots for inputted aldex table
 output$table_bland <- renderPlot({
+
+    # ensure data is inputted
+    validate(need(data() != "", ""))
+
   effect <- effect_input()
   point.colour <- input$point.colour
 
@@ -1558,6 +1720,10 @@ output$ma_hovertext <- renderUI({
 
 #display information of hovered point
 output$mw_hovertext <- renderUI({
+
+    # ensure data is inputted
+    validate(need(data() != "", ""))
+
   x.all <- aldex.obj()
   a <- d.clr()
 
@@ -1583,6 +1749,11 @@ output$mw_hovertext <- renderUI({
 #strip chart of expected CLR values for each sample per condition of hovered
 # point
 output$stripchart <- renderPlot({
+
+    # ensure data is inputted
+    validate(need(data() != "", "You need data. Input your data."))
+
+
   x <- data.t()
   cond1 <- input$group1s
   cond2 <- input$group2s

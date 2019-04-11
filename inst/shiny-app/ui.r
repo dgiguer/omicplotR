@@ -208,6 +208,17 @@ sidebarLayout(
     )
 )
 ),
+tabPanel("GO slim annotation",
+    sidebarPanel(width = 2,
+        checkboxInput("returnpdf", "Output PDF", FALSE),
+        conditionalPanel(
+            condition = "input.returnpdf == true",
+            downloadLink("pdflink"),
+            textOutput("pdf_note")
+        )
+    ),
+	wellPanel(plotOutput("ebi_stripchart", height = "1400px"), style = "overflow-y:scroll; max-height: 700px")
+),
 tabPanel("Effect plots",
 sidebarLayout(
     sidebarPanel(
