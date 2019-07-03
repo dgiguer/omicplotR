@@ -29,22 +29,28 @@ sidebarLayout(
             selected = "Data",
             tabPanel(
                 "Data",
-                fileInput(
+                fluidRow(
+                    column(6, fileInput(
                     'file1',
-                    label = h3('Choose Data'),
-                    accept = c('text/csv',
-                    'text/comma-separated-values,text/plain',
-                    '.csv')
+                    label = h3('Choose Data'))
                 ),
-                actionButton("showdata", "Check data"),
-
-                fileInput(
-                    'file2',
-                    h3('Choose Metadata'),
-                    accept = c('text/csv',
-                    'text/comma-separated-values,text/plain', '.csv')
+                    column(6, fileInput(
+                            'file2',
+                            h3('Choose Metadata'),
+                            accept = c('text/csv',
+                            'text/comma-separated-values,text/plain', '.csv'))
+                        )), #fluidrow
+                    checkboxInput("ebi_format", "Click if data is being downloaded from the MGnify datase"),
+                    h3(textOutput("EBI_data")),
+                    #input EBI project
+                fluidRow(
+                    column(6, h3(actionButton("input_ebi_project", "Download dataset from EBI")))
                 ),
-                actionButton("showmetadata", "Check metadata")),
+                fluidRow(
+                    column(6, actionButton("showdata", "Check data")),
+                    column(6, actionButton("showmetadata", "Check metadata"))
+                )
+            ), #tabpanel
                 tabPanel(
                     "Example Data",
                     checkboxInput("exampledata", "Vaginal dataset (data and metadata)"),
@@ -121,7 +127,7 @@ sidebarLayout(
         actionButton("choosemeta", "Filter by metadata values"),
         textOutput("test"),
         checkboxInput("removesamplenames", label = "Remove sample names"),
-        checkboxInput("arrowcheckbox", label = "Remove arrows", value = FALSE),
+        checkboxInput("arrowcheckbox", label = "Add arrows", value = FALSE),
         checkboxInput("taxoncheckbox", label = "Show taxonomy", value = FALSE),
         uiOutput("taxchoice")
         #,
@@ -201,6 +207,17 @@ sidebarLayout(
         ))
     )
 )
+),
+tabPanel("GO slim annotation",
+    sidebarPanel(width = 2,
+        checkboxInput("returnpdf", "Output PDF", FALSE),
+        conditionalPanel(
+            condition = "input.returnpdf == true",
+            downloadLink("pdflink"),
+            textOutput("pdf_note")
+        )
+    ),
+	wellPanel(plotOutput("ebi_stripchart", height = "auto"), style = "overflow-y:scroll")
 ),
 tabPanel("Effect plots",
 sidebarLayout(

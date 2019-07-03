@@ -1,4 +1,4 @@
-server <- function(input, output) {
+server <- function(input, output, session) {
 
 ################################################################################
     #downloads
@@ -69,6 +69,13 @@ server <- function(input, output) {
         }
     )
 
+    output$ebi_counts_download <- downloadHandler(
+        filename = "ebi_counts.txt",
+        content = function(file) {
+            write.table(vals$ebi_counts, file, sep = "\t", quote = FALSE, col.names = TRUE, row.names = FALSE)
+        }
+    )
+
 ################################################################################
   #observe events
   #quit button
@@ -95,6 +102,142 @@ server <- function(input, output) {
     metaval$data <- input$select_biplot_filter
     removeModal()
   })
+
+  #pop up the modal for EBI input
+    observeEvent(input$input_ebi_project, {
+      showModal(ebiModal())
+    })
+
+    #convert input to reactive object
+    observeEvent(input$update_EBI, {
+
+        # make progress bar object
+        progress <- shiny::Progress$new()
+        # close on exit
+        on.exit(progress$close())
+
+        # set to zero
+        progress$set(message = "Downloading dataset", value = 0)
+
+        # get the MGnify project ID from the input
+        sample_id <- input$ebi_id
+
+        # base for MGnify api
+        api_base = 'https://www.ebi.ac.uk/metagenomics/api/latest/'
+
+        # define link to get samples
+        samples_link <- paste0(api_base, "studies/", sample_id, "/samples")
+
+        # extract number of pages to collect all samples by getting
+        # number of pages from last page line
+        last_link <- fromJSON(paste0(samples_link, "?page=1"))$links$last
+        num_pages <- substr(last_link, nchar(last_link), nchar(last_link) + 1)
+
+        # initiate all samples vector
+        all_samples <- c()
+
+        # update progress bar
+
+        progress$inc(1/5, detail = "All samples found")
+
+        # loop through all pages to get all sample names
+        for (i in 1:num_pages) {
+            current_samples <- fromJSON(paste0(samples_link, "?page=", i))$data$id
+            all_samples <- c(all_samples, current_samples)
+        }
+
+
+
+        # for each sample name, get the list of runs
+        runs_link <- paste0(api_base, "samples/")
+
+        # loop through all samples to get all runs that are associated
+        all_runs <- c()
+
+        progress$inc(0, detail = "Downloading runs...")
+
+        # this loops through the samples and gets all the run numbers. it takes a while for some reason (about 25 seconds for 70 samples)
+        for (i in seq(all_samples)) {
+            current_run <- fromJSON(paste0(runs_link, all_samples[i], "/runs"))$data$id
+            all_runs <- c(all_runs, current_run)
+
+            # print status message
+        message(paste0("Finished getting run for sample ", all_samples[i]))
+        progress$inc(0, detail = paste0("Downloading runs... ", i, "/", length(all_samples)))
+        }
+
+        progress$inc(1/5, detail = "All runs downloaded")
+
+        # download the analysis accession for each of the runs
+        go_slim_link <- paste0(api_base, "runs/")
+
+        # get accession numbers for all runs
+        all_acc <- c()
+
+        progress$inc(0, detail = "Downloading accessions...")
+
+        for (i in seq(all_runs)) {
+            current_acc <- fromJSON(paste0(go_slim_link, all_runs[i], "/analyses"))$data$id
+            all_acc <- c(all_acc, current_acc)
+            # show message to give status
+            message(paste0("Finished getting accession for run ", all_runs[i]))
+
+            progress$inc(0, detail = paste0("Downloading accessions... ", i, "/", length(all_runs)))
+        }
+
+        progress$inc(1/5, detail = "All accessions found")
+
+        # download counts for every accession
+        analyses_link <- "https://www.ebi.ac.uk/metagenomics/api/v1/analyses/"
+
+        # set up the counts table with the GO terms
+        all_counts <- data.frame(GO = fromJSON(paste0(analyses_link, all_acc[i], "/go-slim"))$data$attributes$accession)
+
+        all_counts$description <- fromJSON(paste0(analyses_link, all_acc[i], "/go-slim"))$data$attributes$description
+
+        all_counts$category <- fromJSON(paste0(analyses_link, all_acc[i], "/go-slim"))$data$attributes$lineage
+
+        # add columns for each run, name appropriately (+3 is because first three columns are descriptors
+        all_counts[,4:(length(all_runs)+3)] <- "NA"
+
+        # rename columns with run numbers
+        colnames(all_counts)[4:length(all_counts)] <- all_runs
+
+        progress$inc(0, detail = "Downloading count tables...")
+
+        # add counts to the data table by column
+        # this downloads go-slim counts for every sample.
+        for (i in seq(all_acc)) {
+
+            current_count <- fromJSON(paste0(analyses_link, all_acc[i], "/go-slim"))$data$attributes$count
+
+            message(paste0("Finished accession ", all_acc[i]))
+
+            progress$inc(0, detail = paste0("Downloading count tables... ", i, "/", length(all_acc)))
+
+            # replace column column with counts for each accession, increments each iteration
+            all_counts[,3+i] <- current_count
+        }
+
+        progress$inc(1/5, detail = "All count tables downloaded")
+
+        vals$ebi_counts <- all_counts
+
+        # count table generated
+        progress$inc(0, detail = "Merged count table generated")
+
+        # remove modal
+        removeModal()
+
+        # give pop up for saving file
+        vals$download_finished <- TRUE
+    })
+
+    observeEvent(input$update_EBI, {
+        if (vals$download_finished == TRUE) {
+            showModal(ebi_download_modal())
+        }
+    })
 
   #dendrogram brush ranges
   ranges <- reactiveValues(x = NULL, y = NULL)
@@ -143,6 +286,25 @@ server <- function(input, output) {
     )
   }
 
+  #pop up for inputting ebi project numberq
+    ebiModal <- function (x) {
+        modalDialog(
+                textInput("ebi_id", "EBI Project ID", placeholder = "Project ID"),
+                title = "Download EBI project to explore",
+                "Enter the MGnify study ID (for example: MGYS00001110) to download the GO slim annotation for all samples. This will take a few minutes to gather all data depending on the size of the study. Internet access if required. Do not close window while download is in progress. File will be automatically inputted after downloading.",
+              footer = tagList(actionButton("update_EBI", "Download and input"),
+                modalButton("Cancel")),
+                easyClose = TRUE
+        )
+    }
+
+    ebi_download_modal <- function (x) {
+        modalDialog(
+            title = "Save counts table?", "Click yes to save the counts table locally. Input this file to avoid redownloading the data.",
+            footer = tagList(h3(downloadButton("ebi_counts_download", "Yes")), modalButton("No"), modalButton("Close this window")), easyClose = TRUE
+        )
+    }
+
   output$taxchoice <- renderUI({
     if (input$taxoncheckbox) {
       radioButtons("taxlevel",
@@ -184,6 +346,7 @@ output$conditions<- renderUI({
     meta <- metadata()
     options <- colnames(meta)
     cn <- input$colselect
+
     choice <- unique(meta[[cn]])
     tagList(
       selectInput("group1", "Choose group 1", choices = choice),
@@ -214,8 +377,7 @@ output$conditions<- renderUI({
         comment.char = "",
         na.strings = ""
       )
-    } else {
-      if (input$exampledata2) {
+  } else if (input$exampledata2) {
         read.table(
           "selex.txt",
           header = TRUE,
@@ -226,8 +388,43 @@ output$conditions<- renderUI({
           check.names = FALSE,
           comment.char = "",
           na.strings = ""
-        )
-      } else{
+      )} else if (!is.null(vals$ebi_counts)) {
+            # load downloaded file as input
+            data <- vals$ebi_counts
+
+            # make rownames descriotion
+            rownames(data) <- data$description
+
+            # rearrange, put descriptors at end so it's easy to take off
+            data <- cbind(data[,4:length(data)], GO = data[,1], category = data[,3])
+
+        } else if (input$ebi_format == TRUE) {
+
+            #reactive input file
+            inFile <- input$file1
+
+            #return NULL when no file is uploaded
+            if (is.null(inFile))
+            return(NULL)
+
+            # input EBI formatted data
+                data <- read.table(
+                  inFile$datapath,
+                  header = TRUE,
+                  sep = "\t",
+                  stringsAsFactors = FALSE,
+                  quote = "",
+                  row.names = NULL,
+                  check.names = FALSE,
+                  comment.char = "",
+                  na.strings = "")
+
+                  # make rownames descriotion
+                  rownames(data) <- data$description
+
+                  # rearrange, put descriptors at end so it's easy to take off
+                  data <- cbind(data[,4:length(data)], GO = data[,1], category = data[,3])
+        } else {
         #reactive input file
         inFile <- input$file1
 
@@ -255,9 +452,8 @@ output$conditions<- renderUI({
           #if no error, then continue
           data <- data
         }
-      }
-    }
-  })
+        }
+}) #reactive
 
   #get metadata from uploaded file
   metadata <- reactive({
@@ -348,7 +544,7 @@ formatModal <- function(failed = FALSE) {
    c_occur <- data.frame(table(colnames(inFile2)))
 
    #if frequency is more than one, show the "your format is wrong" modalDialog
-   if (max(r_occur$Freq) > 1) {
+   if (max(c_occur$Freq) > 1) {
      showModal(formatModal())
    } else {
      return(NULL)
@@ -356,7 +552,6 @@ formatModal <- function(failed = FALSE) {
  })
 
 ################################################################################
-
 
   #input ALDEx2 table
   effect_input <- reactive({
@@ -426,6 +621,7 @@ formatModal <- function(failed = FALSE) {
     meta <- metadata()
     cn <- column()
 
+
     #set to zero, but inputs from sliders/numeric inputs
     min.count <- input$mincounts
     min.prop <- input$minprop
@@ -451,7 +647,15 @@ formatModal <- function(failed = FALSE) {
       x <- omicplotr.metadataFilter(x, meta, column = metaval$data, values = vals$data)
     }
 
+    if (input$ebi_format == TRUE) {
+        # remove last two columns (GO terms and descriptor columns)
+        x.filt <- omicplotr.filter(x[,1:(ncol(x)-2)], min.reads = min.reads, min.count = min.count, min.prop = min.prop, max.prop = max.prop, min.sum = min.sum)
+
+    } else {
+
     x.filt <- omicplotr.filter(x, min.reads = min.reads, min.count = min.count, min.prop = min.prop, max.prop = max.prop, min.sum = min.sum)
+}
+    return(x.filt)
 
   })
 
@@ -633,10 +837,10 @@ observeEvent(input$effectplot_ab, {
         # Run a t-test between the two groups specified by conds
         #TODO option to generate effect plots ttest to save time.
         # this will require changing aldex.plot in effect plot output
-        x.tt <- aldex.ttest(d.clr, conds, paired.test=FALSE)
+        x.tt <- aldex.ttest(d.clr, paired.test=FALSE)
         incProgress(1/4, message = "Calculating effect size...")
         # Generate effect sizes
-        x.effect <- aldex.effect(d.clr, conds, include.sample.summary=TRUE,
+        x.effect <- aldex.effect(d.clr, include.sample.summary=TRUE,
           verbose=TRUE)
           incProgress(1/4, message = "Efect sizes calculated")
         }
@@ -659,7 +863,7 @@ observeEvent(input$effectplot_ab, {
           sample.means <- numeric()
 
           # Get sample's MC Instances for features
-          MC.matrix <- getMonteCarloReplicate(x, i)
+          MC.matrix <- getMonteCarloInstance(x, i)
 
           # Iterating features
           for(j in seq_len(numFeatures(x))) {
@@ -686,10 +890,13 @@ observeEvent(input$effectplot_ab, {
     # outputs
     #show removed OTUs/samples
     output$removedDT <- renderDataTable({
-      data.pr <- data.prcomp()
-      data.in <- data()
 
-      validate(need(input$showremoved, ""))
+      # catch error message
+      validate(need(data() != "", ""),
+          need(input$showremoved, ""))
+
+          data.pr <- data.prcomp()
+          data.in <- data()
 
       omicplotr.getRemovedSamples(data.in, data.pr)
     },
@@ -698,10 +905,14 @@ observeEvent(input$effectplot_ab, {
   )
 
   output$removedDTotu <- renderDataTable({
+
+
+    validate(need(data() != "", ""),
+              need(input$showremoved, "Click 'Show removed samples/OTUs' to view removed OTUs"))
+
     data.pr <- data.prcomp()
     data.in <- data()
 
-    validate(need(input$showremoved, "Click 'Show removed samples/OTUs' to view removed OTUs"))
 
     omicplotr.getRemovedFeatures(data.in, data.pr)
   },
@@ -785,7 +996,7 @@ observeEvent(input$effectplot_ab, {
     if (input$showdata) {
       data <- data()
 
-      output <- cbind(OTUs = rownames(data), data)
+      output <- cbind(Features = rownames(data), data)
 
     }
   }, options = list(scrollX = TRUE)) #force data table to window size
@@ -811,6 +1022,8 @@ observeEvent(input$effectplot_ab, {
 
   #biplot
   output$biplot <- renderPlot({
+
+      validate(need(data() !="", "Input a correctly formatted data file"))
 
     #get reactive objects
     data <- data.prcomp()
@@ -892,16 +1105,19 @@ observeEvent(input$effectplot_ab, {
 
   #coloured biplot
   output$coloredBiplot <- renderPlot({
+
+      #file check
+      validate(need(data() !="", "Input a correctly formatted data file"))
+
     #get reactive objects
     d <- data()
-    data <- data.prcomp()
+    data.prcomp <- data.prcomp()
     tax <- data.t()
     tax.check <- data.check()
     meta <- metadata()
     cn <- column()
     taxoncheck <- input$taxoncheckbox
     taxselect <- as.numeric(input$taxlevel)
-    cols <- colours()
     opacity <- input$opacity_samples_pca
     sample_size <- input$size_samples_pca
 
@@ -909,7 +1125,7 @@ observeEvent(input$effectplot_ab, {
 
     if (is.null(vals$data)) {
       #reactive metadata instead
-      df <- as.data.frame(unlist(dimnames(data$x)[1]))
+      df <- as.data.frame(unlist(dimnames(data.prcomp$x)[1]))
 
     } else {
       #order the metadata
@@ -924,7 +1140,7 @@ observeEvent(input$effectplot_ab, {
       #filter metatable if it was filtered
       meta <- meta[which(meta[[metaval$data]] %in% s),]
 
-      df <- unlist(dimnames(data$x)[1])
+      df <- unlist(dimnames(data.prcomp$x)[1])
 
       df <- as.data.frame(df[which(df %in% rownames(meta))])
 
@@ -943,13 +1159,17 @@ observeEvent(input$effectplot_ab, {
       d$taxonomy <- NULL
     }
 
-    colourvector <- omicplotr.colvec(data, meta, opacity, cn, type = input$colouringtype)
+    colourvector <- omicplotr.colvec(data.prcomp, meta, opacity, cn, type = input$colouringtype)
 
-    omicplotr.colouredPCA(data, colourvector, scale = input$scale, arrows = input$arrowcheckbox, taxonomy = tax$taxonomy, show.taxonomy = taxoncheck, tax.level = taxselect, removenames = input$removesamplenames, names.cex=sample_size)
+    omicplotr.colouredPCA(data.prcomp, colourvector, scale = input$scale, arrows = input$arrowcheckbox, taxonomy = tax$taxonomy, show.taxonomy = taxoncheck, tax.level = taxselect, removenames = input$removesamplenames, names.cex=sample_size)
   })
 
   #histograms
   output$metahist <- renderPlot({
+
+      # file check
+      validate(need(data() !="", ""))
+
     #import reactive objects
     cn <- column()
     meta <- metadata()
@@ -1087,6 +1307,10 @@ observeEvent(input$effectplot_ab, {
 
   #generate screeplot
   output$screeplot <- renderPlot({
+
+      # file check
+      validate(need(data() !="", ""))
+
     data <- data.prcomp()
 
     #if no data don't display anything
@@ -1153,6 +1377,148 @@ observeEvent(input$effectplot_ab, {
       legend("topright", legend = c("Remaining", "Removed"), col = c("black", "grey"), pch = 19)
     }
   })
+
+##############################################################################
+
+goslim_stripchart <- reactive({
+
+        # sanity checks. user needs data and EBI formatted data.
+        validate(
+            need(data() != "", "You need data. Input your data."),
+            need(input$ebi_format == TRUE, "This page requires a GO Slim formatted count table. Input the correctly formatted data, and check the GO Slim format box to generate a plot.")
+        )
+
+         # get input date
+         data <- data()
+         data.prcomp <- data.prcomp()
+         meta <- metadata()
+         opacity <- input$opacity_samples_pca
+         cn <- column()
+
+
+        # rearrange the input to format for strip chart function
+        data <- cbind(GO = data$GO, category = data$category, data[,1:(ncol(data) - 2)])
+
+        # if metadata is absent, don't colour by sample.
+
+        # metadata present
+
+        if (!is.null(meta)) {
+            colourvector <- omicplotr.colvec(data.prcomp, meta, opacity, cn, type = input$colouringtype)
+
+        } else {
+
+            # no metadata
+            # make colourvector for number of samples
+            colourvector <- colorRampPalette(c("black", "white"))(length(data) - 2)
+        }
+
+         createStripcharts <- function(data) {
+
+             #create dataframe with 0.5 added so there are no zeros for log function later
+
+             data.n0 <- cbind(data[,1:2], data[,3:ncol(data)] + 0.5)
+
+             #create dataframes with information needed (calculated percent reads)
+             molFunSet <- subset(data.n0, category == "molecular_function")
+             logMFSet <- cbind(molFunSet[,1:2], log(molFunSet[,3:ncol(molFunSet)]))
+             finalMFSet <- (logMFSet[,3:ncol(logMFSet)]) - colMeans(logMFSet[,3:ncol(logMFSet)])
+             #rownames(finalMFSet) <- molFunSet[,1]
+
+             bioProcSet <- subset(data.n0, category == "biological_process")
+             logBPSet <- cbind(bioProcSet[,1:2], log(bioProcSet[,3:ncol(bioProcSet)]))
+             finalBPSet <- (logBPSet[,3:ncol(logBPSet)]) - colMeans(logBPSet[,3:ncol(logBPSet)])
+             #rownames(finalBPSet) <- bioProcSet[,1]
+
+             cellCompSet <- subset(data.n0, category == "cellular_component")
+             logCCSet <- cbind(cellCompSet[,1:2], log(cellCompSet[,3:ncol(cellCompSet)]))
+             finalCCSet <- (logCCSet[,3:ncol(logCCSet)]) - colMeans(logCCSet[,3:ncol(logCCSet)])
+             #rownames(finalCCSet) <- cellCompSet[,1]
+
+             #create room for description titles
+             par(mar=c(5.1, 23.1, 4.1, 1.1))
+             par(mfrow=c(1,3))
+
+             #loop to create and colour stripcharts
+             for (i in 1:length(finalMFSet)) {
+                 if (i == 1) {
+                     stripchart(finalMFSet[,i] ~ rownames(finalMFSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, cex.axis = 0.8, group.names = rownames(finalMFSet), xlab = "Centered Log of Percent Reads", col = colourvector[i], main = "Molecular Function")
+                 }
+                 else {
+                     stripchart(finalMFSet[,i] ~ rownames(finalMFSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, add = TRUE, col = colourvector[i])
+                 }
+             }
+
+             #loop to divide description from description and ease readability
+             for (j in 0.5:(length(rownames(finalMFSet))+0.5)){
+                 abline(h=j, lty=3, col="grey80")
+             }
+
+             #add vertical line to mark x = 0
+             abline(v=0, lty=3, col = "black")
+
+             #loop to create and colour stripcharts
+             for (i in 1:length(finalBPSet)) {
+                 if (i == 1) {
+                     stripchart(finalBPSet[,i] ~ rownames(finalBPSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, cex.axis = 0.8, group.names = rownames(finalBPSet), xlab = "Centered Log of Percent Reads", col = colourvector[i], main = "Biological Process")
+                 }
+                 else {
+                     stripchart(finalBPSet[,i] ~ rownames(finalBPSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, add = TRUE, col = colourvector[i])
+                 }
+             }
+
+             #loop to divide description from description and ease readability
+             for (j in 0.5:(length(rownames(finalBPSet))+0.5)){
+                 abline(h=j, lty=3, col="grey80")
+             }
+
+             #add vertical line to mark x = 0
+             abline(v=0, lty=3, col = "black")
+
+             #loop to create and colour stripcharts
+             for (i in 1:length(finalCCSet)) {
+                 if (i == 1) {
+                     stripchart(finalCCSet[,i] ~ rownames(finalCCSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, cex.axis = 0.8, group.names = rownames(finalCCSet), xlab = "Centered Log of Percent Reads", col = colourvector[i], main = "Cellular Component")
+                 }
+                 else {
+                     stripchart(finalCCSet[,i] ~ rownames(finalCCSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, add = TRUE, col = colourvector[i])
+                 }
+             }
+
+             #loop to divide description from description and ease readability
+             for (j in 0.5:(length(rownames(finalCCSet))+0.5)){
+                 abline(h=j, lty=3, col="grey80")
+             }
+
+             #add vertical line to mark x = 0
+             abline(v=0, lty=3, col = "black")
+         }
+
+         if (input$returnpdf) {
+             pdf("goslim_stripchart.pdf", width = 25, height = nrow(data)/6.8)
+            createStripcharts(data)
+            dev.off()
+         }
+         createStripcharts(data)
+     })
+
+# this dynamically sets the height to adjust to the size of the window.
+output$ebi_stripchart <- renderPlot(expr = {goslim_stripchart()},
+
+# dynamically gets height of plotting window.
+height = function() {
+    session$clientData$output_ebi_stripchart_width
+}
+
+)
+output$pdflink <- downloadHandler(
+    filename <- "ebi_stripchart.pdf",
+    content <- function(file) {
+        file.copy("goslim_stripchart.pdf", file)
+    }
+)
+output$pdf_note <- renderText({"Note: it may take several seconds to generate the PDF before download is available."})
+
 
   ##############################################################################
   #this will be implemented in a later version
@@ -1242,6 +1608,9 @@ observeEvent(input$effectplot_ab, {
 
   #dendrogram
   output$dendrogram <- renderPlot({
+
+      validate(need(data.check() == FALSE, "These plots require a count table with the final column titled taxonomy. Ensure the input is correctly formatted."))
+
     x <- data.t()
     meta <- metadata()
     abund <- input$abundcutoffbarplot
@@ -1334,6 +1703,10 @@ observeEvent(input$effectplot_ab, {
 
   #taoxnomic distribution
   output$barplot <- renderPlot({
+
+      #no need for message to be repeated, but still squashes error.
+    validate(need(data.check() == FALSE, ""))
+
     x <- data.t()
     meta <- metadata()
     abund <- input$abundcutoffbarplot
@@ -1468,6 +1841,10 @@ BA.point.colour <- eventReactive(input$update_points, {
 
 #effect plots after calculating
 output$effectMW <- renderPlot({
+
+    # ensure data is inputted
+    validate(need(data() != "", ""))
+
   x.all <- aldex.obj()
 
  if (input$effectplot_ab) {
@@ -1482,6 +1859,10 @@ output$effectMW <- renderPlot({
   })
 
 output$effectMA <- renderPlot({
+
+    # ensure data is inputted
+    validate(need(data() != "", ""))
+
   x.all <- aldex.obj()
  if (input$effectplot_ab) {
     if (is.null(x.all)){
@@ -1495,6 +1876,10 @@ output$effectMA <- renderPlot({
 
 #effect plots for inputted aldex table
 output$table_effect <- renderPlot({
+
+    # ensure data is inputted
+    validate(need(data() != "", ""))
+
   effect <- effect_input()
   point.colour <- input$point.colour
 
@@ -1515,6 +1900,10 @@ output$table_effect <- renderPlot({
 
 #effect plots for inputted aldex table
 output$table_bland <- renderPlot({
+
+    # ensure data is inputted
+    validate(need(data() != "", ""))
+
   effect <- effect_input()
   point.colour <- input$point.colour
 
@@ -1549,6 +1938,10 @@ output$ma_hovertext <- renderUI({
 
 #display information of hovered point
 output$mw_hovertext <- renderUI({
+
+    # ensure data is inputted
+    validate(need(data() != "", ""))
+
   x.all <- aldex.obj()
   a <- d.clr()
 
@@ -1574,81 +1967,31 @@ output$mw_hovertext <- renderUI({
 #strip chart of expected CLR values for each sample per condition of hovered
 # point
 output$stripchart <- renderPlot({
-  x <- data.t()
-  cond1 <- input$group1s
-  cond2 <- input$group2s
-  g1s <- input$group1s
-  g2s <- input$group2s
-  obj <- clr.strip()
-  x.all <- aldex.obj()
-  meta <- metadata()
-  cn <- input$colselect
-  group1 <- input$group1
-  group2 <- input$group2
 
-  if (is.null(vals$data)) {
-    x <- x
-  } else {
+    # ensure data is inputted
+    validate(need(data() != "", "You need data. Input your data."))
+    x.all <- aldex.obj()
+    d.clr <- d.clr()
 
-    x <- omicplotr.metadataFilter(x, meta, column = metaval$data, values = vals$data)
+if (!is.null(input$mw_hover)){
 
-    #meta <- meta[which(rownames(meta) %in% colnames(x)),]
+# notify user that specific version is needed for density plots
+validate(need(packageVersion("ALDEx2") == "1.15.5", "This density plot requires a specific development version of ALDEx2 to be installed directly from Github. Use: remove.packages(\"ALDEx2\") and  devtools::install_github(\"brandonlieng/ALDEX_bioc\", ref = \"aldex-dev\")"))
+
+feature <- nearPoints(x.all, input$mw_hover, xvar = "diff.win", yvar = "diff.btw", maxpoints = 1)
+
+# only plot if one feature select
+if (dim(feature)[1] == 1) {
+aldex.plotFeature(d.clr, rownames(feature), pooledOnly=TRUE, densityOnly=TRUE)
+}
+} else {
+
+    #HTML("Hover over MW plot with mouse")
+
+    validate(need(input$mw_hover != "", "Hover over a point on the graph."))
+
 }
 
-  if (is.null(x$taxonomy)) {
-    d <- x
-  } else {
-    d <- x[, 0:(dim(x)[2] - 1)]
-    taxon <- x[(dim(x)[2])]
-  }
-
-  row <- nearPoints(x.all, input$mw_hover, xvar = "diff.win", yvar = "diff.btw", maxpoints = 1)
-
-  feature <- rownames(row)
-
-  if (length(feature) == 0) {
-    return(NULL)
-  }
-
-  if (input$ep_chooseconds == 1) {
-    cond1.clr <- obj[feature,1:cond1]
-    cond2.clr <- obj[feature,(cond1+1):(cond1+cond2)]
-
-    #make conditions vector
-    conds <- c(rep("group1", g1s),
-    rep("group2", g2s))
-  }
-
-  if (input$ep_chooseconds ==2) {
-    #filter the meta and keep on the data which have been chosen
-    group1 <- rownames(meta[which(meta[[cn]] == group1), ])
-    group1.filt <- group1[group1 %in% (colnames(x))]
-    data1.filt <- x[,which(colnames(x) %in% group1.filt)]
-    one <- length(data1.filt)
-
-    group2 <- rownames(meta[which(meta[[cn]] == group2), ])
-    group2.filt <- group2[group2 %in% (colnames(x))]
-    data2.filt <- x[,which(colnames(x) %in% group2.filt)]
-    two <- length(data2.filt)
-
-    cond1.clr <- obj[feature,1:one]
-    cond2.clr <- obj[feature,(one+1):(one+two)]
-
-    #make condition vector
-    conds <- c(rep("Group 1", one),
-    rep("Group 2", two))
-
-  }
-
-  s <- cbind(cond1.clr, cond2.clr)
-
-  #clr values for each condition for the otu
-  s.clr <- list("Condition 1" = cond1.clr, "Condition 2" = cond2.clr)
-
-
-  stripchart(s.clr, main = c("Difference between conditions for feature ", feature), xlab = "Conditions", ylab = "Expected CLR values",
-  col = c("black", "red"), pch =16, vertical = TRUE, method = "jitter", jitter = 0.10)
-  #text(0, labels = txt)
 })
 
 #displays row name for plots when inputting ALDEx2 table
