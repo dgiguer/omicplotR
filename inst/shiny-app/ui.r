@@ -40,7 +40,7 @@ sidebarLayout(
                             accept = c('text/csv',
                             'text/comma-separated-values,text/plain', '.csv'))
                         )), #fluidrow
-                    checkboxInput("ebi_format", "Click if data is formatted as GO slim annotation"),
+                    checkboxInput("ebi_format", "Click if data is being downloaded from the MGnify datase"),
                     h3(textOutput("EBI_data")),
                     #input EBI project
                 fluidRow(
@@ -127,7 +127,7 @@ sidebarLayout(
         actionButton("choosemeta", "Filter by metadata values"),
         textOutput("test"),
         checkboxInput("removesamplenames", label = "Remove sample names"),
-        checkboxInput("arrowcheckbox", label = "Remove arrows", value = FALSE),
+        checkboxInput("arrowcheckbox", label = "Add arrows", value = FALSE),
         checkboxInput("taxoncheckbox", label = "Show taxonomy", value = FALSE),
         uiOutput("taxchoice")
         #,
@@ -217,7 +217,7 @@ tabPanel("GO slim annotation",
             textOutput("pdf_note")
         )
     ),
-	wellPanel(plotOutput("ebi_stripchart", height = "1400px"), style = "overflow-y:scroll; max-height: 700px")
+	wellPanel(plotOutput("ebi_stripchart", height = "auto"), style = "overflow-y:scroll")
 ),
 tabPanel("Effect plots",
 sidebarLayout(
