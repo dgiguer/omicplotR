@@ -225,6 +225,8 @@ sidebarLayout(
         tabsetPanel(
             tabPanel("Calculate",
             radioButtons("ep_chooseconds", "How will you select your conditions?", choices = list("Manually" = 1, "From metadata" = 2)),
+            conditionalPanel("input.ep_chooseconds =='1'",
+            actionButton("select_ef_columns", "Select columns for effect plot")),
             selectInput("denomchoice", "Choose ALDEx2 method", choices = list("all" = 1, "iqlr" = 2, "zero"= 3)),
             actionButton("effectplot_ab", "Generate effect plot"),
             # textOutput("anosim"),

@@ -239,6 +239,10 @@ server <- function(input, output, session) {
         }
     })
 
+    observeEvent(input$select_ef_columns, {
+        showModal(select_columns())
+    })
+
   #dendrogram brush ranges
   ranges <- reactiveValues(x = NULL, y = NULL)
   bp_ranges <- reactiveValues(x = NULL, y = NULL)
@@ -305,6 +309,28 @@ server <- function(input, output, session) {
         )
     }
 
+    select_columns <- function (x) {
+
+        modalDialog(
+            title = "Manually select conditions",
+            "Enter the column numbers for each condition, separated by a comma. Condition 1 will be compared against condition 2. Scroll across table to see column names. Column numbers are shown below the column name.",
+            renderDataTable({
+                data <- data()
+                dataTable <- data.frame(matrix(0, ncol = length(colnames(data)), nrow = 1))
+                colnames(dataTable) <- colnames(data)
+
+                newrow <- 1:length(dataTable)
+                dataTable <- rbind(newrow, dataTable)
+                rownames(dataTable) <- c("Column number", "")
+             dataTable
+
+         }, options = list(pageLength = 5, scrollX = TRUE)),
+            textInput("effect_cond_1", "Columns for condition 1", placeholder = "1, 2, 3, ..."),
+            textInput("effect_cond_2", "Columns for condition 2", placeholder = "1, 2, 3, ..."),
+            footer = tagList(actionButton("column_choice_ab", "Update conditions"), modalButton("Close window")), easyClose =TRUE
+        )
+    }
+
   output$taxchoice <- renderUI({
     if (input$taxoncheckbox) {
       radioButtons("taxlevel",
@@ -337,12 +363,7 @@ output$varianceslider <- renderUI({
 
 #effect plot conditions
 output$conditions<- renderUI({
-  if (input$ep_chooseconds == 1) {
-    tagList(
-      numericInput("group1s", "Number of columns for group 1", value = 0),
-      numericInput("group2s", "Number of columns for group 2", value = 0)
-    )
-  } else {
+  if (input$ep_chooseconds == 2) {
     meta <- metadata()
     options <- colnames(meta)
     cn <- input$colselect
@@ -706,11 +727,16 @@ observeEvent(input$effectplot_ab, {
           denom <<- input$denomchoice
   })
 
+ observeEvent(input$column_choice_ab, {
+     effect_cond_2 <<- input$effect_cond_2
+     effect_cond_1 <<- input$effect_cond_1
+
+ })
+
   #computing aldex object
   d.clr <- reactive({
     x <- data.t()
-    g1s <- input$group1s
-    g2s <- input$group2s
+
     meta <- metadata()
 
     #require user to click action button
@@ -735,8 +761,21 @@ observeEvent(input$effectplot_ab, {
     }
 
     if (input$ep_chooseconds == 1) {
-      conds <- c(rep("group1", g1s),
-      rep("group2", g2s))
+
+        g1s <- effect_cond_1
+        g2s <- effect_cond_2
+        # rearrange the columns and make conditions
+        # split on the comma and space to get all columns for each condtion
+        group1 <- as.integer(unlist(strsplit(g1s, ", ")))
+        group2 <- as.integer(unlist(strsplit(g2s, ", ")))
+
+        # rearrange
+        browser()
+        d <- cbind(d[group1], d[group2])
+
+        # make conditions length of each group
+      conds <- c(rep("group1", length(group1)),
+      rep("group2", length(group2)))
     }
 
     if (input$ep_chooseconds ==2) {
@@ -782,8 +821,8 @@ observeEvent(input$effectplot_ab, {
     x <- data.t()
     d.clr <- d.clr()
     meta <- metadata()
-    g1s <- input$group1s
-    g2s <- input$group2s
+    g1s <- effect_cond_1
+    g2s <- effect_cond_2
 
     #get filtered data if filtered
     if (is.null(vals$data)) {
@@ -803,8 +842,11 @@ observeEvent(input$effectplot_ab, {
     }
 
     if (input$ep_chooseconds == 1) {
-      conds <- c(rep("group1", g1s),
-      rep("group2", g2s))
+
+        group1 <- as.integer(unlist(strsplit(g1s, ", ")))
+        group2 <- as.integer(unlist(strsplit(g2s, ", ")))
+      conds <- c(rep("group1", length(group1)),
+      rep("group2", length(group2)))
     }
 
     if (input$ep_chooseconds ==2) {
