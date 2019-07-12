@@ -706,7 +706,18 @@ formatModal <- function(failed = FALSE) {
         data.t$taxonomy <- NULL
       }
 
-      data.pr <- omicplotr.clr(data.t, var.filt)
+      # set to CZM by default
+      zeros <- "CZM"
+
+      if (input$zero_replacement == 1) {
+          zeros <- "CZM"
+      }
+
+      if (input$zero_replacement == 2) {
+          zeros <- "pseudo"
+      }
+
+      data.pr <- omicplotr.clr(data.t, var.filt, zero.method=zeros)
 
     }
     return(data.pr)

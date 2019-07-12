@@ -45,11 +45,17 @@ omicplotr.anosim <- function(x, conds) {
     return(anosim$signif)
 }
 
-omicplotr.clr <- function(data, var.filt = 0) {
+omicplotr.clr <- function(data, var.filt = 0, zero.method="CZM") {
 
     # replace zeros catch error if no 0 present
     if (any(data == 0)) {
+
+        if (zero.method == "CZM") {
         data.0 <- cmultRepl(t(data), label = 0, method = "CZM")
+        }
+        if (zero.method == "pseudo") {
+            data.0 <- t(data + 0.5)
+        }
     } else {
         data.0 <- t(data)
     }

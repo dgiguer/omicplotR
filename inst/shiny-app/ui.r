@@ -120,6 +120,13 @@ sidebarLayout(
                 "Nonnumeric metadata (up to 10 categories)" = 3
             )
         ),
+        radioButtons(
+            label = h4("Choose zero replacement method"),
+            inputId= "zero_replacement",
+            choices = list(
+                "Count zero multiplicative (CZM)" = 1,
+                "Pseudocount (+ 0.5)" = 2)
+        ),
         #change graphical parameters
         #size of sample names
         fluidRow(column(6, sliderInput("size_samples_pca", label = "Size of sample names", min = 0, max = 2, value = 1.0, step = 0.1)),
