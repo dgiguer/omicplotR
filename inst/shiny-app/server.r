@@ -315,7 +315,7 @@ server <- function(input, output, session) {
             title = "Manually select conditions",
             "Enter the column numbers for each condition, separated by a comma. Condition 1 will be compared against condition 2. Scroll across table to see column names. Column numbers are shown below the column name.",
             renderDataTable({
-                data <- data()
+                data <- data.t()
                 dataTable <- data.frame(matrix(0, ncol = length(colnames(data)), nrow = 1))
                 colnames(dataTable) <- colnames(data)
 
@@ -769,12 +769,12 @@ observeEvent(input$effectplot_ab, {
         group1 <- as.integer(unlist(strsplit(g1s, ", ")))
         group2 <- as.integer(unlist(strsplit(g2s, ", ")))
 
-        # rearrange
-        browser()
+        # rearrange for aldex table
         d <- cbind(d[group1], d[group2])
-
         # make conditions length of each group
-      conds <- c(rep("group1", length(group1)),
+
+        # make conds a global variable that can be accessed by other functions
+      conds <<- c(rep("group1", length(group1)),
       rep("group2", length(group2)))
     }
 
@@ -790,7 +790,8 @@ observeEvent(input$effectplot_ab, {
       data2.filt <- x[,which(colnames(x) %in% group2.filt)]
       two <- length(data2.filt)
 
-      conds <- c(rep("Group 1", one),
+      # make conds a global variable that can be accessed by other functions
+      conds <<- c(rep("Group 1", one),
       rep("Group 2", two))
 
       #combine
@@ -821,8 +822,6 @@ observeEvent(input$effectplot_ab, {
     x <- data.t()
     d.clr <- d.clr()
     meta <- metadata()
-    g1s <- effect_cond_1
-    g2s <- effect_cond_2
 
     #get filtered data if filtered
     if (is.null(vals$data)) {
@@ -839,38 +838,6 @@ observeEvent(input$effectplot_ab, {
     } else {
       d <- x[, 0:(dim(x)[2] - 1)]
       taxon <- x[(dim(x)[2])]
-    }
-
-    if (input$ep_chooseconds == 1) {
-
-        group1 <- as.integer(unlist(strsplit(g1s, ", ")))
-        group2 <- as.integer(unlist(strsplit(g2s, ", ")))
-      conds <- c(rep("group1", length(group1)),
-      rep("group2", length(group2)))
-    }
-
-    if (input$ep_chooseconds ==2) {
-      #filter the meta and keep only the data which have been chosen
-
-      #make group of samples from metadata which are chosen by user
-      group1 <- rownames(meta[which(meta[[cn]] == group1), ])
-
-      #make sure these are actually in the otu table
-      group1.filt <- group1[group1 %in% (colnames(x))]
-
-      #subset dataframe to take samples that are only in the filtered group
-      data1.filt <- x[,which(colnames(x) %in% group1.filt)]
-
-      #get length for later
-      one <- length(data1.filt)
-
-      group2 <- rownames(meta[which(meta[[cn]] == group2), ])
-      group2.filt <- group2[group2 %in% (colnames(x))]
-      data2.filt <- x[,which(colnames(x) %in% group2.filt)]
-      two <- length(data2.filt)
-
-      conds <- c(rep("Group 1", one),
-      rep("Group 2", two))
     }
 
     withProgress(
@@ -1427,7 +1394,8 @@ goslim_stripchart <- reactive({
         # sanity checks. user needs data and EBI formatted data.
         validate(
             need(data() != "", "You need data. Input your data."),
-            need(input$ebi_format == TRUE, "This page requires a GO Slim formatted count table. Input the correctly formatted data, and check the GO Slim format box to generate a plot.")
+            need(input$ebi_format == TRUE, "This page requires a GO Slim formatted count table. Input the correctly formatted data, and check the GO Slim format box to generate a plot."),
+            need(!(is.null(input$varslider)), "Principal component object needs to be calculated. Please view Colored PCA Biplot before GO slim chart.")
         )
 
          # get input date
@@ -1437,7 +1405,6 @@ goslim_stripchart <- reactive({
          opacity <- input$opacity_samples_pca
          cn <- column()
 
-
         # rearrange the input to format for strip chart function
         data <- cbind(GO = data$GO, category = data$category, data[,1:(ncol(data) - 2)])
 
@@ -1446,6 +1413,8 @@ goslim_stripchart <- reactive({
         # metadata present
 
         if (!is.null(meta)) {
+
+            validate(need(!is.null(cn), "Please select columns to colour by under the Options panel from Colored Biplot."))
             colourvector <- omicplotr.colvec(data.prcomp, meta, opacity, cn, type = input$colouringtype)
 
         } else {
@@ -1520,7 +1489,7 @@ goslim_stripchart <- reactive({
              #loop to create and colour stripcharts
              for (i in 1:length(finalCCSet)) {
                  if (i == 1) {
-                     stripchart(finalCCSet[,i] ~ rownames(finalCCSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, cex.axis = 0.8, group.names = rownames(finalCCSet), xlab = "Centered Log of Percent Reads", col = colourvector[i], main = "Cellular Component")
+                     stripchart(finalCCSet[,i] ~ rownames(finalCCSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, cex.axis = 0.8, group.names = rownames(finalCCSet), xlab = "Centered log ratio", col = colourvector[i], main = "Cellular Component")
                  }
                  else {
                      stripchart(finalCCSet[,i] ~ rownames(finalCCSet), method = "jitter", jitter = 0.2, pch = 19, las = 2, cex = 0.7, add = TRUE, col = colourvector[i])
@@ -2018,7 +1987,7 @@ output$stripchart <- renderPlot({
 if (!is.null(input$mw_hover)){
 
 # notify user that specific version is needed for density plots
-validate(need(packageVersion("ALDEx2") == "1.15.5", "This density plot requires a specific development version of ALDEx2 to be installed directly from Github. Use: remove.packages(\"ALDEx2\") and  devtools::install_github(\"brandonlieng/ALDEX_bioc\", ref = \"aldex-dev\")"))
+validate(need(packageVersion("ALDEx2") == "1.15.4", "This density plot requires a specific development version of ALDEx2 to be installed directly from Github. Use: remove.packages(\"ALDEx2\") and  devtools::install_github(\"brandonlieng/ALDEX_bioc\", ref = \"aldex-dev\")"))
 
 feature <- nearPoints(x.all, input$mw_hover, xvar = "diff.win", yvar = "diff.btw", maxpoints = 1)
 
