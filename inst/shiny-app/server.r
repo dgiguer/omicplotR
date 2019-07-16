@@ -130,7 +130,7 @@ server <- function(input, output, session) {
 
         # extract number of pages to collect all samples by getting
         # number of pages from last page line
-        last_link <- fromJSON(paste0(samples_link, "?page=1"))$links$last
+        last_link <- jsonlite::fromJSON(paste0(samples_link, "?page=1"))$links$last
         num_pages <- substr(last_link, nchar(last_link), nchar(last_link) + 1)
 
         # initiate all samples vector
@@ -142,7 +142,7 @@ server <- function(input, output, session) {
 
         # loop through all pages to get all sample names
         for (i in 1:num_pages) {
-            current_samples <- fromJSON(paste0(samples_link, "?page=", i))$data$id
+            current_samples <- jsonlite::fromJSON(paste0(samples_link, "?page=", i))$data$id
             all_samples <- c(all_samples, current_samples)
         }
 
@@ -158,7 +158,7 @@ server <- function(input, output, session) {
 
         # this loops through the samples and gets all the run numbers. it takes a while for some reason (about 25 seconds for 70 samples)
         for (i in seq(all_samples)) {
-            current_run <- fromJSON(paste0(runs_link, all_samples[i], "/runs"))$data$id
+            current_run <- jsonlite::fromJSON(paste0(runs_link, all_samples[i], "/runs"))$data$id
             all_runs <- c(all_runs, current_run)
 
             # print status message
@@ -177,7 +177,7 @@ server <- function(input, output, session) {
         progress$inc(0, detail = "Downloading accessions...")
 
         for (i in seq(all_runs)) {
-            current_acc <- fromJSON(paste0(go_slim_link, all_runs[i], "/analyses"))$data$id
+            current_acc <- jsonlite::fromJSON(paste0(go_slim_link, all_runs[i], "/analyses"))$data$id
             all_acc <- c(all_acc, current_acc)
             # show message to give status
             message(paste0("Finished getting accession for run ", all_runs[i]))
@@ -191,11 +191,11 @@ server <- function(input, output, session) {
         analyses_link <- "https://www.ebi.ac.uk/metagenomics/api/v1/analyses/"
 
         # set up the counts table with the GO terms
-        all_counts <- data.frame(GO = fromJSON(paste0(analyses_link, all_acc[i], "/go-slim"))$data$attributes$accession)
+        all_counts <- data.frame(GO = jsonlite::fromJSON(paste0(analyses_link, all_acc[i], "/go-slim"))$data$attributes$accession)
 
-        all_counts$description <- fromJSON(paste0(analyses_link, all_acc[i], "/go-slim"))$data$attributes$description
+        all_counts$description <- jsonlite::fromJSON(paste0(analyses_link, all_acc[i], "/go-slim"))$data$attributes$description
 
-        all_counts$category <- fromJSON(paste0(analyses_link, all_acc[i], "/go-slim"))$data$attributes$lineage
+        all_counts$category <- jsonlite::fromJSON(paste0(analyses_link, all_acc[i], "/go-slim"))$data$attributes$lineage
 
         # add columns for each run, name appropriately (+3 is because first three columns are descriptors
         all_counts[,4:(length(all_runs)+3)] <- "NA"
@@ -209,7 +209,7 @@ server <- function(input, output, session) {
         # this downloads go-slim counts for every sample.
         for (i in seq(all_acc)) {
 
-            current_count <- fromJSON(paste0(analyses_link, all_acc[i], "/go-slim"))$data$attributes$count
+            current_count <- jsonlite::fromJSON(paste0(analyses_link, all_acc[i], "/go-slim"))$data$attributes$count
 
             message(paste0("Finished accession ", all_acc[i]))
 
