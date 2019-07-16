@@ -1,3 +1,12 @@
+CHANGES IN VERSION 1.5.1
+--------------------------
+- choice of pseudocount or CZM
+- changed how conditions are selected manually for effect size. now, you input the column number
+- added ability to download GO slim annotated feature tables directly from MGNify database by inputting a Study ID
+- added density plots for interactive effect sizes
+- currently depends on specific version of ALDEx2 (temporary)
+
+
 CHANGES IN VERSION 1.1.2
 --------------------------
 - bug fix for CZM in RAB plots. if not zeros, plots would fail. 
