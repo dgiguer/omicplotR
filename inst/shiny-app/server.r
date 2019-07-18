@@ -729,15 +729,6 @@ group1 <- ""
 group2 <- ""
 denom <- ""
 
-#forces effect plot to update ONLY when generate action button is clicked
-#these values are needed for d.clr and ald.obj
-observeEvent(input$effectplot_ab, {
-          cn <<- input$colselect
-          group1 <<- input$group1
-          group2 <<- input$group2
-          denom <<- input$denomchoice
-  })
-
  observeEvent(input$column_choice_ab, {
      effect_cond_2 <<- input$effect_cond_2
      effect_cond_1 <<- input$effect_cond_1
@@ -746,6 +737,14 @@ observeEvent(input$effectplot_ab, {
 
   #computing aldex object
   d.clr <- reactive({
+
+      # get reactive input from selecting conditions
+      cn <- input$colselect
+      group1 <- input$group1
+      group2 <- input$group2
+      denom <- input$denomchoice
+
+
     x <- data.t()
 
     meta <- metadata()
@@ -819,7 +818,6 @@ observeEvent(input$effectplot_ab, {
     withProgress(
       message = "Calculating",
       detail = "Calculating expected clr values", value = 1/2, {
-
         d.clr <- aldex.clr(d, mc.samples=128, conds = conds, denom = method, verbose=TRUE)
         incProgress(1/2, message = "clr values calculated")
       }
@@ -1685,7 +1683,7 @@ output$pdf_note <- renderText({"Note: it may take several seconds to generate th
     tax.abund.u <- tax.agg[apply(d.prop, 1, max) > abund]
 
     if (any(d.abund == 0)) {
-    d.abund <- t(cmultRepl(t(d.abund), label = 0, method = "CZM"))
+    d.abund <- t(zCompositions::cmultRepl(t(d.abund), label = 0, method = "CZM"))
     } else {
         d.abund <- d.abund
     }
@@ -1694,8 +1692,8 @@ output$pdf_note <- renderText({"Note: it may take several seconds to generate th
     d.P.u <- apply(d.abund, 2, function(x){x/sum(x)})
 
     # order by OTU abundances
-    new.order <- rownames(d.P.u)[order(apply(d.P.u, 1, sum), decreasing=T)]
-    tax.abund <- tax.abund.u[order(apply(d.P.u, 1, sum), decreasing=T)]
+    new.order <- rownames(d.P.u)[order(apply(d.P.u, 1, sum), decreasing=TRUE)]
+    tax.abund <- tax.abund.u[order(apply(d.P.u, 1, sum), decreasing=TRUE)]
     d.P <- d.P.u[new.order, ]
     d.clr <- apply(d.P, 2, function(x){log2(x) - mean(log2(x))})
 
@@ -1716,7 +1714,7 @@ output$pdf_note <- renderText({"Note: it may take several seconds to generate th
     plot.new()
     par(fig=c(0, 1, 0, 1), new=TRUE)
 
-    plot(as.dendrogram(clust.d), main=NULL, cex=0.8, xlab="", xlim = ranges$x, ylim= ranges$y, xpd = T)
+    plot(as.dendrogram(clust.d), main=NULL, cex=0.8, xlab="", xlim = ranges$x, ylim= ranges$y, xpd = TRUE)
   })
 
   output$dendrotext <- renderText({
@@ -1780,7 +1778,7 @@ output$pdf_note <- renderText({"Note: it may take several seconds to generate th
     tax.abund.u <- tax.agg[apply(d.prop, 1, max) > abund]
 
     if (any(d.abund == 0)) {
-    d.abund <- t(cmultRepl(t(d.abund), label = 0, method = "CZM"))
+    d.abund <- t(zCompositions::cmultRepl(t(d.abund), label = 0, method = "CZM"))
     } else {
         d.abund <- d.abund
     }
@@ -1790,8 +1788,8 @@ output$pdf_note <- renderText({"Note: it may take several seconds to generate th
     d.P.u <- apply(d.abund, 2, function(x){x/sum(x)})
 
     # order by OTU abundances
-    new.order <- rownames(d.P.u)[order(apply(d.P.u, 1, sum), decreasing=T)]
-    tax.abund <- tax.abund.u[order(apply(d.P.u, 1, sum), decreasing=T)]
+    new.order <- rownames(d.P.u)[order(apply(d.P.u, 1, sum), decreasing=TRUE)]
+    tax.abund <- tax.abund.u[order(apply(d.P.u, 1, sum), decreasing=TRUE)]
     d.P <- d.P.u[new.order, ]
     d.clr <- apply(d.P, 2, function(x){log2(x) - mean(log2(x))})
 
@@ -1824,7 +1822,7 @@ output$pdf_note <- renderText({"Note: it may take several seconds to generate th
 
     par(fig=c(0,0.80,0, 1), new = TRUE)
 
-    barplot(d.P[,clust.d$order], names.arg = clust.d$labels, space=0, xlim = bp_ranges$x, ylim= bp_ranges$y, col=colours, las=2, axisnames=T, border = NA, xpd = T)
+    barplot(d.P[,clust.d$order], names.arg = clust.d$labels, space=0, xlim = bp_ranges$x, ylim= bp_ranges$y, col=colours, las=2, axisnames=TRUE, border = NA, xpd = TRUE)
 
     par(fig=c(0.8,1, 0, 1), new=TRUE)
     par(xpd = TRUE)

@@ -63,8 +63,8 @@ d.abund <- t(cmultRepl(t(d.abund), label=0, method="CZM"))
 d.P.u <- apply(d.abund, 2, function(x){x/sum(x)})
 
 # order by OTU abundances
-new.order <- rownames(d.P.u)[order(apply(d.P.u, 1, sum), decreasing=T)]
-tax.abund <- tax.abund.u[order(apply(d.P.u, 1, sum), decreasing=T)]
+new.order <- rownames(d.P.u)[order(apply(d.P.u, 1, sum), decreasing=TRUE)]
+tax.abund <- tax.abund.u[order(apply(d.P.u, 1, sum), decreasing=TRUE)]
 d.P <- d.P.u[new.order, ]
 d.clr <- apply(d.P, 2, function(x){log2(x) - mean(log2(x))})
 
@@ -81,7 +81,7 @@ method.choice <- method[clust]
 clust.d <- hclust(dist.d.clr, method=method.choice)
 
 #plot the dendrogram (option for wide pdfs below)
-plot(as.dendrogram(clust.d), main=NULL, cex=0.8, xlab="", xpd = T)
+plot(as.dendrogram(clust.d), main=NULL, cex=0.8, xlab="", xpd = TRUE)
 
 #change colours if you'd like
 colours <- c("steelblue3", "skyblue1", "indianred", "mediumpurple1",
@@ -102,7 +102,7 @@ par(fig=c(0,1,0,1), new = TRUE)
 par(fig=c(0,0.80,0, 1), new = TRUE)
 
 #stacked barplot
-barplot(d.P[,clust.d$order], names.arg = clust.d$labels, space=0, col=colours, las=2, axisnames=T, border = NA, xpd = T)
+barplot(d.P[,clust.d$order], names.arg = clust.d$labels, space=0, col=colours, las=2, axisnames=TRUE, border = NA, xpd = TRUE)
 
 #change location of legend
 par(fig=c(0.8,1, 0, 1), new=TRUE)

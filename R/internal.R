@@ -21,7 +21,7 @@
 #'
 #' d <- omicplotr.filter(otu_table, min.reads = 10)
 #'
-#' @import ALDEx2 igraph markdown propr
+#' @import ALDEx2
 #'
 
 
@@ -30,7 +30,7 @@ omicplotr.anosim <- function(x, conds) {
     x$taxonomy <- NULL
 
     #replace zeros
-    d <- cmultRepl(t(x), label = 0, method = "CZM")
+    d <- zCompositions::cmultRepl(t(x), label = 0, method = "CZM")
 
     #calculate clr
     d.clr <- t(log(d) - rowMeans(log(d)))
@@ -51,7 +51,7 @@ omicplotr.clr <- function(data, var.filt = 0, zero.method="CZM") {
     if (any(data == 0)) {
 
         if (zero.method == "CZM") {
-        data.0 <- cmultRepl(t(data), label = 0, method = "CZM")
+        data.0 <- zCompositions::cmultRepl(t(data), label = 0, method = "CZM")
         }
         if (zero.method == "pseudo") {
             data.0 <- t(data + 0.5)
@@ -71,7 +71,7 @@ omicplotr.clr <- function(data, var.filt = 0, zero.method="CZM") {
         x.clr.var <- x.clr
     } else {
         # calculate variance
-        var.clr <- colVars(x.clr)
+        var.clr <- matrixStats::colVars(x.clr)
 
         #replace names since colVars gets rid of them
         names(var.clr) <- colnames(x.clr)
@@ -123,7 +123,7 @@ omicplotr.colouredPCA <- function(data, colourvector, scale = 0, arrows = TRUE,
         }
     }
 
-    coloredBiplot(data, col = col, main = main, cex.main = 1.5,
+    compositions::coloredBiplot(data, col = col, main = main, cex.main = 1.5,
         cex = c(names.cex, points.cex), xlabs.col = colourvector,
         var.axes = arrows, scale = scale, xlab = PC1, ylab = PC2,
         xlabs = xlabs, ylabs = points)
@@ -269,7 +269,7 @@ omicplotr.filter <- function(data, min.reads = 0, min.count = 0, min.sum = 0,
         data.0 <- x[, which(colSums(x) > min.reads)]
 
         # filter by min count per feature
-        data.1 <- data.0[which(rowMaxs(data.0) >= min.count), ]
+        data.1 <- data.0[which(matrixStats::rowMaxs(data.0) >= min.count), ]
 
         # filter by sum of count per feature
         data.2 <- data.1[which(rowSums(data.1) >= min.sum), ]
@@ -278,7 +278,7 @@ omicplotr.filter <- function(data, min.reads = 0, min.count = 0, min.sum = 0,
         d.frac <- t(t(data.2)/colSums(data.2))
 
         # filter by proportions, back to dataframe
-        x.filt <- as.data.frame(data.2[which((rowMaxs(d.frac) > min.prop) & (rowMaxs(d.frac) < max.prop)),])
+        x.filt <- as.data.frame(data.2[which((matrixStats::rowMaxs(d.frac) > min.prop) & (matrixStats::rowMaxs(d.frac) < max.prop)),])
 
     } else {
         # order for colouring
@@ -291,8 +291,8 @@ omicplotr.filter <- function(data, min.reads = 0, min.count = 0, min.sum = 0,
         # since tax and data.0 are in the same order, separate, convert to matrix, and remove rows in both tax and data.0 that have max counts less than expected.
 
         # filter by min count per feature, do the same for the tax
-        data.1 <- data.0[which(rowMaxs(data.0) >= min.count), ]
-        tax.1 <- tax[which(rowMaxs(data.0) >= min.count)]
+        data.1 <- data.0[which(matrixStats::rowMaxs(data.0) >= min.count), ]
+        tax.1 <- tax[which(matrixStats::rowMaxs(data.0) >= min.count)]
 
         # filter by sum of count per feature
         data.2 <- data.1[which(rowSums(data.1) >= min.sum),]
@@ -302,8 +302,8 @@ omicplotr.filter <- function(data, min.reads = 0, min.count = 0, min.sum = 0,
         d.frac <- t(t(data.2)/colSums(data.2))
 
         # filter by proportions
-        x.filt <- as.data.frame(data.2[which((rowMaxs(d.frac) > min.prop) & (rowMaxs(d.frac) < max.prop)),])
-        tax.filt <- as.data.frame(tax.2[which((rowMaxs(d.frac) > min.prop) & (rowMaxs(d.frac) < max.prop))])
+        x.filt <- as.data.frame(data.2[which((matrixStats::rowMaxs(d.frac) > min.prop) & (matrixStats::rowMaxs(d.frac) < max.prop)),])
+        tax.filt <- as.data.frame(tax.2[which((matrixStats::rowMaxs(d.frac) > min.prop) & (matrixStats::rowMaxs(d.frac) < max.prop))])
 
         colnames(tax.filt) <- "taxonomy"
 

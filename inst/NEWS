@@ -1,3 +1,13 @@
+CHANGES IN VERSION 1.5.4
+--------------------------
+- explicitly calling some functions to prevent conflicts (jsonlite::fromJSON)
+- corrected namespace and description
+- removed "require(libraries") from ui.
+- bug fix for calculating aldex object. sometimes would need to click generate effect plot twice.
+- version bump
+- changed T to TRUE in rab_script and server.R
+
+
 CHANGES IN VERSION 1.5.1
 --------------------------
 - choice of pseudocount or CZM

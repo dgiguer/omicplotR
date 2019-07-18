@@ -1,15 +1,5 @@
 #in R studio, click Run App (Run External in browser)
 
-#required libraries
-require(shiny)
-require(compositions)
-require(zCompositions)
-require(markdown)
-require(ALDEx2)
-#require(propr)
-#require(igraph)
-#require(vegan)
-
 #userinterface -------------------------------------------------------
 ui <- fluidPage(theme= "bootstrap.css",
 titlePanel("omicplotR: Visual exploration of omic datasets as compositions"),
