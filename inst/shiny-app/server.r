@@ -433,21 +433,10 @@ formatModal <- function(failed = FALSE) {
     min.sum <- input$minsum
     min.reads <- input$minreads
 
-    #provide plain language messages for errors.
-    validate((need((input$mincounts >=0), "Input minimum count above 0")))
-
-    validate((need((input$minprop >=0), "Input minimum proportional abundance above 0")))
-
-    validate((need((input$maxprop <= 1), "Input maximum proportional abundance below or equal to 1")))
-
-    validate((need((input$minsum >= 0 & input$minsum < 10000), "Input minimum count sum per OTU above 0 and below 10 000")))
-
-    validate((need((input$minreads >= 0 & input$minreads < 10000000), "Input minimum count sum per samples below above 0 and below 10 000 000")))
-
     #catch the errors
     validate((need(input$minprop, "Processing..")))
 
-    #check for tax and ensure no input amounts cannot be processed.
+    #check for tax
     if (is.null(x$taxonomy)) {
       taxCheck <- TRUE
     } else {
@@ -462,8 +451,6 @@ formatModal <- function(failed = FALSE) {
       x <- omicplotr.metadataFilter(x, meta, column = metaval$data, values = vals$data)
     }
 
-    # ensure filters used in the following function don't remove all samples or features.
-
     x.filt <- omicplotr.filter(x, min.reads = min.reads, min.count = min.count, min.prop = min.prop, max.prop = max.prop, min.sum = min.sum)
 
   })
@@ -476,10 +463,6 @@ formatModal <- function(failed = FALSE) {
     data <- data()
 
     validate(need(input$varslider, "Calculating..."))
-
-    #require that there are OTUs and samples left to plot from the filtering
-
-    validate(need((dim(data.t)[1] > 0 & dim(data.t)[2] > 1), "Filtering has removed all features or samples. Reduce the stringency of the filters so you have features to plot."))
 
     #check for tax
     if (is.null(data$taxonomy)) {

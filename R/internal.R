@@ -259,10 +259,6 @@ omicplotr.filter <- function(data, min.reads = 0, min.count = 0, min.sum = 0,
         # make a matrix for vectorization
         x <- as.matrix(data[order(colnames(data))])
 
-        if (min.reads > max(colSums(x))) {
-            stop("Minimum count sum per sample exceeds maximum sample sum.")
-
-
         # filter by min reads per sample
         data.0 <- x[, which(colSums(x) > min.reads)]
 
