@@ -650,14 +650,59 @@ formatModal <- function(failed = FALSE) {
     min.sum <- input$minsum
     min.reads <- input$minreads
 
+
+    # validation statements
+    validate((need((input$mincounts >=0), "Input minimum count per feature (0 or above)")))
+
+   validate((need((input$minprop >=0), "Input minimum proportional abundance (0 or above)")))
+
+   validate((need((input$maxprop <= 1), "Input maximum proportional abundance (1 or below)")))
+
+   validate((need((input$minsum >= 0), "Input minimum count sum (0 or above)")))
+
+   validate((need((input$minreads >= 0), "Input minimum count sum per samples (0 or above)")))
+
     #catch the errors
     validate((need(input$minprop, "Processing..")))
 
     #check for tax
     if (is.null(x$taxonomy)) {
       taxCheck <- TRUE
+
+      test <- as.matrix(x[order(colnames(x))])
+
+     validate(need(min.reads < max(colSums(test)), "Minimum count sum per sample exceeds any sample. Reduce so not all samples are removed by filter."))
+
+     # filter by min reads per sample
+     test.0 <- test[, which(colSums(test) > min.reads)]
+
+     validate(need(min.count < max(matrixStats::rowMaxs(test.0)), "Minimum count per feature exceeds maximum count. Reduce so not all features are removed by filter."))
+
+     # filter by min count per feature
+     test.1 <- test.0[which(matrixStats::rowMaxs(test.0) >= min.count), ]
+
+     # filter by sum of count per feature
+     test.2 <- test.1[which(rowSums(test.1) >= min.sum), ]
+
     } else {
       taxCheck <- FALSE
+
+      test <- x[order(colnames(x[seq_len(length(x) - 1)]))]
+
+      validate(need(min.reads < max(colSums(test)), "Minimum count sum per sample exceeds any sample. Reduce so not all samples are removed by filter."))
+
+      # filter by min reads per sample
+      test.0 <- as.matrix(test[, which(colSums(test[, seq_along(test)]) >=
+            min.reads)])
+
+      validate(need(length(which(matrixStats::rowMaxs(test.0) > min.count)) > 1, "Minimum count per feature exceeds maximum count. Reduce so not all features are removed by filter."))
+
+      # filter by min count per feature
+      test.1 <- test.0[which(matrixStats::rowMaxs(test.0) >= min.count),]
+
+      # filter by sum of count per feature
+      test.2 <- test.1[which(rowSums(test.1) >= min.sum), ]
+
     }
 
     #get filtered data if filtered
@@ -684,6 +729,10 @@ formatModal <- function(failed = FALSE) {
   data.prcomp <- reactive({
     #get data
     data.t <- data.t()
+
+    # prevent further calculation if or less than 1 sample remains
+    validate(need((dim(data.t)[1] > 0 & dim(data.t)[2] > 1), "Filtering has removed all features or samples. Reduce the stringency of the filters so you have features to plot."))
+
     var.filt <- input$varslider
     data <- data()
 
@@ -705,6 +754,19 @@ formatModal <- function(failed = FALSE) {
       } else {
         data.t$taxonomy <- NULL
       }
+
+
+      # check fo variance filter
+      if (any(data.t == 0)) {
+        test.0 <- zCompositions::cmultRepl(t(data.t), label = 0, method = "CZM")
+        }
+      else {
+        test.0 <- t(data.t)
+        }
+        test.clr <- as.matrix(log(test.0) - rowMeans(log(test.0)))
+
+        # requires more than 1 feature to remain for plotting.
+        validate(need(length(which(var.filt < matrixStats::colVars(test.clr))) > 1, "Variance filter exceeds maximum variance. Reduce the stringency of the filters so you have features to plot."))
 
       # set to CZM by default
       zeros <- "CZM"
