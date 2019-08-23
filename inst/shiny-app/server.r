@@ -24,21 +24,66 @@ server <- function(input, output) {
         sep = "")
     })
 
+    metadata_script <- reactive({
+        info <- sessionInfo()
+	    loaded <- loadedNamespaces()
+
+	    # from sessionInfo
+	    package <- grep("^package:", search(), value = TRUE)
+	    keep <- vapply(package, function(x) x == "package:base" ||
+	                !is.null(attr(as.environment(x), "path")), NA)
+	    package <- .rmpkg(package[keep])
+
+	    # get rid of non-loaded packages (i.e., base)
+	    loaded <- loaded[!(loaded %in% package)]
+
+	    packages <- list()
+	    packages[loaded] <- loaded
+
+	    for (i in seq(loaded)) {
+
+	           packages[loaded[i]] <- paste(info$loadedOnly[[loaded[i]]]$Package, info$loadedOnly[[loaded[i]]]$Version, sep = "-")
+
+	        }
+
+	    packages.lines <- as.data.frame(unlist(packages))
+	    colnames(packages.lines) <- "loaded_packages"
+
+
+	    # get other packages
+	    other <- list()
+
+	    for (i in seq(info$otherPkgs)) {
+	        other[i] <- paste(info$otherPkgs[[i]]$Package, info$loadedOnly[[loaded[i]]]$Version, sep = "-")
+	    }
+
+	    other.packages <- as.data.frame(unlist(other))
+	    colnames(other.packages)[1] <- "other_packages"
+
+	    #return all the necessary info
+
+	    # generate output in the desired order
+	    output <- c("Session Info", "\n", info$R.version$version.string, info$platform, info$running,  "\n", "Loaded Packages", as.character(packages.lines$loaded_packages), "\n", "Other attached packages", as.character(other.packages$other_packages))
+
+	    })
     #combine reactive values with script for PCA biplot
     PCA_script <- reactive({
         y <- filtering_options()
-        PCA_script <- c(y, readLines("./PCA_script.R"))
+        metadata <- metadata_script()
+	    PCA_script <- c(metadata, "\n", "Filtering options", y, readLines("./PCA_script.R"))
     })
 
     rab_script <- reactive({
         y <- filtering_options()
-        rab_script <- c(y, readLines("./rab_script.R"))
+        metadata <- metadata_script()
+	    rab_script <- c(metadata, "\n", "Filtering options", y, readLines("./rab_script.R"))
     })
 
     effect_script <- reactive({
         y <- filtering_options()
-        effect_script <- c(y, readLines("./effect_script.R"))
-    })
+        metadata <- metadata_script()
+	    effect_script <- c(metadata, "\n", "Filtering options", y, readLines("./effect_script.R"))
+	    })
 
     file_name <- reactive({
         inFile <- input$file1
@@ -540,8 +585,6 @@ formatModal <- function(failed = FALSE) {
         test.0 <- t(data.t)
         }
         test.clr <- as.matrix(log(test.0) - rowMeans(log(test.0)))
-
-        browser()
 
         # requires more than 1 feature to remain for plotting.
         validate(need(length(which(var.filt < matrixStats::colVars(test.clr))) > 1, "Variance filter exceeds maximum variance. Reduce the stringency of the filters so you have features to plot."))

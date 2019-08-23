@@ -1,5 +1,10 @@
 CHANGES IN VERSION 1.4.1
 --------------------------
+- removed browser() statement
+- add package metadata information to downloadable scripts
+
+CHANGES IN VERSION 1.4.1
+--------------------------
 - fixed bug where check metadata would cause crash
 
 CHANGES IN VERSION 1.1.2
