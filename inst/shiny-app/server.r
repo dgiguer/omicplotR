@@ -333,7 +333,7 @@ output$conditions<- renderUI({
       return(NULL)
 
       #reads the file
-      metadata <- read.table(
+      metadata_dataset <- read.table(
         inFile2$datapath,
         header = TRUE,
         sep = "\t",
@@ -345,9 +345,11 @@ output$conditions<- renderUI({
       )
 
       validate(
-          need(dim(metadata)[1] > 0, "There appears to be no samples in your metadata. Is your input a tab-separated table adhering to the omicplotR input format? Check and restart omicplotR"),
-          need(dim(metadata)[2] > 0, "There appears to be no categories in your metadata. Is your input a tab-separated table adhering to the omicplotR input format? Check and restart omicplotR")
+          need(dim(metadata_dataset)[1] > 0, "There appears to be no samples in your metadata. Is your input a tab-separated table adhering to the omicplotR input format? Check and restart omicplotR"),
+          need(dim(metadata_dataset)[2] > 0, "There appears to be no categories in your metadata. Is your input a tab-separated table adhering to the omicplotR input format? Check and restart omicplotR")
       )
+
+      return(metadata_dataset)
 
 
     }
@@ -658,6 +660,8 @@ observeEvent(input$effectplot_ab, {
     g1s <- input$group1s
     g2s <- input$group2s
     meta <- metadata()
+    group1 <- input$group1
+    group2 <- input$group2
 
     #require user to click action button
     validate(need(input$effectplot_ab, ""))
@@ -704,12 +708,12 @@ observeEvent(input$effectplot_ab, {
 
     if (input$ep_chooseconds ==2) {
       #filter the metadata and keep only the data which have been chosen
-      group1 <- rownames(meta[which(meta[[cn]] == group1), ])
+      group1 <- rownames(meta)[which(meta[[cn]] == group1)]
       group1.filt <- group1[group1 %in% (colnames(x))]
       data1.filt <- x[,which(colnames(x) %in% group1.filt)]
       one <- length(data1.filt)
 
-      group2 <- rownames(meta[which(meta[[cn]] == group2), ])
+      group2 <- rownames(meta)[which(meta[[cn]] == group2)]
       group2.filt <- group2[group2 %in% (colnames(x))]
       data2.filt <- x[,which(colnames(x) %in% group2.filt)]
       two <- length(data2.filt)
@@ -1822,12 +1826,12 @@ output$stripchart <- renderPlot({
 
   if (input$ep_chooseconds ==2) {
     #filter the meta and keep on the data which have been chosen
-    group1 <- rownames(meta[which(meta[[cn]] == group1), ])
+    group1 <- rownames(meta)[which(meta[[cn]] == group1)]
     group1.filt <- group1[group1 %in% (colnames(x))]
     data1.filt <- x[,which(colnames(x) %in% group1.filt)]
     one <- length(data1.filt)
 
-    group2 <- rownames(meta[which(meta[[cn]] == group2), ])
+    group2 <- rownames(meta)[which(meta[[cn]] == group2)]
     group2.filt <- group2[group2 %in% (colnames(x))]
     data2.filt <- x[,which(colnames(x) %in% group2.filt)]
     two <- length(data2.filt)
