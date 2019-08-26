@@ -293,16 +293,10 @@ output$conditions<- renderUI({
           comment.char = "",
           na.strings = ""), silent = TRUE)
 
-          validate(
-              need(dim(data)[1] > 0, "There appears to be no features in your input. Is your input a tab-separated table adhering to the omicplotR input format? Check and restart omicplotR"),
-
-              need(dim(data)[2] > 0, "There appears to be no samples in your input. Is your input a tab-separated table adhering to the omicplotR input format? Check and restart omicplotR")
-          )
-
         #if rownames error
         if(grepl("duplicate 'row.names'", data[1], fixed = TRUE)) {
           showModal(rownamesModal())
-      } else {
+        } else {
           #if no error, then continue
           data <- data
         }
@@ -314,7 +308,7 @@ output$conditions<- renderUI({
   metadata <- reactive({
 
     if (input$exampledata) {
-      metadata <- read.table(
+      read.table(
         "example_metadata.txt",
         header = TRUE,
         sep = "\t",
@@ -333,7 +327,7 @@ output$conditions<- renderUI({
       return(NULL)
 
       #reads the file
-      metadata <- read.table(
+      read.table(
         inFile2$datapath,
         header = TRUE,
         sep = "\t",
@@ -343,13 +337,6 @@ output$conditions<- renderUI({
         check.names = FALSE,
         comment.char = ""
       )
-
-      validate(
-          need(dim(metadata)[1] > 0, "There appears to be no samples in your metadata. Is your input a tab-separated table adhering to the omicplotR input format? Check and restart omicplotR"),
-          need(dim(metadata)[2] > 0, "There appears to be no categories in your metadata. Is your input a tab-separated table adhering to the omicplotR input format? Check and restart omicplotR")
-      )
-
-
     }
   })
 
@@ -483,34 +470,6 @@ formatModal <- function(failed = FALSE) {
     x <- data()
     meta <- metadata()
     cn <- column()
-
-    # checks (validation statements) for the input data
-
-    # human readable error for incomplete table. gives false if not found.
-    missing_lines <- paste("line", "[0-9]*", "did not have", "[0-9]*", "elements")
-
-    # for this validate to occur, the grep must be found, otherwise it does not occur
-    validate(need(!grepl(missing_lines, x[1]) == TRUE, paste("One of the columns has a value missing. Here is what R thinks is missing: line",  unlist(strsplit(grep(missing_lines, x[1], value = TRUE), split = "line"))[2])
-        ))
-
-
-
-
-    # ensure all values are numerical
-    if (is.null(x$taxonomy)) {
-        # ensure all values are integers
-        # this is for no taxonomy column
-        validate(need(all(sapply(x, is.numeric) == TRUE), "Not all values are numbers. Please ensure all values in the input data are numbers"))
-    } else {
-        # remove taxonomy group if it exists
-        validate(need(all(sapply(x[,1:length(x)-1], is.numeric) == TRUE), , "Not all values are numbers. Please ensure all values in the input data are numbers"))
-    }
-
-
-
-
-
-
 
     #set to zero, but inputs from sliders/numeric inputs
     min.count <- input$mincounts
@@ -653,7 +612,6 @@ observeEvent(input$effectplot_ab, {
 
   #computing aldex object
   d.clr <- reactive({
-    data <- data()
     x <- data.t()
     g1s <- input$group1s
     g2s <- input$group2s
@@ -681,25 +639,8 @@ observeEvent(input$effectplot_ab, {
     }
 
     if (input$ep_chooseconds == 1) {
-        # get name of columns that are first number of columns in the data
-        names_cond1 <- colnames(data)[1:g1s]
-        names_cond2 <- colnames(data)[(g1s+1):(g1s+g2s)]
-
-        # make conds vector
-        conds <- vector(length = length(colnames(x)))
-
-        # this rearranges conds to be in the correct order when it is rearranged
-        # in data.t
-        for (i in seq(colnames(x))) {
-
-            if (colnames(x)[i] %in% names_cond1) {
-                conds[i] <- "group1"
-                }
-
-            if (colnames(x)[i] %in% names_cond2) {
-                conds[i] <- "group2"
-                }
-            }
+      conds <- c(rep("group1", g1s),
+      rep("group2", g2s))
     }
 
     if (input$ep_chooseconds ==2) {
@@ -742,7 +683,6 @@ observeEvent(input$effectplot_ab, {
   })
 
   aldex.obj <- reactive({
-      data <- data()
     x <- data.t()
     d.clr <- d.clr()
     meta <- metadata()
@@ -767,27 +707,8 @@ observeEvent(input$effectplot_ab, {
     }
 
     if (input$ep_chooseconds == 1) {
-
-    # get name of columns that are first number of columns in the data
-    names_cond1 <- colnames(data)[1:g1s]
-    names_cond2 <- colnames(data)[(g1s+1):(g1s+g2s)]
-
-    # make conds vector
-    conds <- vector(length = length(colnames(x)))
-
-    # this rearranges conds to be in the correct order when it is rearranged
-    # in data.t
-    for (i in seq(colnames(x))) {
-
-        if (colnames(x)[i] %in% names_cond1) {
-            conds[i] <- "group1"
-            }
-
-        if (colnames(x)[i] %in% names_cond2) {
-            conds[i] <- "group2"
-            }
-
-        }
+      conds <- c(rep("group1", g1s),
+      rep("group2", g2s))
     }
 
     if (input$ep_chooseconds ==2) {
@@ -971,13 +892,6 @@ observeEvent(input$effectplot_ab, {
 
     if (input$showdata) {
       data <- data()
-
-      # human readable error for incomplete table. gives false if not found.
-      missing_lines <- paste("line", "[0-9]*", "did not have", "[0-9]*", "elements")
-
-      # for this validate to occur, the grep must be found, otherwise it does not occur
-      validate(need(!grepl(missing_lines, data[1]) == TRUE, paste("One of the columns has a value missing. Here is what R thinks is missing: line",  unlist(strsplit(grep(missing_lines, data[1], value = TRUE), split = "line"))[2])
-          ))
 
       output <- cbind(OTUs = rownames(data), data)
 
@@ -1768,7 +1682,6 @@ output$mw_hovertext <- renderUI({
 #strip chart of expected CLR values for each sample per condition of hovered
 # point
 output$stripchart <- renderPlot({
-  data <- data()
   x <- data.t()
   cond1 <- input$group1s
   cond2 <- input$group2s
@@ -1806,14 +1719,8 @@ output$stripchart <- renderPlot({
   }
 
   if (input$ep_chooseconds == 1) {
-
-    # get column names of input data
-    names_cond1 <- colnames(data)[1:cond1]
-    names_cond2 <- colnames(data)[(cond1+1):(cond1+cond2)]
-
-    # use column names to generate stripchart data
-    cond1.clr <- obj[feature,names_cond1]
-    cond2.clr <- obj[feature,names_cond2]
+    cond1.clr <- obj[feature,1:cond1]
+    cond2.clr <- obj[feature,(cond1+1):(cond1+cond2)]
 
     #make conditions vector
     conds <- c(rep("group1", g1s),
