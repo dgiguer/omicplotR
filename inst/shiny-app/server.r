@@ -702,8 +702,6 @@ observeEvent(input$effectplot_ab, {
             }
     }
 
-    browser()
-
     if (input$ep_chooseconds ==2) {
       #filter the metadata and keep only the data which have been chosen
       group1 <- rownames(meta[which(meta[[cn]] == group1), ])
