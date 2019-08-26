@@ -699,7 +699,7 @@ observeEvent(input$effectplot_ab, {
             if (colnames(x)[i] %in% names_cond2) {
                 conds[i] <- "group2"
                 }
-            } 
+            }
     }
 
     if (input$ep_chooseconds ==2) {
