@@ -931,14 +931,14 @@ observeEvent(input$effectplot_ab, {
   output$nometadata <- renderText({
     metadata <- metadata()
     if (is.null(metadata)) {
-      "Select metadata file"
+      "No metadata detected. Select metadata file"
     }
   })
 
   output$nodata <- renderText({
     metadata <- metadata()
     if (is.null(data)) {
-      "Select data file"
+      "No data detected. Select data file"
     }
   })
 
@@ -1103,7 +1103,7 @@ observeEvent(input$effectplot_ab, {
     opacity <- input$opacity_samples_pca
     sample_size <- input$size_samples_pca
 
-    validate(need(input$selectcolumn, "Click 'Colouring Options' to choose metadata for colouring biplot"))
+    validate(need(input$selectcolumn, "Click 'Options' to choose metadata for colouring biplot"))
 
     if (is.null(vals$data)) {
       #reactive metadata instead
