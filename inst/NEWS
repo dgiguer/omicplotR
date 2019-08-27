@@ -1,3 +1,9 @@
+CHANGES IN VERSION 1.4.3
+--------------------------
+- validation statement to catch and report errors as human readable
+- improved input control of data and metadata with validation statements
+- bug fixes
+
 CHANGES IN VERSION 1.4.1
 --------------------------
 - removed browser() statement
