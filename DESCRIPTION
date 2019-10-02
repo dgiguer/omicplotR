@@ -1,6 +1,6 @@
 Package: omicplotR
 Title: Visual Exploration of Omic Datasets Using a Shiny App
-Version: 1.5.4
+Version: 1.5.5
 Date: 2018-05-23
 Authors@R: c(person("Daniel", "Giguere", email = "dgiguer@uwo.ca", role = c("aut", "cre")), person("Jean", "Macklaim", role = "aut"), person("Greg", "Gloor", role = "aut"))
 biocViews: Software, DifferentialExpression, GeneExpression, GUI, RNASeq, DNASeq, Metagenomics, Transcriptomics, Bayesian, Microbiome, Visualization, Sequencing, ImmunoOncology

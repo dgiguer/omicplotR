@@ -717,7 +717,14 @@ formatModal <- function(failed = FALSE) {
     if (is.null(x$taxonomy)) {
       taxCheck <- TRUE
 
-      test <- as.matrix(x[order(colnames(x))])
+      if (input$ebi_format == TRUE) {
+          # this removes the additional columns.
+          order <- order(colnames(x[,1:(ncol(x) - 2) ]))
+          test <- as.matrix(x[order])
+
+      } else {
+          test <- as.matrix(x[order(colnames(x))])
+      }
 
      validate(need(min.reads < max(colSums(test)), "Minimum count sum per sample exceeds any sample. Reduce so not all samples are removed by filter."))
 
