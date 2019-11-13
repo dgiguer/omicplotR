@@ -1,3 +1,70 @@
 # omicplotR
 An R package to visualize high-throughput sequencing data. Click on the wiki for more!  
 [![DOI](https://zenodo.org/badge/101769044.svg)](https://zenodo.org/badge/latestdoi/101769044)
+
+# Table of content
+
+* [Introduction](#introduction)
+* [Installation](#installation)
+* [Quick usage](#quick-usage)
+
+## Introduction
+
+As input, omicplotR takes the following: 
+* A data file and optionally a metadata file
+* The data file is a count table of sequencing reads with samples as columns and features by rows
+* An additional column of taxonomic identifiers may be included. Column name must be 'taxonomy', identifiers must contain at least 4 levels separated by a semi-colon (Bacteria;Firmicutes;Bacilli;Lactobacillales)
+
+Here is an example of how your data file should look:
+<p align="center"><img src="https://raw.githubusercontent.com/wiki/dgiguer/omicplotR/www/example_data.png" alt="Data" width="600"></p>
+
+* The metadata file must be contain samples by rows and identifiers by columns
+
+<p align="center"><img src="https://raw.githubusercontent.com/wiki/dgiguer/omicplotR/www/example_metadata.png" alt="Metadataata" width="600"></p>
+
+Reasons to use omicplotR: 
+* It allows you to explore your raw sequencing count data without coding in R
+* It performs interactive filtering
+* It allows you to easily colour PCA biplots according to metadata
+* It generates interactive effect plots
+* It allows easy download of publically available data from the EBI MGnify portal
+
+Reasons to **not** use omicplotR: 
+* You have thousands of samples and tens of thousands of features (it will be quicker using the command line)
+
+## Installation
+
+The first thing to check is if you have the current version of [Bioconductor](http://bioconductor.org). Look at the `BiocManager` [vignette](https://cran.r-project.org/web/packages/BiocManager/vignettes/BiocManager.html) for instructions on installing or upgrading to 3.10.
+
+You can check the version of Bioconductor that is install if you already have `BiocManager` installed.
+
+```
+BiocManager::version()
+```
+
+Once you have ensured that you have the correct version of Bioconductor, install `omicplotR`: 
+
+```
+BiocManageR::install("omicplotR")
+```
+
+The development version can be installed directly from Github: 
+
+```
+install.packages("devtools")
+devtools::install_github("dgiguer/omicplotR")
+```
+
+## Quick usage
+
+The quickest way to run `omicplotR` is:
+
+```
+library(omicplotR)
+omicplotr.run()
+```
+
+This will pop up a window in your default browser. 
+
+
+
