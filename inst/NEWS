@@ -1,3 +1,13 @@
+CHANGES IN VERSION 1.6.1
+--------------------------
+- bug fix to cause by Shiny 1.4.0 (renderDataTable causes error in jquery). solution is to import DT package and specify DT::renderDataTable and DT::dataTableOutput. 
+- ensured that ALDEx2 dependency for aldex.plot feature is correctly implemented
+- added Brandon Lieng as author
+
+CHANGES IN VERSION 1.6.0
+--------------------------
+- bioconductor release 3.10, no changes since 1.5.4
+
 CHANGES IN VERSION 1.5.4
 --------------------------
 - explicitly calling some functions to prevent conflicts (jsonlite::fromJSON)

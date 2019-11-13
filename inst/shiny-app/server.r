@@ -362,7 +362,7 @@ server <- function(input, output, session) {
         modalDialog(
             title = "Manually select conditions",
             "Enter the column numbers for each condition, separated by a comma. Condition 1 will be compared against condition 2. Scroll across table to see column names. Column numbers are shown below the column name.",
-            renderDataTable({
+            DT::renderDataTable({
                 data <- data.t()
                 dataTable <- data.frame(matrix(0, ncol = length(colnames(data)), nrow = 1))
                 colnames(dataTable) <- colnames(data)
@@ -1024,7 +1024,7 @@ denom <- ""
     ###########################################################################
     # outputs
     #show removed OTUs/samples
-    output$removedDT <- renderDataTable({
+    output$removedDT <- DT::renderDataTable({
 
       # catch error message
       validate(need(data() != "", ""),
@@ -1039,7 +1039,7 @@ denom <- ""
     options = list(scrollX = TRUE)
   )
 
-  output$removedDTotu <- renderDataTable({
+  output$removedDTotu <- DT::renderDataTable({
 
 
     validate(need(data() != "", ""),
@@ -1125,25 +1125,21 @@ denom <- ""
       }
     })
 
-  output$datatable <- renderDataTable({
+  output$datatable <- DT::renderDataTable({
     validate((need(input$showdata, "Click 'Check data' to check format and display table")))
 
     if (input$showdata) {
       data <- data()
 
-      output <- cbind(Features = rownames(data), data)
-
     }
   }, options = list(scrollX = TRUE)) #force data table to window size
 
-  output$metadatatable <- renderDataTable({
+  output$metadatatable <- DT::renderDataTable({
 
     validate((need(input$showmetadata, "Click 'Check metadata' to check format and display table")))
 
     if (input$showmetadata) {
       meta <- metadata()
-
-      output <- cbind(Samples = rownames(meta), meta)
     }
   }, options = list(scrollX = TRUE)) #force data table to window size
 
@@ -2111,9 +2107,6 @@ output$stripchart <- renderPlot({
     d.clr <- d.clr()
 
 if (!is.null(input$mw_hover)){
-
-# notify user that specific version is needed for density plots
-validate(need(packageVersion("ALDEx2") == "1.15.4", "This density plot requires a specific development version of ALDEx2 to be installed directly from Github. Use: remove.packages(\"ALDEx2\") and  devtools::install_github(\"brandonlieng/ALDEX_bioc\", ref = \"aldex-dev\")"))
 
 feature <- nearPoints(x.all, input$mw_hover, xvar = "diff.win", yvar = "diff.btw", maxpoints = 1)
 

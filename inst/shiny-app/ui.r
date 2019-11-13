@@ -53,10 +53,10 @@ sidebarLayout(
                 type = "tabs",
                 selected="Data",
                 tabPanel("Data",
-                dataTableOutput('datatable')
+                DT::dataTableOutput('datatable')
             ),
             tabPanel("Metadata",
-            dataTableOutput("metadatatable")
+            DT::dataTableOutput("metadatatable")
         )
     ))
 )
@@ -158,11 +158,11 @@ mainPanel(
             column(6, plotOutput("colsums")),
             column(6, plotOutput("rowsums")),
             tabsetPanel(tabPanel("Samples removed", fluidRow(column(
-                12, dataTableOutput("removedDT")
+                12, DT::dataTableOutput("removedDT")
             )),
             actionButton("showremoved", "Show removed samples/OTUs")),
             tabPanel("Features removed", fluidRow(column(
-                12, dataTableOutput("removedDTotu")
+                12, DT::dataTableOutput("removedDTotu")
             ))))
         )
     )
