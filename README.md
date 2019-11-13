@@ -7,6 +7,7 @@ An R package to visualize high-throughput sequencing data. Click on the wiki for
 * [Introduction](#introduction)
 * [Installation](#installation)
 * [Quick usage](#quick-usage)
+* [Submit bug report](#submit-bug-report)
 
 ## Introduction
 
@@ -19,6 +20,8 @@ Here is an example of how your data file should look:
 <p align="center"><img src="https://raw.githubusercontent.com/wiki/dgiguer/omicplotR/www/example_data.png" alt="Data" width="600"></p>
 
 * The metadata file must be contain samples by rows and identifiers by columns
+
+Here is an example of how your metadata should look like:
 
 <p align="center"><img src="https://raw.githubusercontent.com/wiki/dgiguer/omicplotR/www/example_metadata.png" alt="Metadataata" width="600"></p>
 
@@ -66,5 +69,33 @@ omicplotr.run()
 
 This will pop up a window in your default browser. 
 
+For more information, visit [the wiki](https://github.com/dgiguer/omicplotR/wiki).
 
+## Submit bug report
+
+If omicplotR is not working as expected, please submit an issue that includes the following information:
+
+```
+Please make sure to fill in this template when submitting an issue. Thank you for taking the time to submit an issue!
+- [x] Please check off boxes below like this.
+
+What is the error message that appears in the R console?
+
+- [ ] Check that you are using the newest release of R.
+- [ ] Check that you are using the newest release of omicplotR.
+
+What OS are you on? 
+
+- [ ] Windows
+- [ ] macOS
+- [ ] Linux
+
+What version of your OS are you on?
+
+What is the expected behaviour? 
+
+What is the actual behaviour? 
+
+What does the error look like? (submit screenshot of browser if possible)
+```
 
