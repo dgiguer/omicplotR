@@ -19,7 +19,7 @@ As input, omicplotR takes the following:
 Here is an example of how your data file should look:
 <p align="center"><img src="https://raw.githubusercontent.com/wiki/dgiguer/omicplotR/www/example_data.png" alt="Data" width="600"></p>
 
-* The metadata file must be contain samples by rows and identifiers by columns
+* The metadata file must contain samples by rows and identifiers by columns
 
 Here is an example of how your metadata should look like:
 
@@ -48,7 +48,7 @@ BiocManager::version()
 Once you have ensured that you have the correct version of Bioconductor, install `omicplotR`: 
 
 ```
-BiocManageR::install("omicplotR")
+BiocManager::install("omicplotR")
 ```
 
 The development version can be installed directly from Github: 
@@ -69,11 +69,11 @@ omicplotr.run()
 
 This will pop up a window in your default browser. 
 
-For more information, visit [the wiki](https://github.com/dgiguer/omicplotR/wiki).
+To view the tutorials, visit [the wiki](https://github.com/dgiguer/omicplotR/wiki).
 
 ## Submit bug report
 
-If omicplotR is not working as expected, please submit an issue that includes the following information:
+If omicplotR is not working as expected, please submit an issue that includes the following information. This will help me help you!
 
 ```
 Please make sure to fill in this template when submitting an issue. Thank you for taking the time to submit an issue!
