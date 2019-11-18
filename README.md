@@ -2,6 +2,10 @@
 An R package to visualize high-throughput sequencing data. Click on the wiki for more!  
 [![DOI](https://zenodo.org/badge/101769044.svg)](https://zenodo.org/badge/latestdoi/101769044)
 
+Read more about omicplotR here: 
+
+> [__Giguere, DJ, Macklaim, JM, Lieng, BY, Gloor, GB.__ omicplotR: visualizing omic datasets as compositions. BMC Bioinformatics 20, 580 (2019)](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-019-3174-x)
+
 # Table of content
 
 * [Introduction](#introduction)
